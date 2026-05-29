@@ -1,26 +1,319 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-sans: var(--font-geist);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-fraunces);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Brand tokens */
+  --color-ember: var(--ember);
+  --color-ember-2: var(--ember-2);
+  --color-ember-soft: var(--ember-soft);
+  --color-midnight: var(--midnight);
+  --color-midnight-2: var(--midnight-2);
+  --color-bone: var(--bone);
+  --color-bone-2: var(--bone-2);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+  --color-line: var(--line);
+  --color-sol: var(--sol);
+  --color-verde: var(--verde);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.4);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* ── Custom easing curves ── */
+  --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* ── Brand palette (exact from identity) ── */
+  --ember:       oklch(0.57 0.19 34);
+  --ember-2:     oklch(0.49 0.17 34);
+  --ember-soft:  oklch(0.93 0.04 34);
+  --midnight:    oklch(0.19 0.05 255);
+  --midnight-2:  oklch(0.24 0.06 255);
+  --bone:        oklch(0.96 0.01 80);
+  --bone-2:      oklch(0.92 0.015 80);
+  --paper:       oklch(0.985 0.008 80);
+  --ink:         oklch(0.14 0.02 255);
+  --mute:        oklch(0.50 0.008 80);
+  --line:        oklch(0.86 0.01 80);
+  --sol:         oklch(0.79 0.14 82);
+  --verde:       oklch(0.57 0.1 163);
+
+  /* ── Semantic mappings ── */
+  --background:             var(--bone);
+  --foreground:             var(--ink);
+  --card:                   var(--paper);
+  --card-foreground:        var(--ink);
+  --popover:                var(--paper);
+  --popover-foreground:     var(--ink);
+  --primary:                var(--midnight);
+  --primary-foreground:     var(--bone);
+  --secondary:              var(--bone-2);
+  --secondary-foreground:   var(--ink);
+  --muted:                  var(--bone-2);
+  --muted-foreground:       var(--mute);
+  --accent:                 var(--bone-2);
+  --accent-foreground:      var(--ink);
+  --destructive:            oklch(0.57 0.22 27);
+  --border:                 var(--line);
+  --input:                  var(--bone-2);
+  --ring:                   var(--ember);
+  --radius:                 0.75rem;
+
+  /* ── Sidebar ── */
+  --sidebar:                    var(--bone-2);
+  --sidebar-foreground:         var(--ink);
+  --sidebar-primary:            var(--midnight);
+  --sidebar-primary-foreground: var(--bone);
+  --sidebar-accent:             var(--bone);
+  --sidebar-accent-foreground:  var(--ink);
+  --sidebar-border:             var(--line);
+  --sidebar-ring:               var(--ember);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--bone);
+    color: var(--ink);
+    font-family: var(--font-geist), system-ui, sans-serif;
+  }
+  button, a, [role="button"] {
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+  input, textarea, select {
+    touch-action: manipulation;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Brand utilities ── */
+@layer utilities {
+  .font-mono-brand {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-feature-settings: "ss01";
+  }
+  .font-serif-brand {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-optical-sizing: auto;
+  }
+
+  .bg-ember        { background-color: var(--ember); }
+  .bg-ember-soft   { background-color: var(--ember-soft); }
+  .bg-midnight     { background-color: var(--midnight); }
+  .bg-midnight-2   { background-color: var(--midnight-2); }
+  .bg-bone         { background-color: var(--bone); }
+  .bg-bone-2       { background-color: var(--bone-2); }
+  .bg-paper        { background-color: var(--paper); }
+  .bg-sol          { background-color: var(--sol); }
+  .bg-verde        { background-color: var(--verde); }
+
+  .text-ember      { color: var(--ember); }
+  .text-ember-soft { color: var(--ember-soft); }
+  .text-midnight   { color: var(--midnight); }
+  .text-bone       { color: var(--bone); }
+  .text-ink        { color: var(--ink); }
+  .text-mute       { color: var(--mute); }
+  .text-sol        { color: var(--sol); }
+  .text-verde      { color: var(--verde); }
+
+  .border-ember    { border-color: var(--ember); }
+  .border-midnight { border-color: var(--midnight); }
+  .border-line     { border-color: var(--line); }
+
+  /* Eyebrow label */
+  .eyebrow {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ember);
+    font-weight: 500;
+  }
+  .eyebrow-muted {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mute);
+    font-weight: 500;
+  }
+
+  /* Press feedback — scale on :active for all pressable elements */
+  .pressable {
+    transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+  }
+  .pressable:active {
+    transform: scale(0.97);
+  }
+
+  /* Stagger entrance for lists */
+  .stagger-item {
+    opacity: 0;
+    animation: fade-up 300ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  }
+
+  /* ── Emil: Card hover lift (desktop only) */
+  .card-interactive {
+    transition:
+      transform 200ms cubic-bezier(0.23, 1, 0.32, 1),
+      box-shadow 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  /* ── Emil: List row hover background (desktop only) */
+  .row-interactive {
+    transition: background-color 140ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  /* ── Emil: Admin sidebar link smooth transition */
+  .admin-nav-link {
+    transition:
+      background-color 180ms cubic-bezier(0.23, 1, 0.32, 1),
+      color 180ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  /* ── Emil: Brand input focus animation */
+  .input-brand {
+    transition:
+      border-color 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .input-brand:focus {
+    border-color: var(--ember) !important;
+    box-shadow: 0 0 0 3px rgba(232, 80, 42, 0.13);
+    outline: none;
+  }
+}
+
+/* ── Hover states — desktop only (never fire on touch) */
+@media (hover: hover) and (pointer: fine) {
+  .card-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(15, 27, 61, 0.08), 0 2px 8px rgba(15, 27, 61, 0.04);
+  }
+
+  .row-interactive:hover {
+    background-color: var(--bone-2);
+  }
+
+  .admin-nav-link:not([data-active="true"]):hover {
+    background-color: rgba(245, 241, 234, 0.07) !important;
+    color: rgba(245, 241, 234, 0.75) !important;
+  }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pressable { transition: none; }
+  .pressable:active { transform: none; }
+  .stagger-item { animation: none; opacity: 1; }
+}
+
+/* ── View Transitions ───────────────────────────────────────── */
+
+/* ── Driver portal ─────────────────────────────────────────── */
+/* Main content: old page fades out, GSAP handles new page entrance */
+::view-transition-old(driver-main) {
+  animation: 180ms cubic-bezier(0.55, 0, 1, 0.45) both vt-fade-out;
+}
+::view-transition-new(driver-main) {
+  /* GSAP animates new content — suppress the view-transition overlay */
+  animation: none;
+  opacity: 0;
+}
+
+/* Header: anchored, never animates */
+::view-transition-group(driver-header) {
+  animation: none;
+  z-index: 41;
+}
+::view-transition-old(driver-header) { display: none; }
+::view-transition-new(driver-header) { animation: none; }
+
+/* Bottom nav: anchored, never animates */
+::view-transition-group(driver-nav) {
+  animation: none;
+  z-index: 41;
+}
+::view-transition-old(driver-nav) { display: none; }
+::view-transition-new(driver-nav) { animation: none; }
+
+/* ── Admin portal ──────────────────────────────────────────── */
+/* Same pattern: old content fades out, GSAP handles new content */
+::view-transition-old(admin-main) {
+  animation: 160ms cubic-bezier(0.55, 0, 1, 0.45) both vt-fade-out;
+}
+::view-transition-new(admin-main) {
+  animation: none;
+  opacity: 0;
+}
+
+/* Business portal uses browser default crossfade (no custom CSS needed) */
+
+@keyframes vt-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Disable all view transitions for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
 }

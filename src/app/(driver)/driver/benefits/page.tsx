@@ -1,0 +1,87 @@
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
+import { Lock } from "lucide-react"
+import Link from "next/link"
+import BenefitsListAnimated from "@/components/driver/BenefitsListAnimated"
+
+export default async function BenefitsPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect("/login")
+
+  const { data: profile } = await supabase
+    .from("profiles").select("*").eq("id", user.id).single()
+
+  const { data: subscription } = await supabase
+    .from("subscriptions").select("*")
+    .eq("driver_id", user.id).eq("status", "active")
+    .gte("expires_at", new Date().toISOString())
+    .limit(1).single()
+
+  const { data: benefits } = await supabase
+    .from("benefits")
+    .select("*, partner_businesses(id, name, logo_url, category, address)")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+
+  const isVerified = profile?.status === "verified"
+  const canUse = isVerified && !!subscription
+
+  return (
+    <div className="space-y-5">
+      <div className="pt-2">
+        <h1 className="font-bold" style={{ fontSize: "28px", letterSpacing: "-0.025em", color: "var(--midnight)" }}>
+          Beneficios
+        </h1>
+        <p className="eyebrow-muted mt-1">
+          {benefits?.length ?? 0} DESCUENTOS DISPONIBLES
+        </p>
+      </div>
+
+      {!canUse && (
+        <div
+          className="rounded-2xl p-6 text-center space-y-3"
+          style={{ backgroundColor: "var(--bone-2)", border: "1px dashed var(--line)" }}
+        >
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
+            style={{ backgroundColor: "var(--bone)" }}
+          >
+            <Lock className="w-5 h-5" style={{ color: "var(--mute)" }} />
+          </div>
+          <p className="font-semibold" style={{ color: "var(--midnight)" }}>
+            {!isVerified ? "Cuenta en revisión" : "Membresía inactiva"}
+          </p>
+          <p className="text-sm" style={{ color: "var(--mute)" }}>
+            {!isVerified
+              ? "Estamos revisando tu cuenta. En menos de 24 horas quedas activo y puedes usar todos los beneficios."
+              : "Tu membresía venció. Contacta al equipo de RidePerks para renovarla."}
+          </p>
+          {!isVerified && (
+            <Link href="/driver/verify">
+              <button
+                className="px-4 py-2 rounded-full text-sm font-medium border"
+                style={{ color: "var(--midnight)", borderColor: "var(--line)" }}
+              >
+                Ver mi verificación
+              </button>
+            </Link>
+          )}
+        </div>
+      )}
+
+      {(benefits?.length ?? 0) > 0 ? (
+        <BenefitsListAnimated
+          benefits={benefits!}
+          driverId={user.id}
+          canUse={canUse}
+        />
+      ) : (
+        <div className="text-center py-20">
+          <p className="font-semibold mb-1" style={{ color: "var(--midnight)" }}>Próximamente más beneficios</p>
+          <p className="text-sm" style={{ color: "var(--mute)" }}>Estamos sumando comercios aliados.</p>
+        </div>
+      )}
+    </div>
+  )
+}
