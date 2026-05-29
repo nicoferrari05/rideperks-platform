@@ -38,26 +38,14 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single()
-
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("*")
-    .eq("driver_id", user.id)
-    .eq("status", "active")
-    .gte("expires_at", new Date().toISOString())
-    .order("expires_at", { ascending: false })
-    .limit(1)
-    .single()
-
-  const { data: redemptions } = await supabase
-    .from("benefit_redemptions")
-    .select("id")
-    .eq("driver_id", user.id)
+  const [{ data: profile }, { data: subscription }, { data: redemptions }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase.from("subscriptions").select("*")
+      .eq("driver_id", user.id).eq("status", "active")
+      .gte("expires_at", new Date().toISOString())
+      .order("expires_at", { ascending: false }).limit(1).single(),
+    supabase.from("benefit_redemptions").select("id").eq("driver_id", user.id),
+  ])
 
   const sc = statusConfig[profile?.status ?? "pending"]
   const StatusIcon = sc.Icon

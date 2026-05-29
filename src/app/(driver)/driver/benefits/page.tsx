@@ -9,20 +9,17 @@ export default async function BenefitsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  const { data: profile } = await supabase
-    .from("profiles").select("*").eq("id", user.id).single()
-
-  const { data: subscription } = await supabase
-    .from("subscriptions").select("*")
-    .eq("driver_id", user.id).eq("status", "active")
-    .gte("expires_at", new Date().toISOString())
-    .limit(1).single()
-
-  const { data: benefits } = await supabase
-    .from("benefits")
-    .select("*, partner_businesses(id, name, logo_url, category, address)")
-    .eq("is_active", true)
-    .order("created_at", { ascending: false })
+  const [{ data: profile }, { data: subscription }, { data: benefits }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase.from("subscriptions").select("*")
+      .eq("driver_id", user.id).eq("status", "active")
+      .gte("expires_at", new Date().toISOString())
+      .limit(1).single(),
+    supabase.from("benefits")
+      .select("*, partner_businesses(id, name, logo_url, category, address)")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false }),
+  ])
 
   const isVerified = profile?.status === "verified"
   const canUse = isVerified && !!subscription

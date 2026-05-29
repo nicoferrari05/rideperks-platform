@@ -10,25 +10,22 @@ export default async function DriverDashboard() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  const { data: profile } = await supabase
-    .from("profiles").select("*").eq("id", user.id).single()
-
-  const { data: subscription } = await supabase
-    .from("subscriptions").select("*")
-    .eq("driver_id", user.id).eq("status", "active")
-    .gte("expires_at", new Date().toISOString())
-    .order("expires_at", { ascending: false }).limit(1).single()
-
   const startOfMonth = new Date()
   startOfMonth.setDate(1)
   startOfMonth.setHours(0, 0, 0, 0)
 
-  const { data: monthlyRedemptions } = await supabase
-    .from("benefit_redemptions")
-    .select("benefits(savings_value, title), partner_businesses(name), redeemed_at")
-    .eq("driver_id", user.id)
-    .gte("redeemed_at", startOfMonth.toISOString())
-    .order("redeemed_at", { ascending: false })
+  const [{ data: profile }, { data: subscription }, { data: monthlyRedemptions }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase.from("subscriptions").select("*")
+      .eq("driver_id", user.id).eq("status", "active")
+      .gte("expires_at", new Date().toISOString())
+      .order("expires_at", { ascending: false }).limit(1).single(),
+    supabase.from("benefit_redemptions")
+      .select("benefits(savings_value, title), partner_businesses(name), redeemed_at")
+      .eq("driver_id", user.id)
+      .gte("redeemed_at", startOfMonth.toISOString())
+      .order("redeemed_at", { ascending: false }),
+  ])
 
   const totalSaved = monthlyRedemptions?.reduce((sum, r) => {
     const val = (r.benefits as { savings_value?: number } | null)?.savings_value ?? 0
