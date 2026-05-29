@@ -17,14 +17,13 @@ const statusConfig: Record<string, { label: string; dot: string }> = {
 export default async function SubscriptionsAdminPage() {
   const supabase = await createClient()
 
-  const { data: subscriptions } = await supabase
-    .from("subscriptions")
-    .select("*, profiles(id, full_name, phone, platform)")
-    .order("created_at", { ascending: false })
-
-  const { data: verifiedDrivers } = await supabase
-    .from("profiles").select("id, full_name, phone")
-    .eq("role", "driver").eq("status", "verified")
+  const [{ data: subscriptions }, { data: verifiedDrivers }] = await Promise.all([
+    supabase.from("subscriptions")
+      .select("*, profiles(id, full_name, phone, platform)")
+      .order("created_at", { ascending: false }),
+    supabase.from("profiles").select("id, full_name, phone")
+      .eq("role", "driver").eq("status", "verified"),
+  ])
 
   const activeCount = subscriptions?.filter(
     (s) => s.status === "active" && new Date(s.expires_at) > new Date()

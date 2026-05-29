@@ -18,13 +18,12 @@ const statusConfig: Record<string, { label: string; dot: string; bg: string; tex
 export default async function DriversPage() {
   const supabase = await createClient()
 
-  const { data: drivers } = await supabase
-    .from("profiles").select("*").eq("role", "driver").order("created_at", { ascending: false })
-
-  const { data: pendingVerifications } = await supabase
-    .from("driver_verifications")
-    .select("*, profiles(full_name, platform)")
-    .eq("status", "pending").order("created_at", { ascending: false })
+  const [{ data: drivers }, { data: pendingVerifications }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("role", "driver").order("created_at", { ascending: false }),
+    supabase.from("driver_verifications")
+      .select("*, profiles(full_name, platform)")
+      .eq("status", "pending").order("created_at", { ascending: false }),
+  ])
 
   return (
     <div className="space-y-8">

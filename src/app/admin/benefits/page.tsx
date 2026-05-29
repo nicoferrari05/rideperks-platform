@@ -11,11 +11,10 @@ const discountTypeLabel: Record<string, string> = {
 export default async function BenefitsAdminPage() {
   const supabase = await createClient()
 
-  const { data: benefits } = await supabase
-    .from("benefits").select("*, partner_businesses(id, name)").order("created_at", { ascending: false })
-
-  const { data: businesses } = await supabase
-    .from("partner_businesses").select("id, name").eq("is_active", true)
+  const [{ data: benefits }, { data: businesses }] = await Promise.all([
+    supabase.from("benefits").select("*, partner_businesses(id, name)").order("created_at", { ascending: false }),
+    supabase.from("partner_businesses").select("id, name").eq("is_active", true),
+  ])
 
   return (
     <div className="space-y-8">
