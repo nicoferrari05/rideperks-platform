@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { ViewTransition } from "react"
 import DriverNav from "@/components/driver/DriverNav"
 
 export default async function DriverLayout({ children }: { children: React.ReactNode }) {
@@ -21,14 +20,12 @@ export default async function DriverLayout({ children }: { children: React.React
   return (
     <div className="min-h-screen bg-muted/20">
       <DriverNav profile={profile} />
-      <ViewTransition name="driver-main">
-        <main
-          className="max-w-4xl mx-auto px-4 py-6"
-          style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}
-        >
-          {children}
-        </main>
-      </ViewTransition>
+      <main
+        className="max-w-4xl mx-auto px-4 py-6"
+        style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}
+      >
+        {children}
+      </main>
     </div>
   )
 }

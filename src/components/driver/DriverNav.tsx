@@ -97,6 +97,7 @@ export default function DriverNav({ profile }: { profile: Profile }) {
                 <Link
                   key={href}
                   href={href}
+                  prefetch={true}
                   className="pressable flex flex-col items-center gap-1"
                   style={{
                     flex: "1",

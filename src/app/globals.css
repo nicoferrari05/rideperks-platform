@@ -265,31 +265,7 @@
 /* ── View Transitions ───────────────────────────────────────── */
 
 /* ── Driver portal ─────────────────────────────────────────── */
-/* Main content: old page fades out, GSAP handles new page entrance */
-::view-transition-old(driver-main) {
-  animation: 180ms cubic-bezier(0.55, 0, 1, 0.45) both vt-fade-out;
-}
-::view-transition-new(driver-main) {
-  /* GSAP animates new content — suppress the view-transition overlay */
-  animation: none;
-  opacity: 0;
-}
-
-/* Header: anchored, never animates */
-::view-transition-group(driver-header) {
-  animation: none;
-  z-index: 41;
-}
-::view-transition-old(driver-header) { display: none; }
-::view-transition-new(driver-header) { animation: none; }
-
-/* Bottom nav: anchored, never animates */
-::view-transition-group(driver-nav) {
-  animation: none;
-  z-index: 41;
-}
-::view-transition-old(driver-nav) { display: none; }
-::view-transition-new(driver-nav) { animation: none; }
+/* No view transitions — loading.tsx skeleton + GSAP entrance handles the feel */
 
 /* ── Admin portal ──────────────────────────────────────────── */
 /* Same pattern: old content fades out, GSAP handles new content */
