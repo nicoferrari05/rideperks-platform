@@ -60,10 +60,10 @@ export default function SplashScreen({ onComplete }: Props) {
             rotation: REST[i].rotation,
             scale: 1,
             autoAlpha: 1,
-            duration: 0.55,
+            duration: 0.72,
             ease: "expo.out",
           },
-          i * 0.13   // absolute start time — each card 130ms after the previous
+          i * 0.22   // absolute start time — each card 220ms after the previous
         )
       })
 
@@ -71,26 +71,26 @@ export default function SplashScreen({ onComplete }: Props) {
       tl.to(cardEls, {
         scale: 0.5,
         autoAlpha: 0,
-        duration: 0.26,
-        stagger: 0.04,
+        duration: 0.32,
+        stagger: 0.05,
         ease: "power2.in",
-      }, 1.06)
+      }, 1.7)
 
       // ── RP mark emerges while last cards are still fading ──
       tl.fromTo(
         markRef.current,
         { scale: 0.78, autoAlpha: 0, y: 20 },
-        { scale: 1,    autoAlpha: 1, y: 0,  duration: 0.52, ease: "expo.out" },
-        1.14
+        { scale: 1,    autoAlpha: 1, y: 0,  duration: 0.55, ease: "expo.out" },
+        1.8
       )
 
       // ── Fade entire screen ──
       tl.to(containerRef.current, {
         autoAlpha: 0,
-        duration: 0.28,
+        duration: 0.3,
         ease: "power2.out",
         onComplete,
-      }, 2.24)
+      }, 3.1)
     })
 
     mm.add("(prefers-reduced-motion: reduce)", () => {
@@ -109,20 +109,6 @@ export default function SplashScreen({ onComplete }: Props) {
       className="fixed inset-0 z-[9999] overflow-hidden"
       style={{ backgroundColor: "var(--midnight)" }}
     >
-      {/* Ambient ember glow — top-right */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: "-15%",
-          right: "-20%",
-          width: "60%",
-          height: "60%",
-          background: "radial-gradient(circle, rgba(232,80,42,0.18) 0%, transparent 65%)",
-          pointerEvents: "none",
-        }}
-      />
-
       {/* Origin point — centered in viewport; all animated children live here */}
       <div
         aria-hidden="true"
