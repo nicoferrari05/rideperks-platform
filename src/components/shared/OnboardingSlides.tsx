@@ -181,9 +181,9 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
               position: "absolute",
               top: 0,
               right: 0,
-              width: "75%",
-              height: "55%",
-              background: "radial-gradient(circle at 100% 0%, rgba(232,80,42,0.28) 0%, transparent 70%)",
+              width: "55%",
+              height: "26%",
+              background: "radial-gradient(circle at 100% 0%, rgba(232,80,42,0.3) 0%, transparent 80%)",
               pointerEvents: "none",
             }}
           />
