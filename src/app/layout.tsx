@@ -26,8 +26,11 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "RidePerks — Tu trabajo rinde más",
   description: "El club de beneficios para conductores de Uber, InDrive y PedidosYa en Panamá.",
+  themeColor: "#0F1B3D",
   appleWebApp: {
     title: "RidePerks",
+    capable: true,
+    statusBarStyle: "default",
   },
 }
 
