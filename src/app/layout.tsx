@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Geist, Fraunces, JetBrains_Mono } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
+import AppSplash from "@/components/shared/AppSplash"
 import "./globals.css"
 
 const geist = Geist({
@@ -41,6 +42,7 @@ export default function RootLayout({
       className={`${geist.variable} ${fraunces.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <AppSplash />
         {children}
         <Toaster richColors position="top-right" />
       </body>

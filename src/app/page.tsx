@@ -1,31 +1,52 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import SplashScreen from "@/components/shared/SplashScreen"
 import OnboardingSlides from "@/components/shared/OnboardingSlides"
 import { createClient } from "@/lib/supabase/client"
 
-type Phase = "splash" | "onboarding" | "done"
-
 export default function HomePage() {
-  const [phase, setPhase] = useState<Phase>("splash")
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const router = useRouter()
 
-  const handleSplashComplete = useCallback(async () => {
-    const supabase = createClient()
-    const { data: { session } } = await supabase.auth.getSession()
+  useEffect(() => {
+    let cancelled = false
 
-    if (session) {
-      router.replace("/driver/dashboard")
-      return
+    // Kick off auth check immediately so it resolves in parallel with the splash
+    const supabase = createClient()
+    const authPromise = supabase.auth.getSession()
+
+    async function startFlow() {
+      if (cancelled) return
+
+      const { data: { session } } = await authPromise
+      if (cancelled) return
+
+      if (session) {
+        router.replace("/driver/dashboard")
+        return
+      }
+
+      const seen = localStorage.getItem("rp_onboarded")
+      if (seen) {
+        router.replace("/login")
+        return
+      }
+
+      setShowOnboarding(true)
     }
 
-    const seen = localStorage.getItem("rp_onboarded")
-    if (seen) {
-      router.replace("/login")
+    // If the splash already fired this session, proceed immediately.
+    // Otherwise wait for the layout-level AppSplash to signal completion.
+    if (sessionStorage.getItem("rp_splashed")) {
+      startFlow()
     } else {
-      setPhase("onboarding")
+      window.addEventListener("rp:splash-complete", startFlow, { once: true })
+    }
+
+    return () => {
+      cancelled = true
+      window.removeEventListener("rp:splash-complete", startFlow)
     }
   }, [router])
 
@@ -39,13 +60,7 @@ export default function HomePage() {
     router.push("/login")
   }, [router])
 
-  if (phase === "splash") {
-    return <SplashScreen onComplete={handleSplashComplete} />
-  }
+  if (!showOnboarding) return null
 
-  if (phase === "onboarding") {
-    return <OnboardingSlides onRegister={handleRegister} onLogin={handleLogin} />
-  }
-
-  return null
+  return <OnboardingSlides onRegister={handleRegister} onLogin={handleLogin} />
 }
