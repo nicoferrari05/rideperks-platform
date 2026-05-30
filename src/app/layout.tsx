@@ -25,7 +25,6 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "RidePerks — Tu trabajo rinde más",
   description: "El club de beneficios para conductores de Uber, InDrive y PedidosYa en Panamá.",
-  icons: { icon: "/favicon.ico" },
 }
 
 export default function RootLayout({
