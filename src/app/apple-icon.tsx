@@ -13,31 +13,14 @@ export default function AppleIcon() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        position: "relative",
-        overflow: "hidden",
       }}
     >
-      {/* Sol → Ember gradient orb */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: -36,
-          left: -36,
-          width: 180,
-          height: 180,
-          borderRadius: 90,
-          background: "radial-gradient(circle at 35% 35%, #F2B73B 0%, #E8502A 65%)",
-          display: "flex",
-        }}
-      />
-      {/* RP monogram */}
       <span
         style={{
-          position: "relative",
           color: "#F5F1EA",
           fontWeight: 800,
-          fontSize: 80,
-          letterSpacing: -5,
+          fontSize: 84,
+          letterSpacing: -6,
           lineHeight: 1,
           fontFamily: "sans-serif",
         }}

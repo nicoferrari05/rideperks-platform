@@ -13,31 +13,14 @@ export default function Icon() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        position: "relative",
-        overflow: "hidden",
       }}
     >
-      {/* Sol → Ember gradient orb — bottom-left, per brand Dir. 02 */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: -102,
-          left: -102,
-          width: 512,
-          height: 512,
-          borderRadius: 256,
-          background: "radial-gradient(circle at 35% 35%, #F2B73B 0%, #E8502A 65%)",
-          display: "flex",
-        }}
-      />
-      {/* RP monogram */}
       <span
         style={{
-          position: "relative",
           color: "#F5F1EA",
           fontWeight: 800,
-          fontSize: 228,
-          letterSpacing: -14,
+          fontSize: 240,
+          letterSpacing: -16,
           lineHeight: 1,
           fontFamily: "sans-serif",
         }}
