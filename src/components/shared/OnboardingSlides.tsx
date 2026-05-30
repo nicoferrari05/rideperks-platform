@@ -174,16 +174,16 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
             overflow: "hidden",
           }}
         >
-          {/* Ambient ember glow */}
+          {/* Ambient ember glow — anchored to top-right corner, fades inward */}
           <div
             aria-hidden="true"
             style={{
               position: "absolute",
-              top: "-20%",
-              right: "-30%",
-              width: "80%",
-              height: "80%",
-              background: "radial-gradient(circle, rgba(232,80,42,0.22) 0%, transparent 65%)",
+              top: 0,
+              right: 0,
+              width: "75%",
+              height: "55%",
+              background: "radial-gradient(circle at 100% 0%, rgba(232,80,42,0.28) 0%, transparent 70%)",
               pointerEvents: "none",
             }}
           />
