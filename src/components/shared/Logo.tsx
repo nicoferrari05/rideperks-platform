@@ -6,9 +6,9 @@ interface LogoProps {
 }
 
 const sizes = {
-  sm: { pill: "px-3 py-1.5 gap-1.5 text-sm", icon: 14, text: "text-sm" },
-  md: { pill: "px-4 py-2 gap-2 text-base", icon: 16, text: "text-base" },
-  lg: { pill: "px-6 py-3 gap-3 text-xl", icon: 20, text: "text-xl" },
+  sm: { pill: "px-3 py-1.5 gap-1.5 text-sm", icon: 14 },
+  md: { pill: "px-4 py-2 gap-2 text-base", icon: 16 },
+  lg: { pill: "px-6 py-3 gap-3 text-xl", icon: 20 },
 }
 
 export default function Logo({ size = "md", className }: LogoProps) {
@@ -38,8 +38,10 @@ export default function Logo({ size = "md", className }: LogoProps) {
           strokeLinejoin="round"
         />
       </svg>
-      <span style={{ color: "var(--bone)" }}>RIDE</span>
-      <span style={{ color: "var(--ember)" }}>PERKS</span>
+      <span>
+        <span style={{ color: "var(--bone)" }}>RIDE</span>
+        <span style={{ color: "var(--ember)" }}>PERKS</span>
+      </span>
     </div>
   )
 }
