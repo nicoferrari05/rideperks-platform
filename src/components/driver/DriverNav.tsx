@@ -70,20 +70,21 @@ export default function DriverNav({ profile }: { profile: Profile }) {
           viewTransitionName: "driver-nav",
         }}
       >
-        <div className="relative max-w-2xl mx-auto px-3 h-16">
-          {/* Sliding background pill */}
+        {/* 20px side padding keeps pill away from iPhone curved-corner clip zone */}
+        <div className="relative max-w-2xl mx-auto h-[68px]" style={{ paddingLeft: "20px", paddingRight: "20px" }}>
+          {/* Sliding background pill — positioned within the padded content area */}
           {activeIdx >= 0 && (
             <div
               aria-hidden="true"
               style={{
                 position: "absolute",
                 top: "50%",
-                height: "42px",
-                width: "calc(33.33% - 10px)",
+                height: "44px",
+                width: "calc((100% - 40px) / 3 - 8px)",
                 backgroundColor: "rgba(245,241,234,0.07)",
                 borderRadius: "14px",
                 transform: "translateY(-50%)",
-                left: `calc(${activeIdx * 33.333}% + 5px)`,
+                left: `calc(20px + ${activeIdx} * (100% - 40px) / 3 + 4px)`,
                 transition: "left 320ms cubic-bezier(0.23, 1, 0.32, 1)",
               }}
             />
