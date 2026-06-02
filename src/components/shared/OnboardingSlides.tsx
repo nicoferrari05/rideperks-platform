@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import gsap from "gsap"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, ChevronLeft } from "lucide-react"
 
 interface Props {
   onRegister: () => void
@@ -41,6 +41,16 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
     typeof window !== "undefined"
       ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
       : false
+
+  // Keyboard navigation
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "ArrowRight") goTo(Math.min(current + 1, 2))
+      if (e.key === "ArrowLeft") goTo(Math.max(current - 1, 0))
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [current]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Animate content in when a slide becomes active
   useEffect(() => {
@@ -118,6 +128,13 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
   const dotActive = "var(--ember)"
   const dotInactive = isLightSlide ? "rgba(15,27,61,0.18)" : "rgba(245,241,234,0.28)"
 
+  // Shared content width — keeps text readable on large screens
+  const contentStyle: React.CSSProperties = {
+    maxWidth: "480px",
+    width: "100%",
+    margin: "0 auto",
+  }
+
   return (
     <div
       className="fixed inset-0 overflow-hidden"
@@ -135,7 +152,7 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
             top: "max(env(safe-area-inset-top, 0px), 20px)",
             right: "20px",
             color: isLightSlide ? "var(--mute)" : "rgba(245,241,234,0.4)",
-            fontSize: "13px",
+            fontSize: "14px",
             padding: "10px",
             background: "none",
             border: "none",
@@ -144,6 +161,60 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
           }}
         >
           Saltar
+        </button>
+      )}
+
+      {/* ── Arrow navigation (desktop) ── */}
+      {current > 0 && (
+        <button
+          onClick={() => goTo(current - 1)}
+          aria-label="Slide anterior"
+          style={{
+            position: "absolute",
+            left: "20px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 20,
+            width: "44px",
+            height: "44px",
+            borderRadius: "50%",
+            backgroundColor: isLightSlide ? "rgba(15,27,61,0.08)" : "rgba(245,241,234,0.1)",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: isLightSlide ? "var(--midnight)" : "var(--bone)",
+            transition: "background-color 200ms ease",
+          }}
+        >
+          <ChevronLeft style={{ width: "20px", height: "20px" }} />
+        </button>
+      )}
+      {current < 2 && (
+        <button
+          onClick={() => goTo(current + 1)}
+          aria-label="Slide siguiente"
+          style={{
+            position: "absolute",
+            right: "20px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 20,
+            width: "44px",
+            height: "44px",
+            borderRadius: "50%",
+            backgroundColor: isLightSlide ? "rgba(15,27,61,0.08)" : "rgba(245,241,234,0.1)",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: isLightSlide ? "var(--midnight)" : "var(--bone)",
+            transition: "background-color 200ms ease",
+          }}
+        >
+          <ChevronRight style={{ width: "20px", height: "20px" }} />
         </button>
       )}
 
@@ -169,7 +240,8 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            padding: "80px 32px 120px",
+            alignItems: "center",
+            padding: "80px 48px 120px",
             position: "relative",
           }}
         >
@@ -189,12 +261,12 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
               pointerEvents: "none",
             }}
           />
-          <div style={{ position: "relative" }}>
+          <div style={{ ...contentStyle, position: "relative" }}>
             <p
               data-enter
               style={{
                 color: "var(--ember)",
-                fontSize: "10px",
+                fontSize: "clamp(10px, 1.1vw, 13px)",
                 letterSpacing: "0.18em",
                 fontFamily: "var(--font-mono)",
                 marginBottom: "28px",
@@ -207,7 +279,7 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
               data-enter
               style={{
                 fontWeight: 800,
-                fontSize: "clamp(48px, 13vw, 68px)",
+                fontSize: "clamp(48px, 7vw, 80px)",
                 letterSpacing: "-0.04em",
                 lineHeight: 0.95,
                 color: "var(--bone)",
@@ -233,7 +305,7 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
               data-enter
               style={{
                 color: "rgba(245,241,234,0.5)",
-                fontSize: "16px",
+                fontSize: "clamp(16px, 1.4vw, 20px)",
                 lineHeight: 1.55,
                 opacity: 0,
               }}
@@ -253,80 +325,83 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            padding: "80px 28px 120px",
+            alignItems: "center",
+            padding: "80px 48px 120px",
           }}
         >
-          <p
-            data-enter
-            style={{
-              color: "var(--ember)",
-              fontSize: "10px",
-              letterSpacing: "0.18em",
-              fontFamily: "var(--font-mono)",
-              marginBottom: "16px",
-              opacity: 0,
-            }}
-          >
-            BENEFICIOS
-          </p>
-          <h2
-            data-enter
-            style={{
-              fontWeight: 800,
-              fontSize: "clamp(32px, 9vw, 48px)",
-              letterSpacing: "-0.03em",
-              lineHeight: 1.0,
-              color: "var(--midnight)",
-              marginBottom: "28px",
-              fontFamily: "var(--font-geist)",
-              opacity: 0,
-            }}
-          >
-            Una membresía.<br />Todo incluido.
-          </h2>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "10px",
-            }}
-          >
-            {benefits.map((b, i) => (
-              <div
-                key={i}
-                data-enter
-                style={{
-                  backgroundColor: b.bg,
-                  color: b.color,
-                  borderRadius: "16px",
-                  padding: "16px",
-                  opacity: 0,
-                }}
-              >
-                <p
+          <div style={contentStyle}>
+            <p
+              data-enter
+              style={{
+                color: "var(--ember)",
+                fontSize: "clamp(10px, 1.1vw, 13px)",
+                letterSpacing: "0.18em",
+                fontFamily: "var(--font-mono)",
+                marginBottom: "16px",
+                opacity: 0,
+              }}
+            >
+              BENEFICIOS
+            </p>
+            <h2
+              data-enter
+              style={{
+                fontWeight: 800,
+                fontSize: "clamp(32px, 5vw, 56px)",
+                letterSpacing: "-0.03em",
+                lineHeight: 1.0,
+                color: "var(--midnight)",
+                marginBottom: "28px",
+                fontFamily: "var(--font-geist)",
+                opacity: 0,
+              }}
+            >
+              Una membresía.<br />Todo incluido.
+            </h2>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "12px",
+              }}
+            >
+              {benefits.map((b, i) => (
+                <div
+                  key={i}
+                  data-enter
                   style={{
-                    fontSize: "9px",
-                    letterSpacing: "0.12em",
-                    opacity: 0.65,
-                    marginBottom: "8px",
-                    fontFamily: "var(--font-mono)",
+                    backgroundColor: b.bg,
+                    color: b.color,
+                    borderRadius: "16px",
+                    padding: "clamp(16px, 2vw, 24px)",
+                    opacity: 0,
                   }}
                 >
-                  {b.label}
-                </p>
-                <p
-                  style={{
-                    fontSize: "32px",
-                    fontWeight: 800,
-                    letterSpacing: "-0.03em",
-                    lineHeight: 1,
-                    fontFamily: "var(--font-geist)",
-                  }}
-                >
-                  {b.figure}
-                </p>
-              </div>
-            ))}
+                  <p
+                    style={{
+                      fontSize: "clamp(9px, 0.9vw, 11px)",
+                      letterSpacing: "0.12em",
+                      opacity: 0.65,
+                      marginBottom: "8px",
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  >
+                    {b.label}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "clamp(32px, 3.5vw, 44px)",
+                      fontWeight: 800,
+                      letterSpacing: "-0.03em",
+                      lineHeight: 1,
+                      fontFamily: "var(--font-geist)",
+                    }}
+                  >
+                    {b.figure}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -339,24 +414,26 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
             backgroundColor: "var(--midnight)",
             display: "flex",
             flexDirection: "column",
+            alignItems: "center",
             height: "100%",
           }}
         >
           {/* Steps */}
           <div
             style={{
+              ...contentStyle,
               flex: 1,
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              padding: "80px 32px 24px",
+              padding: "80px 0 24px",
             }}
           >
             <p
               data-enter
               style={{
                 color: "var(--ember)",
-                fontSize: "10px",
+                fontSize: "clamp(10px, 1.1vw, 13px)",
                 letterSpacing: "0.18em",
                 fontFamily: "var(--font-mono)",
                 marginBottom: "28px",
@@ -371,8 +448,8 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
                 data-enter
                 style={{
                   display: "flex",
-                  gap: "16px",
-                  marginBottom: "24px",
+                  gap: "20px",
+                  marginBottom: "28px",
                   alignItems: "flex-start",
                   opacity: 0,
                 }}
@@ -381,7 +458,7 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
                   style={{
                     color: "var(--ember)",
                     fontFamily: "var(--font-mono)",
-                    fontSize: "11px",
+                    fontSize: "clamp(11px, 1vw, 13px)",
                     letterSpacing: "0.06em",
                     fontWeight: 600,
                     paddingTop: "2px",
@@ -395,7 +472,7 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
                     style={{
                       color: "var(--bone)",
                       fontWeight: 600,
-                      fontSize: "15px",
+                      fontSize: "clamp(15px, 1.4vw, 19px)",
                       marginBottom: "4px",
                     }}
                   >
@@ -404,8 +481,8 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
                   <p
                     style={{
                       color: "rgba(245,241,234,0.45)",
-                      fontSize: "13px",
-                      lineHeight: 1.5,
+                      fontSize: "clamp(13px, 1.2vw, 16px)",
+                      lineHeight: 1.55,
                     }}
                   >
                     {s.desc}
@@ -419,7 +496,7 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
           <div
             data-enter
             style={{
-              padding: `0 32px max(env(safe-area-inset-bottom, 0px), 56px)`,
+              ...contentStyle,
               paddingBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 40px), 56px)",
               display: "flex",
               flexDirection: "column",
@@ -437,9 +514,9 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
                 backgroundColor: "var(--ember)",
                 color: "#fff",
                 borderRadius: "9999px",
-                padding: "16px 24px",
+                padding: "clamp(14px, 1.4vw, 18px) 24px",
                 fontWeight: 600,
-                fontSize: "16px",
+                fontSize: "clamp(16px, 1.3vw, 18px)",
                 border: "none",
                 cursor: "pointer",
                 fontFamily: "var(--font-geist)",
@@ -453,7 +530,7 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
               onClick={onLogin}
               style={{
                 color: "rgba(245,241,234,0.45)",
-                fontSize: "14px",
+                fontSize: "clamp(14px, 1.2vw, 16px)",
                 textAlign: "center",
                 border: "none",
                 background: "none",
