@@ -429,7 +429,8 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              padding: "80px 0 24px",
+              paddingTop: "80px",
+              paddingBottom: "24px",
             }}
           >
             <p
