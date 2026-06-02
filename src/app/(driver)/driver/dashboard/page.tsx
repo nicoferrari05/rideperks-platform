@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { ChevronRight, AlertTriangle, Clock } from "lucide-react"
 import DashboardAnimation from "@/components/driver/DashboardAnimation"
-import SavingsCounter from "@/components/driver/SavingsCounter"
+import DashboardHero from "@/components/driver/DashboardHero"
 
 type BenefitPreview = {
   id: string
@@ -74,6 +74,10 @@ export default async function DriverDashboard() {
 
   const membershipCost = (subscription as { amount?: number } | null)?.amount ?? 15
   const roi = totalSaved > 0 ? totalSaved / membershipCost : 0
+
+  const monthLabel = new Date()
+    .toLocaleDateString("es-PA", { month: "long" })
+    .toUpperCase()
 
   return (
     <DashboardAnimation>
@@ -150,80 +154,18 @@ export default async function DriverDashboard() {
 
         {/* Savings hero */}
         {hasSubscription ? (
-          <div
-            data-animate="hero"
-            className="rounded-2xl p-6 relative overflow-hidden"
-            style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
-          >
-            <div
-              className="absolute pointer-events-none"
-              style={{
-                right: "-20%", top: "-30%", width: "70%", height: "70%",
-                background: "radial-gradient(circle, rgba(232,80,42,0.35), transparent 60%)",
-              }}
+          <div data-animate="hero">
+            <DashboardHero
+              totalSaved={totalSaved}
+              lifetimeSaved={lifetimeSaved}
+              redemptionsThisMonth={monthlyRedemptions?.length ?? 0}
+              totalRedemptions={allRedemptions?.length ?? 0}
+              roi={roi}
+              expiresAt={expiresAt}
+              daysUntilExpiry={daysUntilExpiry}
+              potentialMonthly={potentialMonthly}
+              monthLabel={monthLabel}
             />
-            <div className="relative">
-              <p className="eyebrow mb-4" style={{ color: "rgba(245,241,234,0.5)", fontSize: "10px" }}>
-                {new Date().toLocaleDateString("es-PA", { month: "long" }).toUpperCase()} · AHORRO ACUMULADO
-              </p>
-
-              <SavingsCounter
-                value={totalSaved}
-                color={totalSaved > 0 ? "var(--ember)" : "var(--bone)"}
-              />
-
-              <div style={{ marginTop: "8px" }}>
-                {totalSaved === 0 ? (
-                  <p style={{ fontSize: "13px", color: "rgba(245,241,234,0.45)" }}>
-                    {potentialMonthly > 0
-                      ? `Conductores activos ahorran hasta B/. ${potentialMonthly.toFixed(2)} al mes`
-                      : "Usa tus primeros beneficios para empezar a acumular."}
-                  </p>
-                ) : (
-                  <>
-                    <p style={{ fontSize: "13px", color: "rgba(245,241,234,0.5)" }}>
-                      {monthlyRedemptions?.length}{" "}
-                      {monthlyRedemptions?.length === 1 ? "beneficio usado" : "beneficios usados"} este mes
-                    </p>
-                    {roi >= 1 && (
-                      <p style={{ fontSize: "12px", color: "var(--verde)", marginTop: "4px", fontWeight: 600 }}>
-                        Has recuperado {roi.toFixed(1)}x el precio de tu membresía
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-
-              <div className="flex items-end justify-between mt-5">
-                <div>
-                  <p className="font-mono-brand" style={{ fontSize: "10px", opacity: 0.4, letterSpacing: "0.1em" }}>
-                    MEMBRESÍA ACTIVA HASTA
-                  </p>
-                  <p className="font-mono-brand font-medium mt-0.5" style={{ fontSize: "12px" }}>
-                    {expiresAt}
-                  </p>
-                  {lifetimeSaved > totalSaved && (
-                    <p className="font-mono-brand mt-1.5" style={{ fontSize: "11px", color: "rgba(245,241,234,0.3)" }}>
-                      B/. {lifetimeSaved.toFixed(2)} ahorrado en total
-                    </p>
-                  )}
-                  {daysUntilExpiry !== null && daysUntilExpiry > 7 && daysUntilExpiry <= 30 && (
-                    <p className="font-mono-brand mt-1" style={{ fontSize: "11px", color: "rgba(232,80,42,0.55)" }}>
-                      Vence en {daysUntilExpiry} días
-                    </p>
-                  )}
-                </div>
-                <Link href="/driver/benefits">
-                  <button
-                    className="flex items-center gap-1.5 px-4 py-3 rounded-full font-semibold text-sm min-h-[44px]"
-                    style={{ backgroundColor: "var(--ember)", color: "#fff" }}
-                  >
-                    Usar beneficios
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </Link>
-              </div>
-            </div>
           </div>
         ) : (
           <div
