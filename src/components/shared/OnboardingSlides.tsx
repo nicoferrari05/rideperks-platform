@@ -27,11 +27,13 @@ const steps = [
 
 export default function OnboardingSlides({ onRegister, onLogin }: Props) {
   const [current, setCurrent] = useState(0)
+  const [hasPointer, setHasPointer] = useState(false)
   const trackRef = useRef<HTMLDivElement>(null)
   const slide0Ref = useRef<HTMLDivElement>(null)
   const slide1Ref = useRef<HTMLDivElement>(null)
   const slide2Ref = useRef<HTMLDivElement>(null)
   const slideRefs = [slide0Ref, slide1Ref, slide2Ref]
+  const swipeHintRef = useRef<HTMLDivElement>(null)
 
   const touchStartX = useRef(0)
   const touchStartTime = useRef(0)
@@ -42,6 +44,11 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
       ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
       : false
 
+  // Detect mouse vs touch device
+  useEffect(() => {
+    setHasPointer(window.matchMedia("(hover: hover) and (pointer: fine)").matches)
+  }, [])
+
   // Keyboard navigation
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -51,6 +58,19 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [current]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Swipe hint nudge — runs once on first slide on touch devices
+  useEffect(() => {
+    if (hasPointer || current !== 0 || !swipeHintRef.current || prefersReducedMotion) return
+    const t = setTimeout(() => {
+      gsap.fromTo(
+        swipeHintRef.current,
+        { x: 0 },
+        { x: 10, duration: 0.45, ease: "power1.inOut", repeat: 3, yoyo: true }
+      )
+    }, 1800)
+    return () => clearTimeout(t)
+  }, [hasPointer, current, prefersReducedMotion])
 
   // Animate content in when a slide becomes active
   useEffect(() => {
@@ -167,8 +187,8 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
         </button>
       )}
 
-      {/* ── Arrow navigation (desktop) ── */}
-      {current > 0 && (
+      {/* ── Arrow navigation — desktop (pointer device) only ── */}
+      {hasPointer && current > 0 && (
         <button
           onClick={() => goTo(current - 1)}
           aria-label="Slide anterior"
@@ -194,7 +214,7 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
           <ChevronLeft style={{ width: "20px", height: "20px" }} />
         </button>
       )}
-      {current < 2 && (
+      {hasPointer && current < 2 && (
         <button
           onClick={() => goTo(current + 1)}
           aria-label="Slide siguiente"
@@ -549,7 +569,7 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
         </div>
       </div>
 
-      {/* ── Dot indicator ── */}
+      {/* ── Dot indicator + swipe hint ── */}
       <div
         aria-hidden="true"
         style={{
@@ -558,24 +578,46 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
           left: 0,
           right: 0,
           display: "flex",
-          justifyContent: "center",
+          flexDirection: "column",
           alignItems: "center",
-          gap: "6px",
+          gap: "10px",
           pointerEvents: "none",
         }}
       >
-        {[0, 1, 2].map((i) => (
+        {/* Swipe hint — touch devices, first slide only */}
+        {!hasPointer && current === 0 && (
           <div
-            key={i}
+            ref={swipeHintRef}
             style={{
-              height: "5px",
-              borderRadius: "3px",
-              backgroundColor: i === current ? dotActive : dotInactive,
-              width: i === current ? "22px" : "5px",
-              transition: "width 300ms cubic-bezier(0.23, 1, 0.32, 1), background-color 250ms ease",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              color: "rgba(245,241,234,0.35)",
+              fontSize: "11px",
+              letterSpacing: "0.1em",
+              fontFamily: "var(--font-mono)",
             }}
-          />
-        ))}
+          >
+            desliza
+            <ChevronRight style={{ width: "12px", height: "12px" }} />
+          </div>
+        )}
+
+        {/* Dots */}
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              style={{
+                height: "5px",
+                borderRadius: "3px",
+                backgroundColor: i === current ? dotActive : dotInactive,
+                width: i === current ? "22px" : "5px",
+                transition: "width 300ms cubic-bezier(0.23, 1, 0.32, 1), background-color 250ms ease",
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   )
