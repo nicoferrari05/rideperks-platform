@@ -5,6 +5,14 @@ import { ChevronRight, AlertTriangle, Clock } from "lucide-react"
 import DashboardAnimation from "@/components/driver/DashboardAnimation"
 import SavingsCounter from "@/components/driver/SavingsCounter"
 
+type BenefitPreview = {
+  id: string
+  title: string
+  discount_value: string | null
+  savings_value: number | null
+  partner_businesses: { name: string } | null
+}
+
 export default async function DriverDashboard() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -35,9 +43,12 @@ export default async function DriverDashboard() {
       .select("benefits(savings_value)")
       .eq("driver_id", user.id),
     supabase.from("benefits")
-      .select("savings_value")
-      .eq("is_active", true),
+      .select("id, title, discount_value, savings_value, partner_businesses(name)")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false }),
   ])
+
+  const benefits = (activeBenefits ?? []) as BenefitPreview[]
 
   const totalSaved = monthlyRedemptions?.reduce((sum, r) => {
     const val = (r.benefits as { savings_value?: number } | null)?.savings_value ?? 0
@@ -49,9 +60,7 @@ export default async function DriverDashboard() {
     return sum + val
   }, 0) ?? 0
 
-  const potentialMonthly = activeBenefits?.reduce((sum, b) => {
-    return sum + ((b as { savings_value?: number }).savings_value ?? 0)
-  }, 0) ?? 0
+  const potentialMonthly = benefits.reduce((sum, b) => sum + (b.savings_value ?? 0), 0)
 
   const isVerified = profile?.status === "verified"
   const hasSubscription = !!subscription
@@ -87,12 +96,12 @@ export default async function DriverDashboard() {
         {!isVerified && (
           <div
             data-animate="hero"
-            className="rounded-2xl p-5 flex items-start gap-4"
+            className="rounded-2xl p-4 flex items-center gap-3"
             style={{ backgroundColor: "var(--ember-soft)", border: "1px solid rgba(232,80,42,0.2)" }}
           >
             {profile?.status === "rejected"
-              ? <AlertTriangle className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: "var(--ember)" }} />
-              : <Clock className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: "var(--ember)" }} />
+              ? <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ember)" }} />
+              : <Clock className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ember)" }} />
             }
             <div className="flex-1">
               <p className="font-semibold text-sm" style={{ color: "var(--midnight)" }}>
@@ -107,7 +116,7 @@ export default async function DriverDashboard() {
             {profile?.status === "rejected" && (
               <Link href="/driver/verify">
                 <button
-                  className="text-xs font-semibold px-3 py-1.5 rounded-full"
+                  className="text-xs font-semibold px-3 py-1.5 rounded-full flex-shrink-0"
                   style={{ backgroundColor: "var(--ember)", color: "#fff" }}
                 >
                   Reintentar
@@ -121,17 +130,15 @@ export default async function DriverDashboard() {
         {hasSubscription && daysUntilExpiry !== null && daysUntilExpiry <= 7 && (
           <div
             data-animate="hero"
-            className="rounded-2xl p-4 flex items-center justify-between gap-4"
+            className="rounded-2xl p-4 flex items-center gap-3"
             style={{ backgroundColor: "var(--ember-soft)", border: "1px solid rgba(232,80,42,0.25)" }}
           >
-            <div className="flex items-center gap-3">
-              <Clock className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ember)" }} />
-              <p className="text-sm font-semibold" style={{ color: "var(--midnight)" }}>
-                {daysUntilExpiry <= 1
-                  ? "Tu membresía vence mañana"
-                  : `Tu membresía vence en ${daysUntilExpiry} días`}
-              </p>
-            </div>
+            <Clock className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ember)" }} />
+            <p className="text-sm font-semibold flex-1" style={{ color: "var(--midnight)" }}>
+              {daysUntilExpiry <= 1
+                ? "Tu membresía vence mañana"
+                : `Tu membresía vence en ${daysUntilExpiry} días`}
+            </p>
             <span
               className="font-semibold flex-shrink-0"
               style={{ fontSize: "11px", color: "var(--ember)", letterSpacing: "0.04em" }}
@@ -187,7 +194,7 @@ export default async function DriverDashboard() {
                 )}
               </div>
 
-              <div className="flex items-end justify-between mt-6">
+              <div className="flex items-end justify-between mt-5">
                 <div>
                   <p className="font-mono-brand" style={{ fontSize: "10px", opacity: 0.4, letterSpacing: "0.1em" }}>
                     MEMBRESÍA ACTIVA HASTA
@@ -233,6 +240,68 @@ export default async function DriverDashboard() {
           </div>
         )}
 
+        {/* Benefits preview */}
+        {benefits.length > 0 && (
+          <div data-animate="row">
+            <div className="flex items-center justify-between mb-3">
+              <p className="eyebrow-muted">BENEFICIOS DISPONIBLES</p>
+              <Link
+                href="/driver/benefits"
+                className="flex items-center gap-0.5 font-semibold"
+                style={{ fontSize: "12px", color: "var(--ember)" }}
+              >
+                Ver todos
+                <ChevronRight className="w-3 h-3" />
+              </Link>
+            </div>
+
+            <div
+              className="rounded-2xl overflow-hidden"
+              style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
+            >
+              {benefits.slice(0, 4).map((benefit, i) => (
+                <Link
+                  key={benefit.id}
+                  href="/driver/benefits"
+                  className="flex items-center gap-3 px-4 py-3.5 pressable"
+                  style={{
+                    borderTop: i > 0 ? "1px solid var(--line)" : "none",
+                    textDecoration: "none",
+                  }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" style={{ color: "var(--midnight)" }}>
+                      {benefit.title}
+                    </p>
+                    {benefit.partner_businesses?.name && (
+                      <p
+                        className="font-mono-brand mt-0.5 truncate"
+                        style={{ fontSize: "11px", color: "var(--mute)", letterSpacing: "0.06em" }}
+                      >
+                        {benefit.partner_businesses.name.toUpperCase()}
+                      </p>
+                    )}
+                  </div>
+                  {benefit.discount_value && (
+                    <span
+                      className="font-mono-brand font-semibold flex-shrink-0 px-2.5 py-0.5 rounded-full"
+                      style={{
+                        fontSize: "11px",
+                        backgroundColor: "var(--ember-soft)",
+                        color: "var(--ember)",
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      {benefit.discount_value}
+                    </span>
+                  )}
+                  <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--line)" }} />
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Recent redemptions */}
         {(monthlyRedemptions?.length ?? 0) > 0 && (
           <div>
@@ -270,6 +339,7 @@ export default async function DriverDashboard() {
             </div>
           </div>
         )}
+
       </div>
     </DashboardAnimation>
   )
