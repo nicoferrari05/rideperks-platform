@@ -14,7 +14,13 @@ export default async function DriverDashboard() {
   startOfMonth.setDate(1)
   startOfMonth.setHours(0, 0, 0, 0)
 
-  const [{ data: profile }, { data: subscription }, { data: monthlyRedemptions }] = await Promise.all([
+  const [
+    { data: profile },
+    { data: subscription },
+    { data: monthlyRedemptions },
+    { data: allRedemptions },
+    { data: activeBenefits },
+  ] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("subscriptions").select("*")
       .eq("driver_id", user.id).eq("status", "active")
@@ -25,6 +31,12 @@ export default async function DriverDashboard() {
       .eq("driver_id", user.id)
       .gte("redeemed_at", startOfMonth.toISOString())
       .order("redeemed_at", { ascending: false }),
+    supabase.from("benefit_redemptions")
+      .select("benefits(savings_value)")
+      .eq("driver_id", user.id),
+    supabase.from("benefits")
+      .select("savings_value")
+      .eq("is_active", true),
   ])
 
   const totalSaved = monthlyRedemptions?.reduce((sum, r) => {
@@ -32,11 +44,27 @@ export default async function DriverDashboard() {
     return sum + val
   }, 0) ?? 0
 
+  const lifetimeSaved = allRedemptions?.reduce((sum, r) => {
+    const val = (r.benefits as { savings_value?: number } | null)?.savings_value ?? 0
+    return sum + val
+  }, 0) ?? 0
+
+  const potentialMonthly = activeBenefits?.reduce((sum, b) => {
+    return sum + ((b as { savings_value?: number }).savings_value ?? 0)
+  }, 0) ?? 0
+
   const isVerified = profile?.status === "verified"
   const hasSubscription = !!subscription
   const expiresAt = subscription?.expires_at
     ? new Date(subscription.expires_at).toLocaleDateString("es-PA", { day: "2-digit", month: "long" })
     : null
+
+  const daysUntilExpiry = subscription?.expires_at
+    ? Math.floor((new Date(subscription.expires_at).getTime() - Date.now()) / 86400000)
+    : null
+
+  const membershipCost = (subscription as { amount?: number } | null)?.amount ?? 15
+  const roi = totalSaved > 0 ? totalSaved / membershipCost : 0
 
   return (
     <DashboardAnimation>
@@ -89,6 +117,30 @@ export default async function DriverDashboard() {
           </div>
         )}
 
+        {/* Expiry warning — urgent (≤7 days) */}
+        {hasSubscription && daysUntilExpiry !== null && daysUntilExpiry <= 7 && (
+          <div
+            data-animate="hero"
+            className="rounded-2xl p-4 flex items-center justify-between gap-4"
+            style={{ backgroundColor: "var(--ember-soft)", border: "1px solid rgba(232,80,42,0.25)" }}
+          >
+            <div className="flex items-center gap-3">
+              <Clock className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ember)" }} />
+              <p className="text-sm font-semibold" style={{ color: "var(--midnight)" }}>
+                {daysUntilExpiry <= 1
+                  ? "Tu membresía vence mañana"
+                  : `Tu membresía vence en ${daysUntilExpiry} días`}
+              </p>
+            </div>
+            <span
+              className="font-semibold flex-shrink-0"
+              style={{ fontSize: "11px", color: "var(--ember)", letterSpacing: "0.04em" }}
+            >
+              Renueva ya
+            </span>
+          </div>
+        )}
+
         {/* Savings hero */}
         {hasSubscription ? (
           <div
@@ -113,15 +165,27 @@ export default async function DriverDashboard() {
                 color={totalSaved > 0 ? "var(--ember)" : "var(--bone)"}
               />
 
-              {totalSaved === 0 ? (
-                <p style={{ fontSize: "13px", color: "rgba(245,241,234,0.4)", marginTop: "8px" }}>
-                  Usa tus primeros beneficios para empezar a acumular.
-                </p>
-              ) : (
-                <p style={{ fontSize: "13px", color: "rgba(245,241,234,0.5)", marginTop: "8px" }}>
-                  {monthlyRedemptions?.length} {monthlyRedemptions?.length === 1 ? "beneficio usado" : "beneficios usados"} este mes
-                </p>
-              )}
+              <div style={{ marginTop: "8px" }}>
+                {totalSaved === 0 ? (
+                  <p style={{ fontSize: "13px", color: "rgba(245,241,234,0.45)" }}>
+                    {potentialMonthly > 0
+                      ? `Conductores activos ahorran hasta B/. ${potentialMonthly.toFixed(2)} al mes`
+                      : "Usa tus primeros beneficios para empezar a acumular."}
+                  </p>
+                ) : (
+                  <>
+                    <p style={{ fontSize: "13px", color: "rgba(245,241,234,0.5)" }}>
+                      {monthlyRedemptions?.length}{" "}
+                      {monthlyRedemptions?.length === 1 ? "beneficio usado" : "beneficios usados"} este mes
+                    </p>
+                    {roi >= 1 && (
+                      <p style={{ fontSize: "12px", color: "var(--verde)", marginTop: "4px", fontWeight: 600 }}>
+                        Has recuperado {roi.toFixed(1)}x el precio de tu membresía
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
 
               <div className="flex items-end justify-between mt-6">
                 <div>
@@ -131,6 +195,16 @@ export default async function DriverDashboard() {
                   <p className="font-mono-brand font-medium mt-0.5" style={{ fontSize: "12px" }}>
                     {expiresAt}
                   </p>
+                  {lifetimeSaved > totalSaved && (
+                    <p className="font-mono-brand mt-1.5" style={{ fontSize: "11px", color: "rgba(245,241,234,0.3)" }}>
+                      B/. {lifetimeSaved.toFixed(2)} ahorrado en total
+                    </p>
+                  )}
+                  {daysUntilExpiry !== null && daysUntilExpiry > 7 && daysUntilExpiry <= 30 && (
+                    <p className="font-mono-brand mt-1" style={{ fontSize: "11px", color: "rgba(232,80,42,0.55)" }}>
+                      Vence en {daysUntilExpiry} días
+                    </p>
+                  )}
                 </div>
                 <Link href="/driver/benefits">
                   <button

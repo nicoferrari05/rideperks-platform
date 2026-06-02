@@ -38,14 +38,30 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  const [{ data: profile }, { data: subscription }, { data: redemptions }] = await Promise.all([
+  const [{ data: profile }, { data: subscription }, { data: redemptions }, { data: firstSubscription }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("subscriptions").select("*")
       .eq("driver_id", user.id).eq("status", "active")
       .gte("expires_at", new Date().toISOString())
       .order("expires_at", { ascending: false }).limit(1).single(),
-    supabase.from("benefit_redemptions").select("id").eq("driver_id", user.id),
+    supabase.from("benefit_redemptions")
+      .select("benefits(savings_value)")
+      .eq("driver_id", user.id),
+    supabase.from("subscriptions")
+      .select("starts_at")
+      .eq("driver_id", user.id)
+      .order("starts_at", { ascending: true })
+      .limit(1).single(),
   ])
+
+  const lifetimeSaved = redemptions?.reduce((sum, r) => {
+    const val = (r.benefits as { savings_value?: number } | null)?.savings_value ?? 0
+    return sum + val
+  }, 0) ?? 0
+
+  const memberSince = firstSubscription?.starts_at
+    ? new Date(firstSubscription.starts_at).toLocaleDateString("es-PA", { day: "2-digit", month: "long", year: "numeric" })
+    : null
 
   const sc = statusConfig[profile?.status ?? "pending"]
   const StatusIcon = sc.Icon
@@ -142,11 +158,13 @@ export default async function ProfilePage() {
           </div>
           {subscription ? (
             <>
-              {[
-                { label: "Estado",            value: "Activa",                              color: "var(--verde)" },
+              {([
+                { label: "Estado",            value: "Activa",              color: "var(--verde)" },
                 { label: "Vence",             value: new Date(subscription.expires_at).toLocaleDateString("es-PA", { day: "2-digit", month: "long", year: "numeric" }) },
+                ...(memberSince ? [{ label: "Miembro desde", value: memberSince }] : []),
                 { label: "Beneficios usados", value: String(redemptions?.length ?? 0) },
-              ].map(({ label, value, color }) => (
+                ...(lifetimeSaved > 0 ? [{ label: "Ahorro total", value: `B/. ${lifetimeSaved.toFixed(2)}`, color: "var(--verde)" }] : []),
+              ] as { label: string; value: string; color?: string }[]).map(({ label, value, color }) => (
                 <div
                   key={label}
                   className="flex items-center justify-between px-5 py-3.5"

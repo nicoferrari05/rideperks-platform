@@ -24,6 +24,10 @@ export default async function BenefitsPage() {
   const isVerified = profile?.status === "verified"
   const canUse = isVerified && !!subscription
 
+  const catalogPotential = benefits?.reduce((sum, b) => {
+    return sum + ((b as { savings_value?: number }).savings_value ?? 0)
+  }, 0) ?? 0
+
   return (
     <div className="space-y-5">
       <div className="pt-2">
@@ -33,6 +37,11 @@ export default async function BenefitsPage() {
         <p className="eyebrow-muted mt-1">
           {benefits?.length ?? 0} DESCUENTOS DISPONIBLES
         </p>
+        {catalogPotential > 0 && (
+          <p className="text-sm font-medium mt-1" style={{ color: "var(--ember)" }}>
+            Ahorra hasta B/. {catalogPotential.toFixed(2)} al mes
+          </p>
+        )}
       </div>
 
       {!canUse && (
