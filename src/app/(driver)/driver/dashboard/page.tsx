@@ -48,7 +48,7 @@ export default async function DriverDashboard() {
       .order("created_at", { ascending: false }),
   ])
 
-  const benefits = (activeBenefits ?? []) as BenefitPreview[]
+  const benefits = (activeBenefits ?? []) as unknown as BenefitPreview[]
 
   const totalSaved = monthlyRedemptions?.reduce((sum, r) => {
     const val = (r.benefits as { savings_value?: number } | null)?.savings_value ?? 0
