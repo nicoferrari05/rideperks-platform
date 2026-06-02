@@ -99,6 +99,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ valid: false, error: "Conductor no verificado" }, { status: 403 })
   }
 
+  // Ensure the scanning business is the one that owns this benefit
+  if (qrToken.benefits && qrToken.benefit_id) {
+    const { data: benefitBusiness } = await supabase
+      .from("benefits")
+      .select("business_id")
+      .eq("id", qrToken.benefit_id)
+      .single()
+
+    if (benefitBusiness && benefitBusiness.business_id !== business.id) {
+      return NextResponse.json({ valid: false, error: "Este QR no corresponde a tu comercio" }, { status: 403 })
+    }
+  }
+
   if (qrToken.benefits?.usage_limit_per_driver) {
     const startOfMonth = new Date()
     startOfMonth.setDate(1)
