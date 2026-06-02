@@ -128,11 +128,14 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
   const dotActive = "var(--ember)"
   const dotInactive = isLightSlide ? "rgba(15,27,61,0.18)" : "rgba(245,241,234,0.28)"
 
-  // Shared content width — keeps text readable on large screens
+  // Shared content width — centered on desktop, full-width on mobile
+  // Side padding uses clamp: ~24px on mobile, ~48px on desktop
   const contentStyle: React.CSSProperties = {
     maxWidth: "480px",
     width: "100%",
     margin: "0 auto",
+    paddingLeft: "clamp(24px, 6.5vw, 48px)",
+    paddingRight: "clamp(24px, 6.5vw, 48px)",
   }
 
   return (
@@ -241,7 +244,7 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            padding: "80px 48px 120px",
+            padding: "80px 0 120px",
             position: "relative",
           }}
         >
@@ -326,7 +329,7 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            padding: "80px 48px 120px",
+            padding: "80px 0 120px",
           }}
         >
           <div style={contentStyle}>
