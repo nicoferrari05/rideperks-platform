@@ -35,7 +35,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
   async function generateQR() {
     setGenerating(true)
     const supabase = createClient()
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
+    const expiresAt = new Date(Date.now() + 2 * 60 * 1000)
 
     const { data, error } = await supabase
       .from("qr_tokens")
@@ -49,7 +49,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
     }
 
     setToken(data.token)
-    setTimeLeft(10 * 60)
+    setTimeLeft(2 * 60)
     setGenerating(false)
     setOpen(true)
 
