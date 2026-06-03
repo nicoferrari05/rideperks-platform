@@ -227,6 +227,25 @@ export default function BusinessVerifyPage() {
     return () => clearInterval(countdownRef.current!)
   }, [result, resetToScan])
 
+  async function validateBusinessCode(): Promise<boolean> {
+    try {
+      const res = await fetch("/api/verify-business", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ business_code: businessCode }),
+      })
+      const data = await res.json()
+      if (!data.valid) {
+        toast.error(data.error ?? "Código de comercio inválido")
+        return false
+      }
+      return true
+    } catch {
+      toast.error("Error de conexión. Intenta de nuevo.")
+      return false
+    }
+  }
+
   async function startScanner() {
     const { Html5Qrcode } = await import("html5-qrcode")
     const scanner = new Html5Qrcode("qr-viewport")
@@ -266,12 +285,16 @@ export default function BusinessVerifyPage() {
     setVerifying(false)
   }
 
-  function handleCodeSubmit(e: { preventDefault(): void }) {
+  async function handleCodeSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
     if (businessCode.trim().length < 3) {
       toast.error("Ingresa el código de tu comercio")
       return
     }
+    setVerifying(true)
+    const valid = await validateBusinessCode()
+    setVerifying(false)
+    if (!valid) return
     withVT(() => setStep("scan"))
     startScanner()
   }
