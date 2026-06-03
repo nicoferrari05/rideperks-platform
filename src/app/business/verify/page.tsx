@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
 import { Loader2 } from "lucide-react"
@@ -78,7 +79,6 @@ function ResultScreen({
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: bg, transition: "background-color 0.3s ease" }}
     >
-      {/* Progress bar */}
       <div className="h-1 w-full" style={{ backgroundColor: "rgba(0,0,0,0.2)" }}>
         <div
           className="h-full"
@@ -91,8 +91,6 @@ function ResultScreen({
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-
-        {/* Status icon */}
         <div
           data-result="icon"
           className="rounded-full flex items-center justify-center mb-8"
@@ -103,7 +101,6 @@ function ResultScreen({
           </span>
         </div>
 
-        {/* Status word */}
         <p
           data-result="title"
           className="font-bold font-mono-brand"
@@ -118,14 +115,10 @@ function ResultScreen({
           {isValid ? "VÁLIDO" : "INVÁLIDO"}
         </p>
 
-        {/* Details */}
         <div data-result="details">
           {isValid ? (
             <div className="space-y-3">
-              <p
-                className="font-bold"
-                style={{ fontSize: "28px", color: "#fff", letterSpacing: "-0.02em" }}
-              >
+              <p className="font-bold" style={{ fontSize: "28px", color: "#fff", letterSpacing: "-0.02em" }}>
                 {result.driver_name}
               </p>
               {result.discount_value && (
@@ -161,7 +154,6 @@ function ResultScreen({
         </div>
       </div>
 
-      {/* Countdown */}
       <div
         data-result="countdown"
         className="px-8 text-center"
@@ -182,8 +174,9 @@ function ResultScreen({
   )
 }
 
-// ── MAIN COMPONENT ───────────────────────────────────────────
-export default function BusinessVerifyPage() {
+// ── MAIN COMPONENT (needs Suspense for useSearchParams) ───────
+function BusinessVerifyContent() {
+  const searchParams = useSearchParams()
   const [step, setStep] = useState<Step>("code")
   const [businessCode, setBusinessCode] = useState("")
   const [verifying, setVerifying] = useState(false)
@@ -227,22 +220,32 @@ export default function BusinessVerifyPage() {
     return () => clearInterval(countdownRef.current!)
   }, [result, resetToScan])
 
-  async function validateBusinessCode(): Promise<boolean> {
+  // If arriving from login with ?code=, skip code entry and go straight to scanner
+  useEffect(() => {
+    const codeParam = searchParams.get("code")
+    if (!codeParam) return
+    setBusinessCode(codeParam)
+    withVT(() => setStep("scan"))
+    startScannerWithCode(codeParam)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  async function startScannerWithCode(code: string) {
+    const { Html5Qrcode } = await import("html5-qrcode")
+    const scanner = new Html5Qrcode("qr-viewport")
+    scannerRef.current = scanner
     try {
-      const res = await fetch("/api/verify-business", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ business_code: businessCode }),
-      })
-      const data = await res.json()
-      if (!data.valid) {
-        toast.error(data.error ?? "Código de comercio inválido")
-        return false
-      }
-      return true
+      await scanner.start(
+        { facingMode: "environment" },
+        { fps: 15, qrbox: { width: 260, height: 260 } },
+        async (decoded) => {
+          await stopScanner()
+          await verifyTokenWithCode(decoded, code)
+        },
+        () => {}
+      )
     } catch {
-      toast.error("Error de conexión. Intenta de nuevo.")
-      return false
+      toast.error("No se pudo acceder a la cámara. Usa el ingreso manual.")
     }
   }
 
@@ -265,14 +268,14 @@ export default function BusinessVerifyPage() {
     }
   }
 
-  async function verifyToken(token: string) {
+  async function verifyTokenWithCode(token: string, code: string) {
     if (!token.trim()) return
     setVerifying(true)
     try {
       const res = await fetch("/api/verify-qr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: token.trim(), business_code: businessCode }),
+        body: JSON.stringify({ token: token.trim(), business_code: code }),
       })
       const data = await res.json()
       withVT(() => { setResult(data); setStep("result") })
@@ -285,16 +288,16 @@ export default function BusinessVerifyPage() {
     setVerifying(false)
   }
 
-  async function handleCodeSubmit(e: { preventDefault(): void }) {
+  async function verifyToken(token: string) {
+    await verifyTokenWithCode(token, businessCode)
+  }
+
+  function handleCodeSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
     if (businessCode.trim().length < 3) {
       toast.error("Ingresa el código de tu comercio")
       return
     }
-    setVerifying(true)
-    const valid = await validateBusinessCode()
-    setVerifying(false)
-    if (!valid) return
     withVT(() => setStep("scan"))
     startScanner()
   }
@@ -302,10 +305,7 @@ export default function BusinessVerifyPage() {
   // ── CODE ENTRY STEP ─────────────────────────────────────────
   if (step === "code") {
     return (
-      <div
-        className="min-h-screen flex flex-col"
-        style={{ backgroundColor: "var(--midnight)" }}
-      >
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--midnight)" }}>
         <header className="px-6 pt-8 pb-4">
           <Logo size="sm" />
         </header>
@@ -370,10 +370,7 @@ export default function BusinessVerifyPage() {
   // ── SCAN STEP ───────────────────────────────────────────────
   if (step === "scan") {
     return (
-      <div
-        className="min-h-screen flex flex-col"
-        style={{ backgroundColor: "var(--midnight)" }}
-      >
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--midnight)" }}>
         <header className="px-6 pt-8 pb-4 flex items-center justify-between">
           <Logo size="sm" />
           <span
@@ -390,10 +387,7 @@ export default function BusinessVerifyPage() {
         </header>
 
         <div className="px-6 pb-3">
-          <p
-            className="font-semibold"
-            style={{ fontSize: "20px", color: "var(--bone)", letterSpacing: "-0.02em" }}
-          >
+          <p className="font-semibold" style={{ fontSize: "20px", color: "var(--bone)", letterSpacing: "-0.02em" }}>
             Apunta al QR del conductor
           </p>
           <p
@@ -404,7 +398,6 @@ export default function BusinessVerifyPage() {
           </p>
         </div>
 
-        {/* Camera viewport */}
         <div className="flex-1 mx-4 rounded-3xl overflow-hidden relative" style={{ minHeight: "360px", backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div id="qr-viewport" className="w-full h-full" />
           {verifying && (
@@ -419,7 +412,6 @@ export default function BusinessVerifyPage() {
           )}
         </div>
 
-        {/* Manual fallback */}
         <div className="px-6 py-6 space-y-3">
           <p className="text-center font-mono-brand" style={{ fontSize: "10px", letterSpacing: "0.1em", color: "rgba(245,241,234,0.25)" }}>
             O INGRESA EL CÓDIGO MANUALMENTE
@@ -471,4 +463,13 @@ export default function BusinessVerifyPage() {
   }
 
   return null
+}
+
+// Suspense wrapper required by Next.js for useSearchParams
+export default function BusinessVerifyPage() {
+  return (
+    <Suspense>
+      <BusinessVerifyContent />
+    </Suspense>
+  )
 }
