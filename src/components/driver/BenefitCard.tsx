@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { MapPin, Clock, QrCode, Loader2, XCircle } from "lucide-react"
+import { MapPin, Clock, QrCode, Loader2, XCircle, Navigation } from "lucide-react"
 import QRCode from "react-qr-code"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -130,19 +130,37 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
             </div>
           </div>
 
-          {canUse && (
-            <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--line)" }}>
-              <button
-                onClick={generateQR}
-                disabled={generating}
-                className="pressable w-full rounded-xl py-3 font-semibold text-sm flex items-center justify-center gap-2 min-h-[44px]"
-                style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
-              >
-                {generating
-                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Generando QR...</>
-                  : <><QrCode className="w-3.5 h-3.5" />Usar este beneficio</>
-                }
-              </button>
+          {(canUse || benefit.partner_businesses?.address) && (
+            <div className="mt-4 pt-4 flex gap-2" style={{ borderTop: "1px solid var(--line)" }}>
+              {benefit.partner_businesses?.address && (
+                <a
+                  href={`https://waze.com/ul?q=${encodeURIComponent(benefit.partner_businesses.address)}&navigate=yes`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pressable flex items-center justify-center gap-1.5 rounded-xl py-3 font-semibold text-sm min-h-[44px] px-4 flex-shrink-0"
+                  style={{
+                    backgroundColor: "var(--bone-2)",
+                    color: "var(--midnight)",
+                    border: "1px solid var(--line)",
+                  }}
+                >
+                  <Navigation className="w-3.5 h-3.5" />
+                  Waze
+                </a>
+              )}
+              {canUse && (
+                <button
+                  onClick={generateQR}
+                  disabled={generating}
+                  className="pressable flex-1 rounded-xl py-3 font-semibold text-sm flex items-center justify-center gap-2 min-h-[44px]"
+                  style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
+                >
+                  {generating
+                    ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Generando QR...</>
+                    : <><QrCode className="w-3.5 h-3.5" />Usar este beneficio</>
+                  }
+                </button>
+              )}
             </div>
           )}
         </div>
