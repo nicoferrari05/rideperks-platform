@@ -78,7 +78,16 @@ export default async function BusinessesAdminPage() {
                       )}
                     </div>
                   </div>
-                  <BusinessRowActions businessId={b.id} isActive={b.is_active} />
+                  <BusinessRowActions
+                    businessId={b.id}
+                    isActive={b.is_active}
+                    accessCode={b.access_code ?? null}
+                    name={b.name}
+                    category={b.category ?? null}
+                    address={b.address ?? null}
+                    phone={b.phone ?? null}
+                    description={b.description ?? null}
+                  />
                 </div>
               ))}
             </div>
