@@ -2,7 +2,20 @@
 
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { MapPin, Clock, QrCode, Loader2, XCircle, Navigation } from "lucide-react"
+import { MapPin, Clock, QrCode, Loader2, XCircle } from "lucide-react"
+
+function WazeLogo({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M32 4C18.7 4 8 14.7 8 28c0 8.8 4.7 16.5 11.8 20.8L17 56l8-3 7 3 7-3 8 3-2.8-7.2C51.3 44.5 56 36.8 56 28 56 14.7 45.3 4 32 4z" fill="#33CCFF"/>
+      <circle cx="24" cy="27" r="4.5" fill="white"/>
+      <circle cx="40" cy="27" r="4.5" fill="white"/>
+      <circle cx="25" cy="28" r="2.5" fill="#1A1A2E"/>
+      <circle cx="41" cy="28" r="2.5" fill="#1A1A2E"/>
+      <path d="M23 37 Q32 44 41 37" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+    </svg>
+  )
+}
 import QRCode from "react-qr-code"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -144,7 +157,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                     border: "1px solid var(--line)",
                   }}
                 >
-                  <Navigation className="w-3.5 h-3.5" />
+                  <WazeLogo size={16} />
                   Waze
                 </a>
               )}
