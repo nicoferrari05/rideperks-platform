@@ -73,7 +73,20 @@ export default async function BenefitsAdminPage() {
                       {b.valid_until ? ` · Hasta ${new Date(b.valid_until).toLocaleDateString("es-PA")}` : ""}
                     </p>
                   </div>
-                  <BenefitRowActions benefitId={b.id} isActive={b.is_active} />
+                  <BenefitRowActions
+                    benefitId={b.id}
+                    isActive={b.is_active}
+                    title={b.title}
+                    description={b.description}
+                    businessId={b.business_id ?? null}
+                    discountType={b.discount_type}
+                    discountValue={b.discount_value ?? null}
+                    savingsValue={(b as { savings_value?: number }).savings_value ?? null}
+                    terms={b.terms ?? null}
+                    usageLimitPerDriver={b.usage_limit_per_driver ?? null}
+                    validUntil={b.valid_until ?? null}
+                    businesses={businesses ?? []}
+                  />
                 </div>
               ))}
             </div>
