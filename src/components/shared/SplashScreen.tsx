@@ -9,7 +9,7 @@ interface Props {
 
 const CARDS = [
   { label: "COMBUSTIBLE", figure: "20%",  bg: "var(--sol)",       color: "var(--midnight)" },
-  { label: "COMIDA",       figure: "B/.5", bg: "var(--verde)",     color: "#fff" },
+  { label: "COMIDA",       figure: "$5", bg: "var(--verde)",     color: "#fff" },
   { label: "TALLER",       figure: "15%",  bg: "var(--ember)",     color: "#fff" },
   { label: "SALUD",        figure: "10%",  bg: "var(--midnight-2)", color: "var(--bone)" },
 ]

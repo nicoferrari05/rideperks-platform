@@ -84,7 +84,7 @@ export default async function SubscriptionsAdminPage() {
                         </div>
                         <p className="font-mono-brand" style={{ fontSize: "11px", color: "var(--mute)", letterSpacing: "0.04em" }}>
                           {new Date(s.starts_at).toLocaleDateString("es-PA")} → {new Date(s.expires_at).toLocaleDateString("es-PA")}
-                          {s.amount ? ` · B/. ${s.amount}` : ""}
+                          {s.amount ? ` · $${s.amount}` : ""}
                           {s.payment_method ? ` · ${paymentLabel[s.payment_method] ?? s.payment_method}` : ""}
                           {s.payment_reference ? ` · ${s.payment_reference}` : ""}
                         </p>

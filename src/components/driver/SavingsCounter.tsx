@@ -27,7 +27,7 @@ export default function SavingsCounter({ value, color }: Props) {
           ease: "power2.out",
           onUpdate() {
             if (numRef.current) {
-              numRef.current.textContent = `B/. ${counter.val.toFixed(2)}`
+              numRef.current.textContent = `$${counter.val.toFixed(2)}`
             }
           },
         })
@@ -43,7 +43,7 @@ export default function SavingsCounter({ value, color }: Props) {
       className="font-bold font-mono-brand leading-none mb-1"
       style={{ fontSize: "52px", letterSpacing: "-0.03em", color }}
     >
-      B/. {value.toFixed(2)}
+      ${value.toFixed(2)}
     </p>
   )
 }

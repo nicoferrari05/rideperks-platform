@@ -123,7 +123,7 @@ export default function BenefitForm({ businesses }: Props) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Valor de ahorro estimado (B/.)</Label>
+            <Label>Valor de ahorro estimado ($)</Label>
             <Input
               type="number"
               step="0.01"

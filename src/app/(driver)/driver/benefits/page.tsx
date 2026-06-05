@@ -39,7 +39,7 @@ export default async function BenefitsPage() {
         </p>
         {catalogPotential > 0 && (
           <p className="text-sm font-medium mt-1" style={{ color: "var(--ember)" }}>
-            Ahorra hasta B/. {catalogPotential.toFixed(2)} al mes
+            Ahorra hasta ${catalogPotential.toFixed(2)} al mes
           </p>
         )}
       </div>

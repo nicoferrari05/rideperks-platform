@@ -272,7 +272,7 @@ export default async function DriverDashboard() {
                         className="font-mono-brand font-semibold"
                         style={{ fontSize: "13px", color: "var(--verde)" }}
                       >
-                        +B/. {benefit.savings_value.toFixed(2)}
+                        +${benefit.savings_value.toFixed(2)}
                       </span>
                     )}
                   </div>

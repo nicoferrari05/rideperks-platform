@@ -163,7 +163,7 @@ export default async function ProfilePage() {
                 { label: "Vence",             value: new Date(subscription.expires_at).toLocaleDateString("es-PA", { day: "2-digit", month: "long", year: "numeric" }) },
                 ...(memberSince ? [{ label: "Miembro desde", value: memberSince }] : []),
                 { label: "Beneficios usados", value: String(redemptions?.length ?? 0) },
-                ...(lifetimeSaved > 0 ? [{ label: "Ahorro total", value: `B/. ${lifetimeSaved.toFixed(2)}`, color: "var(--verde)" }] : []),
+                ...(lifetimeSaved > 0 ? [{ label: "Ahorro total", value: `$${lifetimeSaved.toFixed(2)}`, color: "var(--verde)" }] : []),
               ] as { label: string; value: string; color?: string }[]).map(({ label, value, color }) => (
                 <div
                   key={label}

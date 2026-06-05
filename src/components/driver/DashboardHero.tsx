@@ -101,7 +101,7 @@ export default function DashboardHero({
           {displayValue === 0 && view === "month" ? (
             <p style={{ fontSize: "13px", color: "rgba(245,241,234,0.45)" }}>
               {potentialMonthly > 0
-                ? `Conductores activos ahorran hasta B/. ${potentialMonthly.toFixed(2)} al mes`
+                ? `Conductores activos ahorran hasta $${potentialMonthly.toFixed(2)} al mes`
                 : "Usa tus primeros beneficios para empezar a acumular."}
             </p>
           ) : view === "month" ? (
