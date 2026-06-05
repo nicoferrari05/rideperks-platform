@@ -4,15 +4,29 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { MapPin, Clock, QrCode, Loader2, XCircle } from "lucide-react"
 
-function WazeLogo({ size = 16 }: { size?: number }) {
+function WazeLogo({ size = 18 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M32 4C18.7 4 8 14.7 8 28c0 8.8 4.7 16.5 11.8 20.8L17 56l8-3 7 3 7-3 8 3-2.8-7.2C51.3 44.5 56 36.8 56 28 56 14.7 45.3 4 32 4z" fill="#33CCFF"/>
-      <circle cx="24" cy="27" r="4.5" fill="white"/>
-      <circle cx="40" cy="27" r="4.5" fill="white"/>
-      <circle cx="25" cy="28" r="2.5" fill="#1A1A2E"/>
-      <circle cx="41" cy="28" r="2.5" fill="#1A1A2E"/>
-      <path d="M23 37 Q32 44 41 37" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Cyan background */}
+      <rect width="100" height="100" rx="22" fill="#33CCFF"/>
+      {/* Body: white rounded blob with black stroke */}
+      <path
+        d="M50 12 C66 12 78 23 78 38 C78 50 72 59 62 65 L62 72 C62 75 59 77 56 77 L44 77 C41 77 38 75 38 72 L38 65 C28 59 22 50 22 38 C22 23 34 12 50 12 Z"
+        fill="white" stroke="#111" strokeWidth="4.5" strokeLinejoin="round"
+      />
+      {/* Notch (left bite) */}
+      <path
+        d="M22 42 C18 40 15 35 18 30 C20 34 21 38 22 42 Z"
+        fill="#33CCFF"
+      />
+      {/* Eyes */}
+      <circle cx="40" cy="40" r="4.5" fill="#111"/>
+      <circle cx="60" cy="40" r="4.5" fill="#111"/>
+      {/* Smile */}
+      <path d="M37 54 Q50 64 63 54" stroke="#111" strokeWidth="4" strokeLinecap="round" fill="none"/>
+      {/* Wheels */}
+      <circle cx="41" cy="82" r="8.5" fill="#111"/>
+      <circle cx="62" cy="82" r="8.5" fill="#111"/>
     </svg>
   )
 }
@@ -157,8 +171,8 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                     border: "1px solid var(--line)",
                   }}
                 >
-                  <WazeLogo size={16} />
-                  Waze
+                  <WazeLogo size={18} />
+                  Ir con Waze
                 </a>
               )}
               {canUse && (
