@@ -2,27 +2,9 @@
 
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { MapPin, Clock, QrCode, Loader2, XCircle, ChevronRight } from "lucide-react"
+import { MapPin, Clock, QrCode, Loader2, XCircle } from "lucide-react"
 
-function WazeCharacter({ size = 52 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 56 68" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Body */}
-      <path
-        d="M28 4 C40 4 50 13 50 26 C50 37 44 46 34 51 L34 57 C34 59.5 31.5 61.5 28 61.5 C24.5 61.5 22 59.5 22 57 L22 51 C12 46 6 37 6 26 C6 13 16 4 28 4 Z"
-        fill="white" stroke="#111" strokeWidth="3" strokeLinejoin="round"
-      />
-      {/* Eyes */}
-      <circle cx="21" cy="27" r="3.5" fill="#111"/>
-      <circle cx="35" cy="27" r="3.5" fill="#111"/>
-      {/* Smile */}
-      <path d="M18 37 Q28 46 38 37" stroke="#111" strokeWidth="3" strokeLinecap="round" fill="none"/>
-      {/* Wheels */}
-      <circle cx="22" cy="63.5" r="6" fill="#111"/>
-      <circle cx="36" cy="63.5" r="6" fill="#111"/>
-    </svg>
-  )
-}
+
 import QRCode from "react-qr-code"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -170,31 +152,15 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                   href={`https://waze.com/ul?q=${encodeURIComponent(benefit.partner_businesses.address)}&navigate=yes`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="pressable flex items-center w-full rounded-2xl overflow-hidden min-h-[64px]"
-                  style={{ backgroundColor: "#33CCFF", textDecoration: "none" }}
+                  className="pressable block w-full"
+                  style={{ textDecoration: "none" }}
                 >
-                  {/* Waze character */}
-                  <div className="flex items-center justify-center px-4 py-2 flex-shrink-0">
-                    <WazeCharacter size={48} />
-                  </div>
-                  {/* Divider */}
-                  <div className="self-stretch flex-shrink-0" style={{ width: "1px", backgroundColor: "rgba(255,255,255,0.4)", margin: "10px 0" }} />
-                  {/* Text */}
-                  <div className="flex-1 px-4 py-3">
-                    <p className="font-bold" style={{ fontSize: "16px", color: "#fff", letterSpacing: "-0.01em", lineHeight: 1.2 }}>
-                      Ir con Waze
-                    </p>
-                    <p style={{ fontSize: "12px", color: "rgba(0,20,60,0.65)", marginTop: "2px", lineHeight: 1.3 }}>
-                      Navega con Waze hasta el local
-                    </p>
-                  </div>
-                  {/* Arrow circle */}
-                  <div
-                    className="flex items-center justify-center flex-shrink-0 mr-4"
-                    style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "#fff" }}
-                  >
-                    <ChevronRight className="w-4 h-4" style={{ color: "#33CCFF" }} />
-                  </div>
+                  <img
+                    src="/waze-btn.png"
+                    alt="Ir con Waze"
+                    className="w-full"
+                    style={{ borderRadius: "16px", display: "block" }}
+                  />
                 </a>
               )}
             </div>
