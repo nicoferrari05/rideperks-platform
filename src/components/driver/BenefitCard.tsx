@@ -3,9 +3,10 @@
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { MapPin, Clock, QrCode, Loader2, XCircle, Navigation } from "lucide-react"
-
-
+import { Nunito } from "next/font/google"
 import QRCode from "react-qr-code"
+
+const nunito = Nunito({ subsets: ["latin"], weight: "700" })
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import type { Benefit } from "@/types/database"
@@ -147,7 +148,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                   }}
                 >
                   <Navigation className="w-3.5 h-3.5" />
-                  Ir con Waze
+                  <span className={nunito.className}>Ir con Waze</span>
                 </a>
               )}
               {canUse && (
