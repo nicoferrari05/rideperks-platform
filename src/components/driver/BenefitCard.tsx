@@ -3,10 +3,7 @@
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { MapPin, Clock, QrCode, Loader2, XCircle, Navigation } from "lucide-react"
-import { Nunito } from "next/font/google"
 import QRCode from "react-qr-code"
-
-const nunito = Nunito({ subsets: ["latin"], weight: "700" })
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import type { Benefit } from "@/types/database"
@@ -140,15 +137,15 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                   href={`https://waze.com/ul?q=${encodeURIComponent(benefit.partner_businesses.address)}&navigate=yes`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="pressable flex items-center justify-center gap-1.5 rounded-xl py-3 font-bold text-sm min-h-[44px] px-4 flex-shrink-0"
+                  className="pressable flex items-center justify-center gap-1.5 rounded-xl py-3 font-semibold text-sm min-h-[44px] px-4 flex-shrink-0"
                   style={{
-                    backgroundColor: "#0099ff",
-                    color: "#fff",
+                    backgroundColor: "var(--midnight)",
+                    color: "var(--bone)",
                     textDecoration: "none",
                   }}
                 >
                   <Navigation className="w-3.5 h-3.5" />
-                  <span className={nunito.className}>Ir con Waze</span>
+                  Ir con Waze
                 </a>
               )}
               {canUse && (
