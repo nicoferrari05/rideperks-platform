@@ -133,7 +133,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
           </div>
 
           {(canUse || benefit.partner_businesses?.address) && (
-            <div className="mt-4 pt-4 space-y-2" style={{ borderTop: "1px solid var(--line)" }}>
+            <div className="mt-4 pt-4 flex flex-col gap-1.5" style={{ borderTop: "1px solid var(--line)" }}>
               {canUse && (
                 <button
                   onClick={generateQR}
@@ -159,7 +159,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                     src="/waze-btn.png"
                     alt="Ir con Waze"
                     className="w-full"
-                    style={{ borderRadius: "16px", display: "block" }}
+                    style={{ borderRadius: "12px", display: "block", height: "44px", objectFit: "fill" }}
                   />
                 </a>
               )}
