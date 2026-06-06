@@ -35,7 +35,7 @@ export default async function BenefitsPage() {
           Beneficios
         </h1>
         <p className="eyebrow-muted mt-1">
-          {benefits?.length ?? 0} DESCUENTOS DISPONIBLES
+          {benefits?.length ?? 0} BENEFICIOS ACTIVOS
         </p>
         {catalogPotential > 0 && (
           <p className="text-sm font-medium mt-1" style={{ color: "var(--ember)" }}>
@@ -66,8 +66,8 @@ export default async function BenefitsPage() {
           {!isVerified && (
             <Link href="/driver/verify">
               <button
-                className="px-4 py-2 rounded-full text-sm font-medium border"
-                style={{ color: "var(--midnight)", borderColor: "var(--line)" }}
+                className="px-5 py-2.5 rounded-full text-sm font-semibold"
+                style={{ backgroundColor: "var(--ember)", color: "#fff" }}
               >
                 Ver mi verificación
               </button>

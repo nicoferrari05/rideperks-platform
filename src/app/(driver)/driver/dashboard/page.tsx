@@ -201,7 +201,7 @@ export default async function DriverDashboard() {
               className="rounded-2xl overflow-hidden"
               style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
             >
-              {benefits.slice(0, 4).map((benefit, i) => (
+              {benefits.slice(0, 3).map((benefit, i) => (
                 <Link
                   key={benefit.id}
                   href="/driver/benefits"
@@ -240,6 +240,24 @@ export default async function DriverDashboard() {
                   <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--line)" }} />
                 </Link>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recent redemptions — empty state */}
+        {hasSubscription && (monthlyRedemptions?.length ?? 0) === 0 && (
+          <div data-animate="row">
+            <p className="eyebrow-muted mb-3">ÚLTIMOS USOS</p>
+            <div
+              className="rounded-2xl p-5 text-center"
+              style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
+            >
+              <p className="text-sm font-medium mb-1" style={{ color: "var(--midnight)" }}>
+                Aún no usaste ningún beneficio este mes
+              </p>
+              <p className="text-sm" style={{ color: "var(--mute)" }}>
+                Cada uso suma a tu ahorro mensual.
+              </p>
             </div>
           </div>
         )}

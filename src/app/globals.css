@@ -186,6 +186,12 @@
     font-weight: 500;
   }
 
+  /* Login form fade-in on mode switch */
+  @keyframes loginFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   /* Press feedback — scale on :active for all pressable elements */
   .pressable {
     transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);

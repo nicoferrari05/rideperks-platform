@@ -108,7 +108,7 @@ export default function LoginPage() {
 
           {/* ── DRIVER FORM ─────────────────────────────────────── */}
           {mode === "driver" && (
-            <>
+            <div key="driver" style={{ animation: "loginFadeIn 180ms ease-out" }}>
               <h1
                 className="font-bold mb-1"
                 style={{ fontSize: "22px", letterSpacing: "-0.025em", color: "var(--bone)" }}
@@ -188,18 +188,18 @@ export default function LoginPage() {
                 </button>
               </form>
 
-              <p className="text-center text-sm mt-6" style={{ color: "rgba(245,241,234,0.3)" }}>
+              <p className="text-center text-sm mt-6" style={{ color: "rgba(245,241,234,0.45)" }}>
                 ¿No tienes cuenta?{" "}
                 <Link href="/register" className="font-medium" style={{ color: "var(--ember)" }}>
                   Regístrate
                 </Link>
               </p>
-            </>
+            </div>
           )}
 
           {/* ── BUSINESS FORM ───────────────────────────────────── */}
           {mode === "business" && (
-            <>
+            <div key="business" style={{ animation: "loginFadeIn 180ms ease-out" }}>
               <h1
                 className="font-bold mb-1"
                 style={{ fontSize: "22px", letterSpacing: "-0.025em", color: "var(--bone)" }}
@@ -254,14 +254,14 @@ export default function LoginPage() {
                   }
                 </button>
               </form>
-            </>
+            </div>
           )}
 
         </div>
 
         {mode === "driver" && (
           <div className="text-center mt-6">
-            <Link href="/" className="text-sm" style={{ color: "rgba(245,241,234,0.25)" }}>
+            <Link href="/" className="text-sm" style={{ color: "rgba(245,241,234,0.45)" }}>
               Volver al inicio
             </Link>
           </div>

@@ -103,7 +103,7 @@ export default function DriverNav({ profile }: { profile: Profile }) {
                   style={{
                     flex: "1",
                     color: active ? "var(--ember)" : "rgba(245,241,234,0.38)",
-                    fontSize: "11px",
+                    fontSize: "12px",
                     letterSpacing: "0.05em",
                     transition: "color 280ms cubic-bezier(0.23, 1, 0.32, 1)",
                   }}

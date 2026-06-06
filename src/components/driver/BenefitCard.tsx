@@ -79,7 +79,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
         <div className="p-5">
           <div className="flex gap-4">
             <div
-              className="w-11 h-11 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-base"
+              className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-base"
               style={{ backgroundColor: "var(--ember-soft)", color: "var(--ember)" }}
             >
               {benefit.partner_businesses?.name?.[0]?.toUpperCase() ?? "?"}
@@ -125,7 +125,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
               </div>
 
               {benefit.terms && (
-                <p className="text-xs mt-2 italic" style={{ color: "var(--mute)" }}>{benefit.terms}</p>
+                <p className="text-xs mt-2" style={{ color: "var(--mute)" }}>{benefit.terms}</p>
               )}
             </div>
           </div>
@@ -207,8 +207,8 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                 </p>
               </>
             ) : (
-              <div className="text-center py-6 space-y-4">
-                <XCircle className="w-12 h-12 mx-auto" style={{ color: "var(--ember)" }} />
+              <div className="text-center py-4 space-y-3">
+                <XCircle className="w-10 h-10 mx-auto" style={{ color: "var(--ember)" }} />
                 <p className="font-semibold" style={{ color: "var(--midnight)" }}>QR expirado</p>
                 <p className="text-sm" style={{ color: "var(--mute)" }}>Genera uno nuevo para usar el beneficio.</p>
                 <button

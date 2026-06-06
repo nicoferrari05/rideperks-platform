@@ -187,7 +187,7 @@ export default async function ProfilePage() {
           )}
         </div>
 
-        <div data-stagger>
+        <div data-stagger className="mt-4">
           <LogoutButton />
         </div>
       </div>
