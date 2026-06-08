@@ -124,25 +124,39 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                 </p>
               )}
 
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
-                {benefit.partner_businesses?.address && (
-                  <a
-                    href={`https://waze.com/ul?q=${encodeURIComponent(benefit.partner_businesses.address)}&navigate=yes`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1"
-                    style={{ fontSize: "11px", color: "var(--mute)", textDecoration: "none" }}
-                  >
-                    <MapPin className="w-3 h-3 flex-shrink-0" />
-                    <span>{benefit.partner_businesses.address}</span>
-                    <Navigation className="w-2.5 h-2.5 ml-0.5 opacity-50" />
-                  </a>
-                )}
+              <div className="mt-2 space-y-2">
                 {benefit.valid_until && (
-                  <span className="flex items-center gap-1" style={{ fontSize: "11px", color: "var(--mute)" }}>
-                    <Clock className="w-3 h-3" />
+                  <p className="flex items-center gap-1" style={{ fontSize: "11px", color: "var(--mute)" }}>
+                    <Clock className="w-3 h-3 flex-shrink-0" />
                     Hasta {new Date(benefit.valid_until).toLocaleDateString("es-PA", { day: "2-digit", month: "short" })}
-                  </span>
+                  </p>
+                )}
+                {benefit.partner_businesses?.address && (
+                  <div>
+                    <p className="flex items-center gap-1 mb-2" style={{ fontSize: "11px", color: "var(--mute)" }}>
+                      <MapPin className="w-3 h-3 flex-shrink-0" />
+                      {benefit.partner_businesses.address}
+                    </p>
+                    <a
+                      href={`https://waze.com/ul?q=${encodeURIComponent(benefit.partner_businesses.address)}&navigate=yes`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full rounded-xl font-semibold text-sm min-h-[44px]"
+                      style={{
+                        backgroundColor: "var(--bone-2)",
+                        border: "1px solid var(--line)",
+                        color: "var(--midnight)",
+                        textDecoration: "none",
+                        transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1)",
+                      }}
+                      onPointerDown={(e) => { e.currentTarget.style.transform = "scale(0.97)" }}
+                      onPointerUp={(e) => { e.currentTarget.style.transform = "" }}
+                      onPointerLeave={(e) => { e.currentTarget.style.transform = "" }}
+                    >
+                      <Navigation className="w-3.5 h-3.5" />
+                      Ir con Waze
+                    </a>
+                  </div>
                 )}
               </div>
             </div>
