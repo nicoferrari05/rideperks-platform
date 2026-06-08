@@ -41,7 +41,7 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse }: Pro
   )
 
   return (
-    <div ref={containerRef} className="grid grid-cols-1 gap-3">
+    <div ref={containerRef} className="grid grid-cols-1 gap-4">
       {benefits.map((benefit) => (
         <div key={benefit.id} className="benefit-card">
           <BenefitCard benefit={benefit} driverId={driverId} canUse={canUse} />

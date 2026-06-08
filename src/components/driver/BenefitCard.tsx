@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { MapPin, Clock, QrCode, Loader2, XCircle, Navigation } from "lucide-react"
+import { MapPin, Clock, QrCode, Loader2, XCircle, Navigation, Wrench, Zap, Utensils, Heart, Store } from "lucide-react"
 import QRCode from "react-qr-code"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -19,11 +19,24 @@ interface Props {
   canUse: boolean
 }
 
-const discountTypeLabel: Record<string, string> = {
-  percentage: "% de descuento",
+const discountSuffix: Record<string, string> = {
+  percentage: "de descuento",
   fixed: "de descuento",
   free_item: "",
   other: "",
+}
+
+function getCategoryStyle(category: string | null | undefined) {
+  const c = (category ?? "").toLowerCase()
+  if (c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri"))
+    return { bg: "var(--ember-soft)", fg: "var(--ember)", Icon: Wrench }
+  if (c.includes("combustible") || c.includes("gas") || c.includes("gasolina"))
+    return { bg: "rgba(242,183,59,0.15)", fg: "oklch(0.5 0.1 82)", Icon: Zap }
+  if (c.includes("comida") || c.includes("restaurante") || c.includes("food") || c.includes("aliment"))
+    return { bg: "rgba(47,143,110,0.12)", fg: "var(--verde)", Icon: Utensils }
+  if (c.includes("salud") || c.includes("health") || c.includes("medic"))
+    return { bg: "rgba(99,102,241,0.1)", fg: "oklch(0.5 0.18 270)", Icon: Heart }
+  return { bg: "var(--ember-soft)", fg: "var(--ember)", Icon: Store }
 }
 
 export default function BenefitCard({ benefit, driverId, canUse }: Props) {
@@ -66,110 +79,183 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
     return `${m}:${(s % 60).toString().padStart(2, "0")}`
   }
 
-  const discountLabel = benefit.discount_value
-    ? `${benefit.discount_value} ${discountTypeLabel[benefit.discount_type] ?? ""}`.trim()
-    : null
+  const category = getCategoryStyle(benefit.partner_businesses?.category)
+  const { Icon } = category
+  const suffix = discountSuffix[benefit.discount_type] ?? ""
 
   return (
     <>
+      {/* ─── PASS CARD ─── */}
       <div
-        className="card-interactive rounded-2xl overflow-hidden"
-        style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
+        className="rounded-2xl relative"
+        style={{
+          backgroundColor: "var(--paper)",
+          border: "1px solid var(--line)",
+          boxShadow: "0 1px 3px rgba(15,27,61,0.04), 0 4px 16px rgba(15,27,61,0.05)",
+        }}
       >
-        <div className="p-5">
-          <div className="flex gap-4">
+        {/* TOP — business + benefit info */}
+        <div className="p-5 pb-4">
+          <div className="flex items-start gap-3">
             <div
-              className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-base"
-              style={{ backgroundColor: "var(--ember-soft)", color: "var(--ember)" }}
+              className="w-11 h-11 rounded-xl flex-shrink-0 flex items-center justify-center"
+              style={{ backgroundColor: category.bg }}
             >
-              {benefit.partner_businesses?.name?.[0]?.toUpperCase() ?? "?"}
+              <Icon className="w-[18px] h-[18px]" style={{ color: category.fg }} />
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2 mb-1">
-                <h3 className="font-semibold text-sm leading-snug" style={{ color: "var(--midnight)" }}>
-                  {benefit.title}
-                </h3>
-                {discountLabel && (
-                  <span
-                    className="font-mono-brand font-semibold flex-shrink-0 text-xs px-2.5 py-0.5 rounded-full"
-                    style={{ backgroundColor: "var(--ember-soft)", color: "var(--ember)" }}
-                  >
-                    {discountLabel}
-                  </span>
-                )}
-              </div>
-
-              <p className="text-xs leading-relaxed mb-2" style={{ color: "var(--mute)" }}>
-                {benefit.description}
+              <p
+                className="font-semibold uppercase"
+                style={{ fontSize: "10px", color: "var(--mute)", letterSpacing: "0.12em" }}
+              >
+                {benefit.partner_businesses?.name ?? "Comercio aliado"}
               </p>
+              <h3
+                className="font-bold mt-0.5 leading-snug"
+                style={{ fontSize: "16px", color: "var(--midnight)", letterSpacing: "-0.02em" }}
+              >
+                {benefit.title}
+              </h3>
 
-              <div className="flex items-center gap-3 flex-wrap" style={{ fontSize: "11px", color: "var(--mute)" }}>
-                {benefit.partner_businesses?.name && (
-                  <span className="font-medium" style={{ color: "var(--midnight)" }}>
-                    {benefit.partner_businesses.name}
-                  </span>
-                )}
+              {benefit.description && (
+                <p className="text-xs leading-relaxed mt-1.5" style={{ color: "var(--mute)" }}>
+                  {benefit.description}
+                </p>
+              )}
+
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
                 {benefit.partner_businesses?.address && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {benefit.partner_businesses.address}
-                  </span>
+                  <a
+                    href={`https://waze.com/ul?q=${encodeURIComponent(benefit.partner_businesses.address)}&navigate=yes`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1"
+                    style={{ fontSize: "11px", color: "var(--mute)", textDecoration: "none" }}
+                  >
+                    <MapPin className="w-3 h-3 flex-shrink-0" />
+                    <span>{benefit.partner_businesses.address}</span>
+                    <Navigation className="w-2.5 h-2.5 ml-0.5 opacity-50" />
+                  </a>
                 )}
                 {benefit.valid_until && (
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1" style={{ fontSize: "11px", color: "var(--mute)" }}>
                     <Clock className="w-3 h-3" />
                     Hasta {new Date(benefit.valid_until).toLocaleDateString("es-PA", { day: "2-digit", month: "short" })}
                   </span>
                 )}
               </div>
-
-              {benefit.terms && (
-                <p className="text-xs mt-2" style={{ color: "var(--mute)" }}>{benefit.terms}</p>
-              )}
             </div>
           </div>
-
-          {(canUse || benefit.partner_businesses?.address) && (
-            <div className="mt-4 pt-4 flex gap-2" style={{ borderTop: "1px solid var(--line)" }}>
-              {benefit.partner_businesses?.address && (
-                <a
-                  href={`https://waze.com/ul?q=${encodeURIComponent(benefit.partner_businesses.address)}&navigate=yes`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pressable flex items-center justify-center gap-1.5 rounded-xl py-3 font-semibold text-sm min-h-[44px] px-4 flex-shrink-0"
-                  style={{
-                    backgroundColor: "var(--midnight)",
-                    color: "var(--bone)",
-                    textDecoration: "none",
-                  }}
-                >
-                  <Navigation className="w-3.5 h-3.5" />
-                  Ir con Waze
-                </a>
-              )}
-              {canUse && (
-                <button
-                  onClick={generateQR}
-                  disabled={generating}
-                  className="pressable flex-1 rounded-xl py-3 font-semibold text-sm flex items-center justify-center gap-2 min-h-[44px]"
-                  style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
-                >
-                  {generating
-                    ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Generando QR...</>
-                    : <><QrCode className="w-3.5 h-3.5" />Usar este beneficio</>
-                  }
-                </button>
-              )}
-            </div>
-          )}
         </div>
+
+        {/* MIDDLE — discount hero block */}
+        {benefit.discount_value && (
+          <div
+            className="mx-5 rounded-2xl py-6 text-center"
+            style={{ backgroundColor: category.bg }}
+          >
+            <p
+              className="font-black leading-none"
+              style={{
+                fontSize: "58px",
+                color: category.fg,
+                letterSpacing: "-0.035em",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {benefit.discount_value}
+            </p>
+            {suffix && (
+              <p
+                className="mt-2 font-semibold uppercase"
+                style={{ fontSize: "10px", color: category.fg, opacity: 0.6, letterSpacing: "0.14em" }}
+              >
+                {suffix}
+              </p>
+            )}
+          </div>
+        )}
+
+        {benefit.terms && (
+          <p className="px-5 pt-3 text-xs" style={{ color: "var(--mute)" }}>
+            * {benefit.terms}
+          </p>
+        )}
+
+        {/* TEAR LINE — separates pass info from activation zone */}
+        {canUse && (
+          <div className="relative mt-5" style={{ height: 0 }}>
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                height: "1.5px",
+                background:
+                  "repeating-linear-gradient(to right, var(--line) 0, var(--line) 6px, transparent 6px, transparent 12px)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                left: -9,
+                top: -8,
+                width: 16,
+                height: 16,
+                borderRadius: "50%",
+                backgroundColor: "var(--bone)",
+                border: "1px solid var(--line)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                right: -9,
+                top: -8,
+                width: 16,
+                height: 16,
+                borderRadius: "50%",
+                backgroundColor: "var(--bone)",
+                border: "1px solid var(--line)",
+              }}
+            />
+          </div>
+        )}
+
+        {/* BOTTOM — activation CTA */}
+        {canUse && (
+          <div className="px-5 pt-5 pb-5">
+            <button
+              onClick={generateQR}
+              disabled={generating}
+              className="w-full rounded-xl font-semibold text-sm flex items-center justify-center gap-2 min-h-[48px]"
+              style={{
+                backgroundColor: "var(--midnight)",
+                color: "var(--bone)",
+                transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1)",
+              }}
+              onPointerDown={(e) => { e.currentTarget.style.transform = "scale(0.97)" }}
+              onPointerUp={(e) => { e.currentTarget.style.transform = "" }}
+              onPointerLeave={(e) => { e.currentTarget.style.transform = "" }}
+            >
+              {generating
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> Generando QR...</>
+                : <><QrCode className="w-4 h-4" /> Usar este beneficio</>
+              }
+            </button>
+          </div>
+        )}
       </div>
 
+      {/* ─── QR MODAL ─── */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-center font-semibold" style={{ color: "var(--midnight)", letterSpacing: "-0.02em" }}>
+            <DialogTitle
+              className="text-center font-bold"
+              style={{ color: "var(--midnight)", letterSpacing: "-0.02em" }}
+            >
               {benefit.title}
             </DialogTitle>
           </DialogHeader>
@@ -190,13 +276,22 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                 </div>
 
                 {benefit.discount_value && (
-                  <div className="w-full rounded-2xl py-4 text-center" style={{ backgroundColor: "var(--ember-soft)" }}>
-                    <p className="font-bold font-mono-brand" style={{ fontSize: "36px", color: "var(--ember)", letterSpacing: "-0.02em", lineHeight: 1 }}>
+                  <div
+                    className="w-full rounded-2xl py-5 text-center"
+                    style={{ backgroundColor: category.bg }}
+                  >
+                    <p
+                      className="font-black leading-none"
+                      style={{ fontSize: "40px", color: category.fg, letterSpacing: "-0.03em" }}
+                    >
                       {benefit.discount_value}
                     </p>
-                    {discountTypeLabel[benefit.discount_type] && (
-                      <p className="font-mono-brand mt-1" style={{ fontSize: "11px", color: "var(--ember)", opacity: 0.7, letterSpacing: "0.1em" }}>
-                        {discountTypeLabel[benefit.discount_type].toUpperCase()}
+                    {suffix && (
+                      <p
+                        className="mt-1.5 font-semibold uppercase"
+                        style={{ fontSize: "10px", color: category.fg, opacity: 0.65, letterSpacing: "0.14em" }}
+                      >
+                        {suffix}
                       </p>
                     )}
                   </div>
@@ -213,8 +308,15 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                 <p className="text-sm" style={{ color: "var(--mute)" }}>Genera uno nuevo para usar el beneficio.</p>
                 <button
                   onClick={() => { setOpen(false); generateQR() }}
-                  className="pressable px-6 py-2.5 rounded-full font-semibold text-sm"
-                  style={{ backgroundColor: "var(--ember)", color: "#fff" }}
+                  className="px-6 py-2.5 rounded-full font-semibold text-sm"
+                  style={{
+                    backgroundColor: "var(--ember)",
+                    color: "#fff",
+                    transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1)",
+                  }}
+                  onPointerDown={(e) => { e.currentTarget.style.transform = "scale(0.97)" }}
+                  onPointerUp={(e) => { e.currentTarget.style.transform = "" }}
+                  onPointerLeave={(e) => { e.currentTarget.style.transform = "" }}
                 >
                   Generar nuevo QR
                 </button>
