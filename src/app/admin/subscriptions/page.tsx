@@ -31,7 +31,7 @@ export default async function SubscriptionsAdminPage({
 
   const [{ data: subscriptions, count: totalSubscriptions, error: subError }, { data: verifiedDrivers }, { count: activeCount }] = await Promise.all([
     supabase.from("subscriptions")
-      .select("*, profiles(id, full_name, phone, platform)", { count: "exact" })
+      .select("*, profiles!driver_id(id, full_name, phone)", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(start, end),
     supabase.from("profiles").select("id, full_name, phone")
