@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Clock, QrCode, Loader2, XCircle, Navigation, MapPin, Wrench, Zap, Utensils, Heart, Store, ChevronDown } from "lucide-react"
+import { Clock, QrCode, Loader2, XCircle, Navigation, MapPin, ArrowUpRight, Wrench, Zap, Utensils, Heart, Store, ChevronDown } from "lucide-react"
 import QRCode from "react-qr-code"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -263,11 +263,12 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                   href={`https://waze.com/ul?q=${encodeURIComponent(address!)}&navigate=yes`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 min-h-[44px]"
+                  className="flex-1 rounded-xl text-sm flex items-center justify-center gap-2 min-h-[44px]"
                   style={{
-                    backgroundColor: "var(--bone-2)",
-                    border: "1px solid var(--line)",
+                    backgroundColor: "rgba(15,27,61,0.05)",
+                    border: "1px solid rgba(15,27,61,0.14)",
                     color: "var(--midnight)",
+                    fontWeight: 600,
                     textDecoration: "none",
                     transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1)",
                   }}
@@ -275,8 +276,9 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                   onPointerUp={(e) => { e.currentTarget.style.transform = "" }}
                   onPointerLeave={(e) => { e.currentTarget.style.transform = "" }}
                 >
-                  <Navigation className="w-3.5 h-3.5" />
-                  Ir con Waze
+                  <Navigation className="w-3.5 h-3.5" style={{ flexShrink: 0 }} />
+                  <span>Ir con Waze</span>
+                  <ArrowUpRight className="w-3 h-3" style={{ opacity: 0.4, flexShrink: 0 }} />
                 </a>
               )}
             </div>
