@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { LayoutGrid, Wrench, Zap, Utensils, Heart, type LucideIcon } from "lucide-react"
+import { Wrench, Zap, Utensils, Heart, Store, LayoutGrid, type LucideIcon } from "lucide-react"
 import BenefitRowActions from "./BenefitRowActions"
 
 type BenefitRow = {
@@ -28,78 +28,64 @@ const discountTypeLabel: Record<string, string> = {
   percentage: "Porcentaje", fixed: "Monto fijo", free_item: "Artículo gratis", other: "Otro",
 }
 
-type CategoryConfig = {
-  key: string
-  label: string
-  Icon: LucideIcon
-  activeBg: string
-  activeFg: string
-  match: (c: string) => boolean
+function getIconForCategory(category: string): LucideIcon {
+  const c = category.toLowerCase()
+  if (c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri")) return Wrench
+  if (c.includes("combustible") || c.includes("gas") || c.includes("gasolina")) return Zap
+  if (c.includes("comida") || c.includes("restaurante") || c.includes("food") || c.includes("aliment")) return Utensils
+  if (c.includes("salud") || c.includes("health") || c.includes("medic")) return Heart
+  return Store
 }
 
-// Ordered warm → cool to match brand system
-const CATEGORIES: CategoryConfig[] = [
-  {
-    key: "taller",
-    label: "Taller / Auto",
-    Icon: Wrench,
-    activeBg: "var(--ember-soft)",
-    activeFg: "var(--ember)",
-    match: (c) => c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri"),
-  },
-  {
-    key: "combustible",
-    label: "Combustible",
-    Icon: Zap,
-    activeBg: "rgba(242,183,59,0.18)",
-    activeFg: "oklch(0.48 0.1 82)",
-    match: (c) => c.includes("combustible") || c.includes("gas") || c.includes("gasolina"),
-  },
-  {
-    key: "comida",
-    label: "Comida",
-    Icon: Utensils,
-    activeBg: "rgba(47,143,110,0.14)",
-    activeFg: "var(--verde)",
-    match: (c) => c.includes("comida") || c.includes("restaurante") || c.includes("food") || c.includes("aliment"),
-  },
-  {
-    key: "salud",
-    label: "Salud",
-    Icon: Heart,
-    activeBg: "rgba(99,102,241,0.12)",
-    activeFg: "oklch(0.48 0.18 270)",
-    match: (c) => c.includes("salud") || c.includes("health") || c.includes("medic"),
-  },
-]
+type ChipStyle = { activeBg: string; activeFg: string }
 
-function getCategoryConfig(category: string | null | undefined): CategoryConfig | null {
-  const c = (category ?? "").toLowerCase()
-  return CATEGORIES.find((cat) => cat.match(c)) ?? null
+function getChipStyle(category: string): ChipStyle {
+  const c = category.toLowerCase()
+  if (c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri"))
+    return { activeBg: "var(--ember-soft)", activeFg: "var(--ember)" }
+  if (c.includes("combustible") || c.includes("gas") || c.includes("gasolina"))
+    return { activeBg: "rgba(242,183,59,0.18)", activeFg: "oklch(0.48 0.1 82)" }
+  if (c.includes("comida") || c.includes("restaurante") || c.includes("food") || c.includes("aliment"))
+    return { activeBg: "rgba(47,143,110,0.14)", activeFg: "var(--verde)" }
+  if (c.includes("salud") || c.includes("health") || c.includes("medic"))
+    return { activeBg: "rgba(99,102,241,0.12)", activeFg: "oklch(0.48 0.18 270)" }
+  return { activeBg: "var(--bone-2)", activeFg: "var(--midnight)" }
+}
+
+// Warm → cool sort order for chips
+const CATEGORY_ORDER = ["taller", "mecanica", "auto", "chapisteri", "combustible", "gas", "gasolina", "comida", "restaurante", "food", "aliment", "salud", "health", "medic"]
+
+function categoryRank(category: string): number {
+  const c = category.toLowerCase()
+  const idx = CATEGORY_ORDER.findIndex((k) => c.includes(k))
+  return idx === -1 ? 999 : idx
 }
 
 export default function AdminBenefitsList({ benefits, businesses }: Props) {
   const [activeCategory, setActiveCategory] = useState("todos")
 
-  const availableCategories = useMemo(
-    () => CATEGORIES.filter((cat) =>
-      benefits.some((b) => cat.match((b.partner_businesses?.category ?? "").toLowerCase()))
-    ),
-    [benefits]
-  )
+  // Derive categories directly from data — same approach as driver portal
+  const categories = useMemo(() => {
+    const seen = new Set<string>()
+    const cats: string[] = []
+    for (const b of benefits) {
+      const c = b.partner_businesses?.category
+      if (c && !seen.has(c)) { seen.add(c); cats.push(c) }
+    }
+    // Sort warm → cool
+    return cats.sort((a, b) => categoryRank(a) - categoryRank(b))
+  }, [benefits])
 
   const filtered = useMemo(() => {
     if (activeCategory === "todos") return benefits
-    const cat = CATEGORIES.find((c) => c.key === activeCategory)
-    if (!cat) return benefits
-    return benefits.filter((b) => cat.match((b.partner_businesses?.category ?? "").toLowerCase()))
+    return benefits.filter((b) => b.partner_businesses?.category === activeCategory)
   }, [benefits, activeCategory])
 
   return (
     <div className="space-y-4">
 
       {/* ── Category chips (only when 2+ categories exist) ── */}
-      {availableCategories.length > 1 && (
+      {categories.length > 1 && (
         <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none", paddingBottom: "2px" }}>
 
           {/* Todos */}
@@ -121,29 +107,29 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
             <span style={{ opacity: 0.55, fontWeight: 500 }}>({benefits.length})</span>
           </button>
 
-          {/* One chip per available category, warm → cool order */}
-          {availableCategories.map((cat) => {
-            const isActive = activeCategory === cat.key
-            const count = benefits.filter((b) =>
-              cat.match((b.partner_businesses?.category ?? "").toLowerCase())
-            ).length
+          {/* One chip per category, warm → cool order */}
+          {categories.map((cat) => {
+            const isActive = activeCategory === cat
+            const count = benefits.filter((b) => b.partner_businesses?.category === cat).length
+            const Icon = getIconForCategory(cat)
+            const { activeBg, activeFg } = getChipStyle(cat)
             return (
               <button
-                key={cat.key}
-                onClick={() => setActiveCategory(cat.key)}
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
                 className="flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
                 style={{
                   fontSize: "12px",
                   height: "32px",
-                  backgroundColor: isActive ? cat.activeBg : "transparent",
-                  color: isActive ? cat.activeFg : "var(--midnight)",
+                  backgroundColor: isActive ? activeBg : "transparent",
+                  color: isActive ? activeFg : "var(--midnight)",
                   border: "1px solid",
                   borderColor: isActive ? "transparent" : "var(--line)",
                   transition: "background-color 180ms ease, color 180ms ease, border-color 180ms ease",
                 }}
               >
-                <cat.Icon className="w-3 h-3" />
-                {cat.label}
+                <Icon className="w-3 h-3" />
+                {cat}
                 <span style={{ opacity: 0.55, fontWeight: 500 }}>({count})</span>
               </button>
             )
@@ -159,7 +145,9 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
           </p>
         ) : (
           filtered.map((b) => {
-            const catConfig = getCategoryConfig(b.partner_businesses?.category)
+            const catStyle = b.partner_businesses?.category
+              ? getChipStyle(b.partner_businesses.category)
+              : null
             return (
               <div
                 key={b.id}
@@ -173,8 +161,8 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
                       <span
                         className="font-mono-brand text-xs px-2 py-0.5 rounded-full"
                         style={{
-                          backgroundColor: catConfig?.activeBg ?? "var(--ember-soft)",
-                          color: catConfig?.activeFg ?? "var(--ember)",
+                          backgroundColor: catStyle?.activeBg ?? "var(--ember-soft)",
+                          color: catStyle?.activeFg ?? "var(--ember)",
                         }}
                       >
                         {b.discount_value}
