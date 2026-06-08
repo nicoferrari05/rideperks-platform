@@ -26,8 +26,8 @@ export default function Icon() {
           color: "#F5F1EA",
           fontFamily: "Geist",
           fontWeight: 900,
-          fontSize: 240,
-          letterSpacing: -16,
+          fontSize: 310,
+          letterSpacing: -20,
           lineHeight: 1,
         }}
       >
