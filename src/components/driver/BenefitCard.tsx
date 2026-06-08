@@ -12,7 +12,7 @@ interface Props {
   benefit: Benefit & {
     partner_businesses?: {
       id: string; name: string; logo_url: string | null
-      category: string | null; address: string | null
+      category: string | null; address: string | null; waze_url: string | null
     } | null
   }
   driverId: string
@@ -84,7 +84,8 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
   const { Icon } = category
   const label = discountLabel[benefit.discount_type] ?? ""
   const address = benefit.partner_businesses?.address
-  const hasAddress = !!address
+  const wazeUrl = benefit.partner_businesses?.waze_url
+  const hasAddress = !!(wazeUrl || address)
 
   return (
     <>
@@ -260,7 +261,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
 
               {hasAddress && (
                 <a
-                  href={`https://waze.com/ul?q=${encodeURIComponent(address!)}&navigate=yes`}
+                  href={wazeUrl ?? `https://waze.com/ul?q=${encodeURIComponent(address!)}&navigate=yes`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 rounded-xl text-sm flex items-center justify-center gap-2 min-h-[44px]"
@@ -285,14 +286,14 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
           ) : (
             hasAddress && (
               <a
-                href={`https://waze.com/ul?q=${encodeURIComponent(address!)}&navigate=yes`}
+                href={wazeUrl ?? `https://waze.com/ul?q=${encodeURIComponent(address!)}&navigate=yes`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1.5"
                 style={{ fontSize: "12px", color: "var(--mute)", textDecoration: "none" }}
               >
                 <MapPin className="w-3 h-3 flex-shrink-0" />
-                <span>{address}</span>
+                <span>{address ?? "Ver ubicación en Waze"}</span>
               </a>
             )
           )}

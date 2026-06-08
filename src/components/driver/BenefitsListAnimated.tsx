@@ -16,6 +16,7 @@ type BenefitWithBusiness = Benefit & {
     logo_url: string | null
     category: string | null
     address: string | null
+    waze_url: string | null
   } | null
 }
 

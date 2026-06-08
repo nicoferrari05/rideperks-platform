@@ -37,6 +37,7 @@ export interface PartnerBusiness {
   description: string | null
   category: string | null
   address: string | null
+  waze_url: string | null
   phone: string | null
   logo_url: string | null
   is_active: boolean

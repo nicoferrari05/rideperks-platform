@@ -14,7 +14,7 @@ const getActiveBenefits = unstable_cache(
     const supabase = createAdminClient()
     const { data } = await supabase
       .from("benefits")
-      .select("*, partner_businesses(id, name, logo_url, category, address)")
+      .select("*, partner_businesses(id, name, logo_url, category, address, waze_url)")
       .eq("is_active", true)
       .order("created_at", { ascending: false })
     return data ?? []

@@ -22,13 +22,14 @@ interface Props {
   name: string
   category: string | null
   address: string | null
+  wazeUrl: string | null
   phone: string | null
   description: string | null
 }
 
 export default function BusinessRowActions({
   businessId, isActive, accessCode, name,
-  category, address, phone, description,
+  category, address, wazeUrl, phone, description,
 }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -37,7 +38,7 @@ export default function BusinessRowActions({
   const [newCode, setNewCode] = useState(accessCode ?? "")
 
   const [editDialog, setEditDialog] = useState(false)
-  const [editForm, setEditForm] = useState({ name, category: category ?? "", address: address ?? "", phone: phone ?? "", description: description ?? "" })
+  const [editForm, setEditForm] = useState({ name, category: category ?? "", address: address ?? "", waze_url: wazeUrl ?? "", phone: phone ?? "", description: description ?? "" })
 
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [confirmName, setConfirmName] = useState("")
@@ -79,6 +80,7 @@ export default function BusinessRowActions({
       name: editForm.name.trim(),
       category: editForm.category.trim() || null,
       address: editForm.address.trim() || null,
+      waze_url: editForm.waze_url.trim() || null,
       phone: editForm.phone.trim() || null,
       description: editForm.description.trim() || null,
     }).eq("id", businessId)
@@ -124,7 +126,7 @@ export default function BusinessRowActions({
               ? <><EyeOff className="w-4 h-4 mr-2" />Desactivar</>
               : <><Eye className="w-4 h-4 mr-2" />Activar</>}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => { setEditForm({ name, category: category ?? "", address: address ?? "", phone: phone ?? "", description: description ?? "" }); setEditDialog(true) }}>
+          <DropdownMenuItem onClick={() => { setEditForm({ name, category: category ?? "", address: address ?? "", waze_url: wazeUrl ?? "", phone: phone ?? "", description: description ?? "" }); setEditDialog(true) }}>
             <Pencil className="w-4 h-4 mr-2" />Editar datos
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => { setNewCode(accessCode ?? ""); setCodeDialog(true) }}>
@@ -163,7 +165,12 @@ export default function BusinessRowActions({
             </div>
             <div className="space-y-2">
               <Label>Dirección</Label>
-              <Input value={editForm.address} onChange={(e) => setEditForm(p => ({ ...p, address: e.target.value }))} />
+              <Input value={editForm.address} onChange={(e) => setEditForm(p => ({ ...p, address: e.target.value }))} placeholder="Ej: Calle 50, San Francisco, Panamá" />
+            </div>
+            <div className="space-y-2">
+              <Label>Link de Waze</Label>
+              <Input value={editForm.waze_url} onChange={(e) => setEditForm(p => ({ ...p, waze_url: e.target.value }))} placeholder="https://ul.waze.com/ul?venue_id=..." />
+              <p className="text-xs" style={{ color: "var(--mute)" }}>Pega el link que comparte Waze al hacer "Compartir lugar". Tiene prioridad sobre la dirección.</p>
             </div>
             <div className="space-y-2">
               <Label>Descripción</Label>

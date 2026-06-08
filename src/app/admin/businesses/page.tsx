@@ -85,6 +85,7 @@ export default async function BusinessesAdminPage() {
                     name={b.name}
                     category={b.category ?? null}
                     address={b.address ?? null}
+                    wazeUrl={(b as { waze_url?: string | null }).waze_url ?? null}
                     phone={b.phone ?? null}
                     description={b.description ?? null}
                   />

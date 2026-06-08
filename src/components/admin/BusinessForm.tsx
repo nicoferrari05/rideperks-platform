@@ -16,7 +16,7 @@ export default function BusinessForm() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
-    name: "", description: "", category: "", address: "", phone: "", access_code: "",
+    name: "", description: "", category: "", address: "", waze_url: "", phone: "", access_code: "",
   })
 
   function set(field: string, value: string) {
@@ -37,6 +37,7 @@ export default function BusinessForm() {
       description: form.description || null,
       category: form.category || null,
       address: form.address || null,
+      waze_url: form.waze_url || null,
       phone: form.phone || null,
       access_code: form.access_code.toUpperCase(),
     })
@@ -50,7 +51,7 @@ export default function BusinessForm() {
     } else {
       toast.success("Comercio creado correctamente")
       setOpen(false)
-      setForm({ name: "", description: "", category: "", address: "", phone: "", access_code: "" })
+      setForm({ name: "", description: "", category: "", address: "", waze_url: "", phone: "", access_code: "" })
       router.refresh()
     }
     setLoading(false)
@@ -85,6 +86,11 @@ export default function BusinessForm() {
           <div className="space-y-2">
             <Label>Dirección</Label>
             <Input value={form.address} onChange={(e) => set("address", e.target.value)} placeholder="Ej: Ave. Balboa, Ciudad de Panamá" />
+          </div>
+          <div className="space-y-2">
+            <Label>Link de Waze</Label>
+            <Input value={form.waze_url} onChange={(e) => set("waze_url", e.target.value)} placeholder="https://ul.waze.com/ul?venue_id=..." />
+            <p className="text-xs text-muted-foreground">Pega el link que comparte Waze al hacer "Compartir lugar". Tiene prioridad sobre la dirección.</p>
           </div>
           <div className="space-y-2">
             <Label>Descripción</Label>
