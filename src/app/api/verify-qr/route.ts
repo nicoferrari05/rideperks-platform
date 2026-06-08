@@ -9,48 +9,36 @@ export async function POST(request: Request) {
   }
 
   const supabase = createAdminClient()
-
-  // Verify business access code
-  const { data: business } = await supabase
-    .from("partner_businesses")
-    .select("id, name, is_active")
-    .eq("access_code", business_code)
-    .single()
-
-  if (!business || !business.is_active) {
-    return NextResponse.json({ valid: false, error: "Código de comercio inválido" }, { status: 401 })
-  }
+  const now = new Date().toISOString()
 
   // ── QR de membresía general (member:UUID) ──
   if (token.startsWith("member:")) {
     const driverId = token.replace("member:", "")
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name, status, platform")
-      .eq("id", driverId)
-      .single()
+    // business + profile en paralelo: son independientes entre sí
+    const [{ data: business }, { data: profile }] = await Promise.all([
+      supabase.from("partner_businesses").select("id, name, is_active").eq("access_code", business_code).single(),
+      supabase.from("profiles").select("full_name, status, platform").eq("id", driverId).single(),
+    ])
 
-    if (!profile) {
+    if (!business || !business.is_active)
+      return NextResponse.json({ valid: false, error: "Código de comercio inválido" }, { status: 401 })
+    if (!profile)
       return NextResponse.json({ valid: false, error: "Conductor no encontrado" }, { status: 404 })
-    }
-
-    if (profile.status !== "verified") {
+    if (profile.status !== "verified")
       return NextResponse.json({ valid: false, error: "Conductor no verificado" }, { status: 403 })
-    }
 
     const { data: subscription } = await supabase
       .from("subscriptions")
       .select("id, expires_at")
       .eq("driver_id", driverId)
       .eq("status", "active")
-      .gte("expires_at", new Date().toISOString())
+      .gte("expires_at", now)
       .limit(1)
       .single()
 
-    if (!subscription) {
+    if (!subscription)
       return NextResponse.json({ valid: false, error: "Membresía inactiva o vencida" }, { status: 403 })
-    }
 
     return NextResponse.json({
       valid: true,
@@ -62,61 +50,55 @@ export async function POST(request: Request) {
     })
   }
 
-  // ── QR de beneficio específico (token UUID) ──
-  const { data: qrToken } = await supabase
-    .from("qr_tokens")
-    .select("*, benefits(id, title, discount_value, discount_type, usage_limit_per_driver), profiles(full_name, platform, status)")
-    .eq("token", token)
-    .single()
+  // ── QR de beneficio específico ──
 
-  if (!qrToken) {
+  // business + qrToken en paralelo: son independientes entre sí
+  const [{ data: business }, { data: qrToken }] = await Promise.all([
+    supabase.from("partner_businesses").select("id, name, is_active").eq("access_code", business_code).single(),
+    supabase.from("qr_tokens")
+      .select("*, benefits(id, title, discount_value, discount_type, usage_limit_per_driver), profiles(full_name, platform, status)")
+      .eq("token", token)
+      .single(),
+  ])
+
+  if (!business || !business.is_active)
+    return NextResponse.json({ valid: false, error: "Código de comercio inválido" }, { status: 401 })
+  if (!qrToken)
     return NextResponse.json({ valid: false, error: "QR no encontrado" }, { status: 404 })
-  }
-
-  if (qrToken.status === "used") {
+  if (qrToken.status === "used")
     return NextResponse.json({ valid: false, error: "Este QR ya fue utilizado" }, { status: 409 })
-  }
+  if (qrToken.profiles?.status !== "verified")
+    return NextResponse.json({ valid: false, error: "Conductor no verificado" }, { status: 403 })
 
   if (new Date(qrToken.expires_at) < new Date()) {
     await supabase.from("qr_tokens").update({ status: "expired" }).eq("id", qrToken.id)
     return NextResponse.json({ valid: false, error: "QR expirado" }, { status: 410 })
   }
 
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("id")
-    .eq("driver_id", qrToken.driver_id)
-    .eq("status", "active")
-    .gte("expires_at", new Date().toISOString())
-    .limit(1)
-    .single()
+  // subscription + benefitBusiness en paralelo: ambas son independientes
+  const startOfMonth = new Date()
+  startOfMonth.setDate(1)
+  startOfMonth.setHours(0, 0, 0, 0)
 
-  if (!subscription) {
+  const [{ data: subscription }, { data: benefitBusiness }] = await Promise.all([
+    supabase.from("subscriptions").select("id")
+      .eq("driver_id", qrToken.driver_id)
+      .eq("status", "active")
+      .gte("expires_at", now)
+      .limit(1)
+      .single(),
+    qrToken.benefit_id
+      ? supabase.from("benefits").select("business_id").eq("id", qrToken.benefit_id).single()
+      : Promise.resolve({ data: null, error: null }),
+  ])
+
+  if (!subscription)
     return NextResponse.json({ valid: false, error: "El conductor no tiene membresía activa" }, { status: 403 })
-  }
+  if (benefitBusiness?.business_id && benefitBusiness.business_id !== business.id)
+    return NextResponse.json({ valid: false, error: "Este QR no corresponde a tu comercio" }, { status: 403 })
 
-  if (qrToken.profiles?.status !== "verified") {
-    return NextResponse.json({ valid: false, error: "Conductor no verificado" }, { status: 403 })
-  }
-
-  // Ensure the scanning business is the one that owns this benefit
-  if (qrToken.benefits && qrToken.benefit_id) {
-    const { data: benefitBusiness } = await supabase
-      .from("benefits")
-      .select("business_id")
-      .eq("id", qrToken.benefit_id)
-      .single()
-
-    if (benefitBusiness && benefitBusiness.business_id !== business.id) {
-      return NextResponse.json({ valid: false, error: "Este QR no corresponde a tu comercio" }, { status: 403 })
-    }
-  }
-
+  // Límite mensual (depende de qrToken, no se puede paralelizar antes)
   if (qrToken.benefits?.usage_limit_per_driver) {
-    const startOfMonth = new Date()
-    startOfMonth.setDate(1)
-    startOfMonth.setHours(0, 0, 0, 0)
-
     const { count } = await supabase
       .from("benefit_redemptions")
       .select("*", { count: "exact", head: true })
@@ -124,26 +106,27 @@ export async function POST(request: Request) {
       .eq("benefit_id", qrToken.benefit_id)
       .gte("redeemed_at", startOfMonth.toISOString())
 
-    if ((count ?? 0) >= qrToken.benefits.usage_limit_per_driver) {
+    if ((count ?? 0) >= qrToken.benefits.usage_limit_per_driver)
       return NextResponse.json({
         valid: false,
         error: `Límite mensual alcanzado (${qrToken.benefits.usage_limit_per_driver} uso/mes)`,
       }, { status: 429 })
-    }
   }
 
-  await supabase.from("qr_tokens").update({
-    status: "used",
-    used_at: new Date().toISOString(),
-    used_by_business: business.id,
-  }).eq("id", qrToken.id)
-
-  await supabase.from("benefit_redemptions").insert({
-    driver_id: qrToken.driver_id,
-    benefit_id: qrToken.benefit_id,
-    business_id: business.id,
-    qr_token_id: qrToken.id,
-  })
+  // update + insert en paralelo: son independientes entre sí
+  await Promise.all([
+    supabase.from("qr_tokens").update({
+      status: "used",
+      used_at: new Date().toISOString(),
+      used_by_business: business.id,
+    }).eq("id", qrToken.id),
+    supabase.from("benefit_redemptions").insert({
+      driver_id: qrToken.driver_id,
+      benefit_id: qrToken.benefit_id,
+      business_id: business.id,
+      qr_token_id: qrToken.id,
+    }),
+  ])
 
   return NextResponse.json({
     valid: true,

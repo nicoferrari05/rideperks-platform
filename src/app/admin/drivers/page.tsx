@@ -1,9 +1,12 @@
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { Users } from "lucide-react"
+import Link from "next/link"
 import DriverActions from "@/components/admin/DriverActions"
 import VerificationActions from "@/components/admin/VerificationActions"
 import StaggerEntrance from "@/components/shared/StaggerEntrance"
+
+const PAGE_SIZE = 50
 
 const platformLabel: Record<string, string> = {
   uber: "Uber", indrive: "InDrive", pedidosya: "PedidosYa", multiple: "Múltiple",
@@ -24,16 +27,31 @@ function extractStoragePath(photoUrl: string): string {
   return idx !== -1 ? photoUrl.substring(idx + marker.length) : photoUrl
 }
 
-export default async function DriversPage() {
+export default async function DriversPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>
+}) {
+  const { page: pageParam } = await searchParams
+  const page = Math.max(1, parseInt(pageParam ?? "1", 10))
+  const start = (page - 1) * PAGE_SIZE
+  const end = start + PAGE_SIZE - 1
+
   const supabase = await createClient()
   const adminSupabase = createAdminClient()
 
-  const [{ data: drivers }, { data: rawVerifications }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("role", "driver").order("created_at", { ascending: false }),
+  const [{ data: drivers, count: totalDrivers }, { data: rawVerifications }] = await Promise.all([
+    supabase.from("profiles")
+      .select("*", { count: "exact" })
+      .eq("role", "driver")
+      .order("created_at", { ascending: false })
+      .range(start, end),
     supabase.from("driver_verifications")
       .select("*, profiles(full_name, platform)")
       .eq("status", "pending").order("created_at", { ascending: false }),
   ])
+
+  const totalPages = Math.ceil((totalDrivers ?? 0) / PAGE_SIZE)
 
   // Generate signed URLs so the admin can view private bucket photos
   const pendingVerifications = await Promise.all(
@@ -151,6 +169,34 @@ export default async function DriversPage() {
               })}
             </div>
           </StaggerEntrance>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-5">
+            <span className="text-xs" style={{ color: "var(--mute)" }}>
+              Página {page} de {totalPages}
+            </span>
+            <div className="flex gap-2">
+              {page > 1 && (
+                <Link
+                  href={`?page=${page - 1}`}
+                  className="px-4 py-2 rounded-full text-sm font-medium"
+                  style={{ backgroundColor: "var(--bone-2)", color: "var(--midnight)" }}
+                >
+                  ← Anterior
+                </Link>
+              )}
+              {page < totalPages && (
+                <Link
+                  href={`?page=${page + 1}`}
+                  className="px-4 py-2 rounded-full text-sm font-medium"
+                  style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
+                >
+                  Siguiente →
+                </Link>
+              )}
+            </div>
+          </div>
         )}
       </div>
     </div>
