@@ -2,10 +2,10 @@ import { ImageResponse } from "next/og"
 import { readFileSync } from "fs"
 import { join } from "path"
 
-export const size = { width: 180, height: 180 }
+export const size = { width: 512, height: 512 }
 export const contentType = "image/png"
 
-export default function AppleIcon() {
+export default function Icon() {
   const font = readFileSync(
     join(process.cwd(), "node_modules/geist/dist/fonts/geist-sans/Geist-Black.ttf")
   )
@@ -13,9 +13,10 @@ export default function AppleIcon() {
   return new ImageResponse(
     <div
       style={{
-        width: 180,
-        height: 180,
+        width: 512,
+        height: 512,
         background: "#0F1B3D",
+        borderRadius: 115,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -26,8 +27,8 @@ export default function AppleIcon() {
           color: "#F5F1EA",
           fontFamily: "Geist",
           fontWeight: 900,
-          fontSize: 84,
-          letterSpacing: -6,
+          fontSize: 240,
+          letterSpacing: -16,
           lineHeight: 1,
         }}
       >
@@ -35,8 +36,8 @@ export default function AppleIcon() {
       </span>
     </div>,
     {
-      width: 180,
-      height: 180,
+      width: 512,
+      height: 512,
       fonts: [{ name: "Geist", data: font, weight: 900, style: "normal" }],
     }
   )
