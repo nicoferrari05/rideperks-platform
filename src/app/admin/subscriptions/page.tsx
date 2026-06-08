@@ -29,7 +29,7 @@ export default async function SubscriptionsAdminPage({
 
   const supabase = createAdminClient()
 
-  const [{ data: subscriptions, count: totalSubscriptions }, { data: verifiedDrivers }, { count: activeCount }] = await Promise.all([
+  const [{ data: subscriptions, count: totalSubscriptions, error: subError }, { data: verifiedDrivers }, { count: activeCount }] = await Promise.all([
     supabase.from("subscriptions")
       .select("*, profiles(id, full_name, phone, platform)", { count: "exact" })
       .order("created_at", { ascending: false })
@@ -41,6 +41,8 @@ export default async function SubscriptionsAdminPage({
       .eq("status", "active")
       .gte("expires_at", new Date().toISOString()),
   ])
+
+  if (subError) console.error("[subscriptions] query error:", JSON.stringify(subError))
 
   const totalPages = Math.ceil((totalSubscriptions ?? 0) / PAGE_SIZE)
 
