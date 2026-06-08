@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { CreditCard } from "lucide-react"
 import Link from "next/link"
 import SubscriptionForm from "@/components/admin/SubscriptionForm"
@@ -27,7 +27,7 @@ export default async function SubscriptionsAdminPage({
   const start = (page - 1) * PAGE_SIZE
   const end = start + PAGE_SIZE - 1
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const [{ data: subscriptions, count: totalSubscriptions }, { data: verifiedDrivers }, { count: activeCount }] = await Promise.all([
     supabase.from("subscriptions")
