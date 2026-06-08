@@ -56,13 +56,9 @@ export default function VerifyPage() {
       return
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from("driver-photos")
-      .getPublicUrl(path)
-
     const { error: verifyError } = await supabase
       .from("driver_verifications")
-      .insert({ driver_id: user.id, photo_url: publicUrl || path, platform })
+      .insert({ driver_id: user.id, photo_url: path, platform })
 
     if (verifyError) {
       toast.error("Error al enviar la verificación.")

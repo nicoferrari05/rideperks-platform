@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { Users } from "lucide-react"
 import DriverActions from "@/components/admin/DriverActions"
 import VerificationActions from "@/components/admin/VerificationActions"
@@ -15,15 +16,36 @@ const statusConfig: Record<string, { label: string; dot: string; bg: string; tex
   suspended: { label: "Suspendido", dot: "var(--mute)", bg: "var(--bone-2)", text: "var(--mute)" },
 }
 
+// driver-photos paths may be stored as full public URLs (legacy) or bare paths (new).
+// This extracts the bare storage path in either case.
+function extractStoragePath(photoUrl: string): string {
+  const marker = "/object/public/driver-photos/"
+  const idx = photoUrl.indexOf(marker)
+  return idx !== -1 ? photoUrl.substring(idx + marker.length) : photoUrl
+}
+
 export default async function DriversPage() {
   const supabase = await createClient()
+  const adminSupabase = createAdminClient()
 
-  const [{ data: drivers }, { data: pendingVerifications }] = await Promise.all([
+  const [{ data: drivers }, { data: rawVerifications }] = await Promise.all([
     supabase.from("profiles").select("*").eq("role", "driver").order("created_at", { ascending: false }),
     supabase.from("driver_verifications")
       .select("*, profiles(full_name, platform)")
       .eq("status", "pending").order("created_at", { ascending: false }),
   ])
+
+  // Generate signed URLs so the admin can view private bucket photos
+  const pendingVerifications = await Promise.all(
+    (rawVerifications ?? []).map(async (v) => {
+      if (!v.photo_url) return { ...v, signedPhotoUrl: null }
+      const path = extractStoragePath(v.photo_url)
+      const { data } = await adminSupabase.storage
+        .from("driver-photos")
+        .createSignedUrl(path, 3600)
+      return { ...v, signedPhotoUrl: data?.signedUrl ?? null }
+    })
+  )
 
   return (
     <div className="space-y-8">
@@ -67,9 +89,9 @@ export default async function DriversPage() {
                     PENDIENTE
                   </span>
                 </div>
-                {v.photo_url && (
+                {v.signedPhotoUrl && (
                   <img
-                    src={v.photo_url}
+                    src={v.signedPhotoUrl}
                     alt="Foto verificación"
                     className="max-h-48 w-auto rounded-xl object-contain"
                     style={{ border: "1px solid var(--line)" }}
