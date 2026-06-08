@@ -46,17 +46,38 @@ export default async function BenefitsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="pt-2">
-        <h1 className="font-bold" style={{ fontSize: "28px", letterSpacing: "-0.025em", color: "var(--midnight)" }}>
-          Beneficios
-        </h1>
-        <p className="eyebrow-muted mt-1">
-          {benefits?.length ?? 0} BENEFICIOS ACTIVOS
-        </p>
-        {catalogPotential > 0 && (
-          <p className="text-sm font-medium mt-1" style={{ color: "var(--ember)" }}>
-            Ahorra hasta ${catalogPotential.toFixed(2)} al mes
-          </p>
+      <div className="pt-2 pb-1">
+        <p className="eyebrow-muted mb-3">BENEFICIOS</p>
+
+        {catalogPotential > 0 ? (
+          <>
+            <p className="text-sm" style={{ color: "var(--mute)" }}>Esta semana podrías ahorrar</p>
+            <p
+              className="font-black leading-none my-1"
+              style={{
+                fontSize: "48px",
+                color: "var(--midnight)",
+                letterSpacing: "-0.04em",
+                fontFamily: "'JetBrains Mono', 'Geist Mono', monospace",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              B/.{catalogPotential.toFixed(2)}
+            </p>
+            <p className="text-sm font-medium" style={{ color: "var(--mute)" }}>
+              {benefits?.length ?? 0}{" "}
+              {(benefits?.length ?? 0) === 1 ? "beneficio disponible" : "beneficios disponibles"}
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="font-bold" style={{ fontSize: "28px", letterSpacing: "-0.025em", color: "var(--midnight)" }}>
+              Beneficios
+            </h1>
+            <p className="eyebrow-muted mt-1">
+              {benefits?.length ?? 0} BENEFICIOS ACTIVOS
+            </p>
+          </>
         )}
       </div>
 
