@@ -20,7 +20,7 @@ const getActiveBenefits = unstable_cache(
     return data ?? []
   },
   ["active-benefits"],
-  { revalidate: 300 }
+  { revalidate: 300, tags: ["active-benefits"] }
 )
 
 export default async function BenefitsPage() {

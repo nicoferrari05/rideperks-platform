@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { revalidateBenefitsCache } from "@/app/admin/benefits/actions"
 
 interface Props {
   benefitId: string
@@ -63,6 +64,7 @@ export default function BenefitRowActions({
     const supabase = createClient()
     await supabase.from("benefits").update({ is_active: !isActive }).eq("id", benefitId)
     toast.success(isActive ? "Beneficio desactivado" : "Beneficio activado")
+    await revalidateBenefitsCache()
     setLoading(false)
     router.refresh()
   }
@@ -92,6 +94,7 @@ export default function BenefitRowActions({
     } else {
       toast.success("Beneficio actualizado")
       setEditDialog(false)
+      await revalidateBenefitsCache()
       router.refresh()
     }
     setLoading(false)
@@ -106,6 +109,7 @@ export default function BenefitRowActions({
     } else {
       toast.success("Beneficio eliminado")
       setDeleteDialog(false)
+      await revalidateBenefitsCache()
       router.refresh()
     }
     setLoading(false)

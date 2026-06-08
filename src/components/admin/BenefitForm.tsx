@@ -11,6 +11,7 @@ import { Plus, Loader2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { revalidateBenefitsCache } from "@/app/admin/benefits/actions"
 
 interface Props {
   businesses: { id: string; name: string }[]
@@ -64,6 +65,7 @@ export default function BenefitForm({ businesses }: Props) {
       toast.success("Beneficio creado correctamente")
       setOpen(false)
       setForm({ title: "", description: "", business_id: "", discount_type: "percentage", discount_value: "", savings_value: "", terms: "", usage_limit_per_driver: "", valid_until: "" })
+      await revalidateBenefitsCache()
       router.refresh()
     }
     setLoading(false)
