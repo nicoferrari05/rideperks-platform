@@ -1,24 +1,40 @@
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
+import { unstable_cache } from "next/cache"
 import { redirect } from "next/navigation"
 import { Lock } from "lucide-react"
 import Link from "next/link"
 import BenefitsListAnimated from "@/components/driver/BenefitsListAnimated"
+
+// Beneficios activos: iguales para todos los conductores, cambian solo cuando
+// el admin agrega o edita uno. Se cachean 5 minutos para evitar una query
+// por cada conductor que abre la pantalla.
+const getActiveBenefits = unstable_cache(
+  async () => {
+    const supabase = createAdminClient()
+    const { data } = await supabase
+      .from("benefits")
+      .select("*, partner_businesses(id, name, logo_url, category, address)")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+    return data ?? []
+  },
+  ["active-benefits"],
+  { revalidate: 300 }
+)
 
 export default async function BenefitsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  const [{ data: profile }, { data: subscription }, { data: benefits }] = await Promise.all([
+  const [{ data: profile }, { data: subscription }, benefits] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("subscriptions").select("*")
       .eq("driver_id", user.id).eq("status", "active")
       .gte("expires_at", new Date().toISOString())
       .limit(1).single(),
-    supabase.from("benefits")
-      .select("*, partner_businesses(id, name, logo_url, category, address)")
-      .eq("is_active", true)
-      .order("created_at", { ascending: false }),
+    getActiveBenefits(),
   ])
 
   const isVerified = profile?.status === "verified"
