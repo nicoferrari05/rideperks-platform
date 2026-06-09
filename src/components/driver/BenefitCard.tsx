@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Clock, QrCode, Loader2, XCircle, Navigation, MapPin, ArrowUpRight, Wrench, Zap, Utensils, Heart, Store, ChevronDown } from "lucide-react"
+import { Clock, QrCode, Loader2, XCircle, Navigation, MapPin, ArrowUpRight, Wrench, Zap, Utensils, Heart, Store, ChevronDown, Tag } from "lucide-react"
 import QRCode from "react-qr-code"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -45,6 +45,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
   const [generating, setGenerating] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number>(0)
   const [termsOpen, setTermsOpen] = useState(false)
+  const [pricesOpen, setPricesOpen] = useState(false)
 
   async function generateQR() {
     setGenerating(true)
@@ -200,6 +201,94 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
               <Clock className="w-3 h-3 flex-shrink-0" />
               Hasta {new Date(benefit.valid_until).toLocaleDateString("es-PA", { day: "2-digit", month: "short" })}
             </p>
+          )}
+
+          {/* PRICE COMPARISON — collapsible, only when both prices set */}
+          {benefit.regular_price != null && benefit.rideperks_price != null && (
+            <div>
+              <button
+                onClick={() => setPricesOpen(!pricesOpen)}
+                className="pressable flex items-center gap-1.5"
+                style={{ fontSize: "12px", color: "var(--mute)", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+              >
+                <Tag className="w-3 h-3" />
+                Ver precios
+                <ChevronDown
+                  className="w-3.5 h-3.5"
+                  style={{
+                    transition: "transform 220ms cubic-bezier(0.23, 1, 0.32, 1)",
+                    transform: pricesOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+              </button>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateRows: pricesOpen ? "1fr" : "0fr",
+                  transition: "grid-template-rows 220ms cubic-bezier(0.23, 1, 0.32, 1)",
+                }}
+              >
+                <div style={{ overflow: "hidden" }}>
+                  <div
+                    className="mt-3 rounded-xl px-4 py-3 space-y-2"
+                    style={{ backgroundColor: "var(--bone-2)" }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium" style={{ color: "var(--mute)" }}>Precio regular</span>
+                      <span
+                        className="text-sm font-medium"
+                        style={{
+                          color: "var(--mute)",
+                          textDecoration: "line-through",
+                          fontFamily: "'JetBrains Mono', 'Geist Mono', monospace",
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
+                        ${benefit.regular_price.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div style={{ height: "1px", backgroundColor: "var(--line)" }} />
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold" style={{ color: "var(--midnight)" }}>Precio RidePerks</span>
+                      <span
+                        className="font-bold"
+                        style={{
+                          fontSize: "16px",
+                          color: "var(--midnight)",
+                          fontFamily: "'JetBrains Mono', 'Geist Mono', monospace",
+                          fontVariantNumeric: "tabular-nums",
+                          letterSpacing: "-0.02em",
+                        }}
+                      >
+                        ${benefit.rideperks_price.toFixed(2)}
+                      </span>
+                    </div>
+
+                    {benefit.regular_price > benefit.rideperks_price && (
+                      <div
+                        className="flex items-center justify-between rounded-lg px-3 py-2"
+                        style={{ backgroundColor: "rgba(47,143,110,0.1)" }}
+                      >
+                        <span className="text-xs font-semibold" style={{ color: "var(--verde)" }}>Ahorras</span>
+                        <span
+                          className="text-sm font-bold"
+                          style={{
+                            color: "var(--verde)",
+                            fontFamily: "'JetBrains Mono', 'Geist Mono', monospace",
+                            fontVariantNumeric: "tabular-nums",
+                          }}
+                        >
+                          ${(benefit.regular_price - benefit.rideperks_price).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* TERMS: collapsible */}

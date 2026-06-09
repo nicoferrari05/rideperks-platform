@@ -28,6 +28,8 @@ export default function BenefitForm({ businesses }: Props) {
     discount_type: "percentage",
     discount_value: "",
     savings_value: "",
+    regular_price: "",
+    rideperks_price: "",
     terms: "",
     usage_limit_per_driver: "",
     valid_until: "",
@@ -53,6 +55,8 @@ export default function BenefitForm({ businesses }: Props) {
       discount_type: form.discount_type,
       discount_value: form.discount_value || null,
       savings_value: form.savings_value ? parseFloat(form.savings_value) : null,
+      regular_price: form.regular_price ? parseFloat(form.regular_price) : null,
+      rideperks_price: form.rideperks_price ? parseFloat(form.rideperks_price) : null,
       terms: form.terms || null,
       usage_limit_per_driver: form.usage_limit_per_driver ? parseInt(form.usage_limit_per_driver) : null,
       valid_until: form.valid_until || null,
@@ -64,7 +68,7 @@ export default function BenefitForm({ businesses }: Props) {
     } else {
       toast.success("Beneficio creado correctamente")
       setOpen(false)
-      setForm({ title: "", description: "", business_id: "", discount_type: "percentage", discount_value: "", savings_value: "", terms: "", usage_limit_per_driver: "", valid_until: "" })
+      setForm({ title: "", description: "", business_id: "", discount_type: "percentage", discount_value: "", savings_value: "", regular_price: "", rideperks_price: "", terms: "", usage_limit_per_driver: "", valid_until: "" })
       await revalidateBenefitsCache()
       router.refresh()
     }
@@ -146,6 +150,20 @@ export default function BenefitForm({ businesses }: Props) {
               <Label>Válido hasta</Label>
               <Input type="date" value={form.valid_until} onChange={(e) => set("valid_until", e.target.value)} />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Comparativa de precios (opcional)</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <p className="text-xs" style={{ color: "var(--mute)" }}>Precio regular ($)</p>
+                <Input type="number" step="0.01" min="0" value={form.regular_price} onChange={(e) => set("regular_price", e.target.value)} placeholder="60.00" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs" style={{ color: "var(--mute)" }}>Precio RidePerks ($)</p>
+                <Input type="number" step="0.01" min="0" value={form.rideperks_price} onChange={(e) => set("rideperks_price", e.target.value)} placeholder="40.00" />
+              </div>
+            </div>
+            <p className="text-xs" style={{ color: "var(--mute)" }}>Aparece como "Ver precios" en el beneficio del conductor.</p>
           </div>
           <div className="space-y-2">
             <Label>Términos y condiciones</Label>

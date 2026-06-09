@@ -20,6 +20,8 @@ type BenefitRow = {
   terms: string | null
   usage_limit_per_driver: number | null
   savings_value?: number | null
+  regular_price?: number | null
+  rideperks_price?: number | null
   partner_businesses?: { id: string; name: string; category: string | null } | null
 }
 
@@ -198,6 +200,8 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
                   discountType={b.discount_type}
                   discountValue={b.discount_value ?? null}
                   savingsValue={b.savings_value ?? null}
+                  regularPrice={b.regular_price ?? null}
+                  rideperksPrice={b.rideperks_price ?? null}
                   terms={b.terms ?? null}
                   usageLimitPerDriver={b.usage_limit_per_driver ?? null}
                   validUntil={b.valid_until ?? null}

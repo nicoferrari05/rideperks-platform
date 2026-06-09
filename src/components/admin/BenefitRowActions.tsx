@@ -26,6 +26,8 @@ interface Props {
   discountType: string
   discountValue: string | null
   savingsValue: number | null
+  regularPrice: number | null
+  rideperksPrice: number | null
   terms: string | null
   usageLimitPerDriver: number | null
   validUntil: string | null
@@ -34,8 +36,8 @@ interface Props {
 
 export default function BenefitRowActions({
   benefitId, isActive, title, description, businessId,
-  discountType, discountValue, savingsValue, terms,
-  usageLimitPerDriver, validUntil, businesses,
+  discountType, discountValue, savingsValue, regularPrice, rideperksPrice,
+  terms, usageLimitPerDriver, validUntil, businesses,
 }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -48,6 +50,8 @@ export default function BenefitRowActions({
     discount_type: discountType,
     discount_value: discountValue ?? "",
     savings_value: savingsValue != null ? String(savingsValue) : "",
+    regular_price: regularPrice != null ? String(regularPrice) : "",
+    rideperks_price: rideperksPrice != null ? String(rideperksPrice) : "",
     terms: terms ?? "",
     usage_limit_per_driver: usageLimitPerDriver != null ? String(usageLimitPerDriver) : "",
     valid_until: validUntil ? validUntil.split("T")[0] : "",
@@ -84,6 +88,8 @@ export default function BenefitRowActions({
       discount_type: form.discount_type,
       discount_value: form.discount_value.trim() || null,
       savings_value: form.savings_value ? parseFloat(form.savings_value) : null,
+      regular_price: form.regular_price ? parseFloat(form.regular_price) : null,
+      rideperks_price: form.rideperks_price ? parseFloat(form.rideperks_price) : null,
       terms: form.terms.trim() || null,
       usage_limit_per_driver: form.usage_limit_per_driver ? parseInt(form.usage_limit_per_driver) : null,
       valid_until: form.valid_until || null,
@@ -134,6 +140,8 @@ export default function BenefitRowActions({
               title, description, business_id: businessId ?? "",
               discount_type: discountType, discount_value: discountValue ?? "",
               savings_value: savingsValue != null ? String(savingsValue) : "",
+              regular_price: regularPrice != null ? String(regularPrice) : "",
+              rideperks_price: rideperksPrice != null ? String(rideperksPrice) : "",
               terms: terms ?? "",
               usage_limit_per_driver: usageLimitPerDriver != null ? String(usageLimitPerDriver) : "",
               valid_until: validUntil ? validUntil.split("T")[0] : "",
@@ -214,6 +222,20 @@ export default function BenefitRowActions({
                 <Label>Válido hasta</Label>
                 <Input type="date" value={form.valid_until} onChange={(e) => set("valid_until", e.target.value)} />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Comparativa de precios (opcional)</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <p className="text-xs" style={{ color: "var(--mute)" }}>Precio regular ($)</p>
+                  <Input type="number" step="0.01" min="0" value={form.regular_price} onChange={(e) => set("regular_price", e.target.value)} placeholder="60.00" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs" style={{ color: "var(--mute)" }}>Precio RidePerks ($)</p>
+                  <Input type="number" step="0.01" min="0" value={form.rideperks_price} onChange={(e) => set("rideperks_price", e.target.value)} placeholder="40.00" />
+                </div>
+              </div>
+              <p className="text-xs" style={{ color: "var(--mute)" }}>Aparece como "Ver precios" en el beneficio del conductor.</p>
             </div>
             <div className="space-y-2">
               <Label>Términos y condiciones</Label>

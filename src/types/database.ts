@@ -57,6 +57,8 @@ export interface Benefit {
   is_active: boolean
   usage_limit_per_driver: number | null
   image_url: string | null
+  regular_price: number | null
+  rideperks_price: number | null
   valid_from: string | null
   valid_until: string | null
   created_at: string
