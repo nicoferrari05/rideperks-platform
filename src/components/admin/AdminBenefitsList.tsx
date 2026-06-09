@@ -1,8 +1,12 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useRef, useState, useMemo } from "react"
+import { useGSAP } from "@gsap/react"
+import gsap from "gsap"
 import { Wrench, Zap, Utensils, Heart, Store, LayoutGrid, type LucideIcon } from "lucide-react"
 import BenefitRowActions from "./BenefitRowActions"
+
+gsap.registerPlugin(useGSAP)
 
 type BenefitRow = {
   id: string
@@ -28,31 +32,39 @@ const discountTypeLabel: Record<string, string> = {
   percentage: "Porcentaje", fixed: "Monto fijo", free_item: "Artículo gratis", other: "Otro",
 }
 
-// Mirrors getCategoryStyle() in BenefitCard — ember is the default/fallback
-function getCategoryStyle(category: string | null | undefined) {
+type ChipStyle = { bg: string; fg: string; activeBg: string; activeFg: string; Icon: LucideIcon }
+
+function getCategoryChipStyle(category: string | null | undefined): ChipStyle {
   const c = (category ?? "").toLowerCase()
   if (c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri"))
-    return { bg: "var(--ember-soft)", fg: "var(--ember)", Icon: Wrench as LucideIcon }
+    return { bg: "var(--ember-soft)", fg: "var(--ember)", activeBg: "var(--ember)", activeFg: "var(--bone)", Icon: Wrench }
   if (c.includes("combustible") || c.includes("gas") || c.includes("gasolina"))
-    return { bg: "rgba(242,183,59,0.15)", fg: "oklch(0.5 0.1 82)", Icon: Zap as LucideIcon }
+    return { bg: "rgba(242,183,59,0.18)", fg: "oklch(0.48 0.1 82)", activeBg: "oklch(0.48 0.1 82)", activeFg: "var(--bone)", Icon: Zap }
   if (c.includes("comida") || c.includes("restaurante") || c.includes("food") || c.includes("aliment"))
-    return { bg: "rgba(47,143,110,0.12)", fg: "var(--verde)", Icon: Utensils as LucideIcon }
+    return { bg: "rgba(47,143,110,0.14)", fg: "var(--verde)", activeBg: "var(--verde)", activeFg: "var(--bone)", Icon: Utensils }
   if (c.includes("salud") || c.includes("health") || c.includes("medic"))
-    return { bg: "rgba(99,102,241,0.1)", fg: "oklch(0.5 0.18 270)", Icon: Heart as LucideIcon }
-  return { bg: "var(--ember-soft)", fg: "var(--ember)", Icon: Store as LucideIcon }
+    return { bg: "rgba(99,102,241,0.12)", fg: "oklch(0.48 0.18 270)", activeBg: "oklch(0.48 0.18 270)", activeFg: "var(--bone)", Icon: Heart }
+  return { bg: "var(--ember-soft)", fg: "var(--ember)", activeBg: "var(--ember)", activeFg: "var(--bone)", Icon: Store }
 }
 
-// Warm → cool sort order for chips
+// Same badge style as BenefitCard — ember is the default
+function getBadgeStyle(category: string | null | undefined) {
+  const { bg, fg } = getCategoryChipStyle(category)
+  return { bg, fg }
+}
+
 const CATEGORY_ORDER = ["taller", "mecanica", "auto", "chapisteri", "combustible", "gas", "gasolina", "comida", "restaurante", "food", "aliment", "salud", "health", "medic"]
-
-function categoryRank(category: string): number {
-  const c = category.toLowerCase()
-  const idx = CATEGORY_ORDER.findIndex((k) => c.includes(k))
-  return idx === -1 ? 999 : idx
+function categoryRank(cat: string) {
+  const c = cat.toLowerCase()
+  const i = CATEGORY_ORDER.findIndex((k) => c.includes(k))
+  return i === -1 ? 999 : i
 }
+
+const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
 
 export default function AdminBenefitsList({ benefits, businesses }: Props) {
   const [activeCategory, setActiveCategory] = useState("todos")
+  const listRef = useRef<HTMLDivElement>(null)
 
   const categories = useMemo(() => {
     const seen = new Set<string>()
@@ -69,16 +81,28 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
     return benefits.filter((b) => b.partner_businesses?.category === activeCategory)
   }, [benefits, activeCategory])
 
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.from(".admin-benefit-row", {
+          autoAlpha: 0, y: 10, duration: 0.22, stagger: 0.04, ease: "power2.out",
+        })
+      })
+      return () => mm.revert()
+    },
+    { scope: listRef, dependencies: [activeCategory] }
+  )
+
   return (
     <div className="space-y-4">
 
-      {/* ── Category chips — same styling as driver portal ── */}
       {categories.length > 1 && (
         <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none", paddingBottom: "2px" }}>
 
           <button
             onClick={() => setActiveCategory("todos")}
-            className="flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+            className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
             style={{
               fontSize: "12px",
               height: "36px",
@@ -86,7 +110,7 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
               color: activeCategory === "todos" ? "var(--bone)" : "var(--midnight)",
               border: "1px solid",
               borderColor: activeCategory === "todos" ? "transparent" : "var(--line)",
-              transition: "background-color 180ms ease, color 180ms ease, border-color 180ms ease",
+              transition: `background-color 200ms ${EASE}, color 200ms ${EASE}, border-color 200ms ${EASE}`,
             }}
           >
             <LayoutGrid className="w-3 h-3" />
@@ -96,46 +120,44 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
 
           {categories.map((cat) => {
             const isActive = activeCategory === cat
-            const { Icon } = getCategoryStyle(cat)
+            const { bg, fg, activeBg, activeFg, Icon } = getCategoryChipStyle(cat)
             const count = benefits.filter((b) => b.partner_businesses?.category === cat).length
             return (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className="flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+                className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
                 style={{
                   fontSize: "12px",
                   height: "36px",
                   textTransform: "capitalize",
-                  backgroundColor: isActive ? "var(--midnight)" : "transparent",
-                  color: isActive ? "var(--bone)" : "var(--midnight)",
-                  border: "1px solid",
-                  borderColor: isActive ? "transparent" : "var(--line)",
-                  transition: "background-color 180ms ease, color 180ms ease, border-color 180ms ease",
+                  backgroundColor: isActive ? activeBg : bg,
+                  color: isActive ? activeFg : fg,
+                  border: "none",
+                  transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
                 }}
               >
                 <Icon className="w-3 h-3" />
                 {cat}
-                <span style={{ opacity: 0.55, fontWeight: 500 }}>({count})</span>
+                <span style={{ opacity: isActive ? 0.7 : 0.55, fontWeight: 500 }}>({count})</span>
               </button>
             )
           })}
         </div>
       )}
 
-      {/* ── Benefits list ── */}
-      <div>
+      <div key={activeCategory} ref={listRef}>
         {filtered.length === 0 ? (
           <p className="text-sm py-8 text-center" style={{ color: "var(--mute)" }}>
             No hay beneficios en esta categoría.
           </p>
         ) : (
           filtered.map((b) => {
-            const { bg, fg } = getCategoryStyle(b.partner_businesses?.category)
+            const { bg, fg } = getBadgeStyle(b.partner_businesses?.category)
             return (
               <div
                 key={b.id}
-                className="flex items-start justify-between gap-3 py-4 border-b flex-wrap"
+                className="admin-benefit-row flex items-start justify-between gap-3 py-4 border-b flex-wrap"
                 style={{ borderColor: "var(--line)" }}
               >
                 <div className="flex-1 min-w-0">

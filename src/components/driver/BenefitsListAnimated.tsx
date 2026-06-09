@@ -26,14 +26,29 @@ interface Props {
   canUse: boolean
 }
 
-function getIconForCategory(category: string): LucideIcon {
-  const c = category.toLowerCase()
-  if (c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri")) return Wrench
-  if (c.includes("combustible") || c.includes("gas") || c.includes("gasolina")) return Zap
-  if (c.includes("comida") || c.includes("restaurante") || c.includes("food") || c.includes("aliment")) return Utensils
-  if (c.includes("salud") || c.includes("health") || c.includes("medic")) return Heart
-  return Store
+type ChipStyle = { bg: string; fg: string; activeBg: string; activeFg: string; Icon: LucideIcon }
+
+function getCategoryChipStyle(category: string | null | undefined): ChipStyle {
+  const c = (category ?? "").toLowerCase()
+  if (c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri"))
+    return { bg: "var(--ember-soft)", fg: "var(--ember)", activeBg: "var(--ember)", activeFg: "var(--bone)", Icon: Wrench }
+  if (c.includes("combustible") || c.includes("gas") || c.includes("gasolina"))
+    return { bg: "rgba(242,183,59,0.18)", fg: "oklch(0.48 0.1 82)", activeBg: "oklch(0.48 0.1 82)", activeFg: "var(--bone)", Icon: Zap }
+  if (c.includes("comida") || c.includes("restaurante") || c.includes("food") || c.includes("aliment"))
+    return { bg: "rgba(47,143,110,0.14)", fg: "var(--verde)", activeBg: "var(--verde)", activeFg: "var(--bone)", Icon: Utensils }
+  if (c.includes("salud") || c.includes("health") || c.includes("medic"))
+    return { bg: "rgba(99,102,241,0.12)", fg: "oklch(0.48 0.18 270)", activeBg: "oklch(0.48 0.18 270)", activeFg: "var(--bone)", Icon: Heart }
+  return { bg: "var(--ember-soft)", fg: "var(--ember)", activeBg: "var(--ember)", activeFg: "var(--bone)", Icon: Store }
 }
+
+const CATEGORY_ORDER = ["taller", "mecanica", "auto", "chapisteri", "combustible", "gas", "gasolina", "comida", "restaurante", "food", "aliment", "salud", "health", "medic"]
+function categoryRank(cat: string) {
+  const c = cat.toLowerCase()
+  const i = CATEGORY_ORDER.findIndex((k) => c.includes(k))
+  return i === -1 ? 999 : i
+}
+
+const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
 
 export default function BenefitsListAnimated({ benefits, driverId, canUse }: Props) {
   const [activeCategory, setActiveCategory] = useState("todos")
@@ -46,7 +61,7 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse }: Pro
       const c = b.partner_businesses?.category
       if (c && !seen.has(c)) { seen.add(c); cats.push(c) }
     }
-    return cats
+    return cats.sort((a, b) => categoryRank(a) - categoryRank(b))
   }, [benefits])
 
   const filtered = useMemo(
@@ -73,68 +88,56 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse }: Pro
   return (
     <div className="space-y-4">
 
-      {/* ── Category filter chips (only if 2+ categories exist) ── */}
       {categories.length > 1 && (
-        <div
-          className="flex gap-2 overflow-x-auto"
-          style={{ scrollbarWidth: "none", paddingBottom: "2px" }}
-        >
-          {/* "Todos" chip */}
-          {(["todos"] as const).map(() => {
-            const isActive = activeCategory === "todos"
-            return (
-              <button
-                key="todos"
-                onClick={() => setActiveCategory("todos")}
-                className="flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
-                style={{
-                  fontSize: "12px",
-                  height: "36px",
-                  backgroundColor: isActive ? "var(--midnight)" : "transparent",
-                  color: isActive ? "var(--bone)" : "var(--midnight)",
-                  border: "1px solid",
-                  borderColor: isActive ? "transparent" : "var(--line)",
-                  transition: "background-color 180ms ease, color 180ms ease, border-color 180ms ease",
-                }}
-              >
-                <LayoutGrid className="w-3 h-3" />
-                Todos
-                <span style={{ opacity: 0.55, fontWeight: 500 }}>({benefits.length})</span>
-              </button>
-            )
-          })}
+        <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none", paddingBottom: "2px" }}>
 
-          {/* One chip per category */}
+          {/* "Todos" — neutral, no category color */}
+          <button
+            onClick={() => setActiveCategory("todos")}
+            className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+            style={{
+              fontSize: "12px",
+              height: "36px",
+              backgroundColor: activeCategory === "todos" ? "var(--midnight)" : "transparent",
+              color: activeCategory === "todos" ? "var(--bone)" : "var(--midnight)",
+              border: "1px solid",
+              borderColor: activeCategory === "todos" ? "transparent" : "var(--line)",
+              transition: `background-color 200ms ${EASE}, color 200ms ${EASE}, border-color 200ms ${EASE}`,
+            }}
+          >
+            <LayoutGrid className="w-3 h-3" />
+            Todos
+            <span style={{ opacity: 0.55, fontWeight: 500 }}>({benefits.length})</span>
+          </button>
+
           {categories.map((cat) => {
             const isActive = activeCategory === cat
-            const CatIcon = getIconForCategory(cat)
+            const { bg, fg, activeBg, activeFg, Icon } = getCategoryChipStyle(cat)
             const count = benefits.filter((b) => b.partner_businesses?.category === cat).length
             return (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className="flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+                className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
                 style={{
                   fontSize: "12px",
                   height: "36px",
                   textTransform: "capitalize",
-                  backgroundColor: isActive ? "var(--midnight)" : "transparent",
-                  color: isActive ? "var(--bone)" : "var(--midnight)",
-                  border: "1px solid",
-                  borderColor: isActive ? "transparent" : "var(--line)",
-                  transition: "background-color 180ms ease, color 180ms ease, border-color 180ms ease",
+                  backgroundColor: isActive ? activeBg : bg,
+                  color: isActive ? activeFg : fg,
+                  border: "none",
+                  transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
                 }}
               >
-                <CatIcon className="w-3 h-3" />
+                <Icon className="w-3 h-3" />
                 {cat}
-                <span style={{ opacity: 0.55, fontWeight: 500 }}>({count})</span>
+                <span style={{ opacity: isActive ? 0.7 : 0.55, fontWeight: 500 }}>({count})</span>
               </button>
             )
           })}
         </div>
       )}
 
-      {/* ── Benefit cards (key resets GSAP entrance on category switch) ── */}
       <div key={activeCategory} ref={containerRef} className="grid grid-cols-1 gap-4">
         {filtered.length === 0 ? (
           <p className="text-sm py-10 text-center" style={{ color: "var(--mute)" }}>
