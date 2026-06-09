@@ -28,28 +28,18 @@ const discountTypeLabel: Record<string, string> = {
   percentage: "Porcentaje", fixed: "Monto fijo", free_item: "Artículo gratis", other: "Otro",
 }
 
-function getIconForCategory(category: string): LucideIcon {
-  const c = category.toLowerCase()
-  if (c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri")) return Wrench
-  if (c.includes("combustible") || c.includes("gas") || c.includes("gasolina")) return Zap
-  if (c.includes("comida") || c.includes("restaurante") || c.includes("food") || c.includes("aliment")) return Utensils
-  if (c.includes("salud") || c.includes("health") || c.includes("medic")) return Heart
-  return Store
-}
-
-type ChipStyle = { activeBg: string; activeFg: string }
-
-function getChipStyle(category: string): ChipStyle {
-  const c = category.toLowerCase()
+// Mirrors getCategoryStyle() in BenefitCard — ember is the default/fallback
+function getCategoryStyle(category: string | null | undefined) {
+  const c = (category ?? "").toLowerCase()
   if (c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri"))
-    return { activeBg: "var(--ember-soft)", activeFg: "var(--ember)" }
+    return { bg: "var(--ember-soft)", fg: "var(--ember)", Icon: Wrench as LucideIcon }
   if (c.includes("combustible") || c.includes("gas") || c.includes("gasolina"))
-    return { activeBg: "rgba(242,183,59,0.18)", activeFg: "oklch(0.48 0.1 82)" }
+    return { bg: "rgba(242,183,59,0.15)", fg: "oklch(0.5 0.1 82)", Icon: Zap as LucideIcon }
   if (c.includes("comida") || c.includes("restaurante") || c.includes("food") || c.includes("aliment"))
-    return { activeBg: "rgba(47,143,110,0.14)", activeFg: "var(--verde)" }
+    return { bg: "rgba(47,143,110,0.12)", fg: "var(--verde)", Icon: Utensils as LucideIcon }
   if (c.includes("salud") || c.includes("health") || c.includes("medic"))
-    return { activeBg: "rgba(99,102,241,0.12)", activeFg: "oklch(0.48 0.18 270)" }
-  return { activeBg: "var(--bone-2)", activeFg: "var(--midnight)" }
+    return { bg: "rgba(99,102,241,0.1)", fg: "oklch(0.5 0.18 270)", Icon: Heart as LucideIcon }
+  return { bg: "var(--ember-soft)", fg: "var(--ember)", Icon: Store as LucideIcon }
 }
 
 // Warm → cool sort order for chips
@@ -64,7 +54,6 @@ function categoryRank(category: string): number {
 export default function AdminBenefitsList({ benefits, businesses }: Props) {
   const [activeCategory, setActiveCategory] = useState("todos")
 
-  // Derive categories directly from data — same approach as driver portal
   const categories = useMemo(() => {
     const seen = new Set<string>()
     const cats: string[] = []
@@ -72,7 +61,6 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
       const c = b.partner_businesses?.category
       if (c && !seen.has(c)) { seen.add(c); cats.push(c) }
     }
-    // Sort warm → cool
     return cats.sort((a, b) => categoryRank(a) - categoryRank(b))
   }, [benefits])
 
@@ -84,17 +72,16 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
   return (
     <div className="space-y-4">
 
-      {/* ── Category chips (only when 2+ categories exist) ── */}
+      {/* ── Category chips — same styling as driver portal ── */}
       {categories.length > 1 && (
         <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none", paddingBottom: "2px" }}>
 
-          {/* Todos */}
           <button
             onClick={() => setActiveCategory("todos")}
             className="flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
             style={{
               fontSize: "12px",
-              height: "32px",
+              height: "36px",
               backgroundColor: activeCategory === "todos" ? "var(--midnight)" : "transparent",
               color: activeCategory === "todos" ? "var(--bone)" : "var(--midnight)",
               border: "1px solid",
@@ -107,12 +94,10 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
             <span style={{ opacity: 0.55, fontWeight: 500 }}>({benefits.length})</span>
           </button>
 
-          {/* One chip per category, warm → cool order */}
           {categories.map((cat) => {
             const isActive = activeCategory === cat
+            const { Icon } = getCategoryStyle(cat)
             const count = benefits.filter((b) => b.partner_businesses?.category === cat).length
-            const Icon = getIconForCategory(cat)
-            const { activeBg, activeFg } = getChipStyle(cat)
             return (
               <button
                 key={cat}
@@ -120,9 +105,10 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
                 className="flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
                 style={{
                   fontSize: "12px",
-                  height: "32px",
-                  backgroundColor: isActive ? activeBg : "transparent",
-                  color: isActive ? activeFg : "var(--midnight)",
+                  height: "36px",
+                  textTransform: "capitalize",
+                  backgroundColor: isActive ? "var(--midnight)" : "transparent",
+                  color: isActive ? "var(--bone)" : "var(--midnight)",
                   border: "1px solid",
                   borderColor: isActive ? "transparent" : "var(--line)",
                   transition: "background-color 180ms ease, color 180ms ease, border-color 180ms ease",
@@ -145,9 +131,7 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
           </p>
         ) : (
           filtered.map((b) => {
-            const catStyle = b.partner_businesses?.category
-              ? getChipStyle(b.partner_businesses.category)
-              : null
+            const { bg, fg } = getCategoryStyle(b.partner_businesses?.category)
             return (
               <div
                 key={b.id}
@@ -159,11 +143,8 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
                     <p className="font-medium text-sm" style={{ color: "var(--midnight)" }}>{b.title}</p>
                     {b.discount_value && (
                       <span
-                        className="font-mono-brand text-xs px-2 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor: catStyle?.activeBg ?? "var(--ember-soft)",
-                          color: catStyle?.activeFg ?? "var(--ember)",
-                        }}
+                        className="font-bold rounded-full px-2.5 py-0.5"
+                        style={{ fontSize: "11px", backgroundColor: bg, color: fg, letterSpacing: "-0.01em" }}
                       >
                         {b.discount_value}
                       </span>
