@@ -62,7 +62,7 @@ export default async function BenefitsPage() {
                 fontVariantNumeric: "tabular-nums",
               }}
             >
-              B/.{catalogPotential.toFixed(2)}
+              ${catalogPotential.toFixed(2)}
             </p>
             <p className="text-sm font-medium" style={{ color: "var(--mute)" }}>
               {benefits?.length ?? 0}{" "}
