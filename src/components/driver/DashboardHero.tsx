@@ -17,8 +17,6 @@ interface DashboardHeroProps {
   monthLabel: string
 }
 
-const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
-
 export default function DashboardHero({
   totalSaved,
   lifetimeSaved,
@@ -37,14 +35,9 @@ export default function DashboardHero({
 
   return (
     <div
-      className="rounded-3xl p-6 relative overflow-hidden"
-      style={{
-        backgroundColor: "var(--midnight)",
-        color: "var(--bone)",
-        boxShadow: "var(--shadow-float), inset 0 1px 0 rgba(245,241,234,0.07)",
-      }}
+      className="rounded-2xl p-6 relative overflow-hidden"
+      style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
     >
-      {/* Ember glow — top right */}
       <div
         className="absolute pointer-events-none"
         style={{
@@ -52,18 +45,10 @@ export default function DashboardHero({
           background: "radial-gradient(circle, rgba(232,80,42,0.35), transparent 60%)",
         }}
       />
-      {/* Midnight-2 lift — bottom left, barely there, gives the card dimension */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          left: "-25%", bottom: "-40%", width: "80%", height: "80%",
-          background: "radial-gradient(circle, rgba(38,52,94,0.55), transparent 65%)",
-        }}
-      />
 
       <div className="relative">
 
-        {/* Header: eyebrow + segmented control */}
+        {/* Header: eyebrow + toggle */}
         <div className="flex items-center justify-between mb-4">
           <p className="eyebrow" style={{ color: "rgba(245,241,234,0.5)", fontSize: "10px" }}>
             {view === "month" ? `${monthLabel} · AHORRO` : "AHORRO TOTAL"}
@@ -71,39 +56,35 @@ export default function DashboardHero({
 
           {hasLifetimeData && (
             <div
-              className="relative grid grid-cols-2 rounded-full p-0.5"
+              className="flex items-center rounded-full p-0.5 gap-0.5"
               style={{ backgroundColor: "rgba(245,241,234,0.07)" }}
             >
-              {/* Sliding thumb */}
-              <div
-                aria-hidden="true"
-                className="absolute rounded-full"
+              <button
+                onClick={() => setView("month")}
+                className="rounded-full px-3 py-1 font-semibold"
                 style={{
-                  top: "2px",
-                  bottom: "2px",
-                  left: "2px",
-                  width: "calc(50% - 2px)",
-                  backgroundColor: "rgba(245,241,234,0.14)",
-                  transform: view === "month" ? "translateX(0)" : "translateX(calc(100% - 2px))",
-                  transition: `transform 260ms ${EASE}`,
+                  fontSize: "11px",
+                  letterSpacing: "0.02em",
+                  backgroundColor: view === "month" ? "rgba(245,241,234,0.14)" : "transparent",
+                  color: view === "month" ? "var(--bone)" : "rgba(245,241,234,0.38)",
+                  transition: "background-color 180ms, color 180ms",
                 }}
-              />
-              {(["month", "lifetime"] as const).map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setView(v)}
-                  className="relative rounded-full px-3 py-1 font-semibold"
-                  style={{
-                    fontSize: "11px",
-                    letterSpacing: "0.02em",
-                    color: view === v ? "var(--bone)" : "rgba(245,241,234,0.38)",
-                    transition: `color 260ms ${EASE}`,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {v === "month" ? "Este mes" : "Total"}
-                </button>
-              ))}
+              >
+                Este mes
+              </button>
+              <button
+                onClick={() => setView("lifetime")}
+                className="rounded-full px-3 py-1 font-semibold"
+                style={{
+                  fontSize: "11px",
+                  letterSpacing: "0.02em",
+                  backgroundColor: view === "lifetime" ? "rgba(245,241,234,0.14)" : "transparent",
+                  color: view === "lifetime" ? "var(--bone)" : "rgba(245,241,234,0.38)",
+                  transition: "background-color 180ms, color 180ms",
+                }}
+              >
+                Total
+              </button>
             </div>
           )}
         </div>
@@ -169,11 +150,7 @@ export default function DashboardHero({
           <Link href="/driver/benefits">
             <button
               className="pressable flex items-center gap-1.5 px-4 py-3 rounded-full font-semibold text-sm min-h-[44px]"
-              style={{
-                backgroundColor: "var(--ember)",
-                color: "#fff",
-                boxShadow: "var(--shadow-ember)",
-              }}
+              style={{ backgroundColor: "var(--ember)", color: "#fff" }}
             >
               Usar beneficios
               <ChevronRight className="w-3.5 h-3.5" />

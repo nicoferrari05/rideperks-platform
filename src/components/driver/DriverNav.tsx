@@ -32,9 +32,10 @@ export default function DriverNav({ profile }: { profile: Profile }) {
     <>
       {/* Top header */}
       <header
-        className="glass-midnight sticky top-0 z-40 border-b"
+        className="sticky top-0 z-40 border-b"
         style={{
-          borderColor: "rgba(245,241,234,0.08)",
+          backgroundColor: "var(--midnight)",
+          borderColor: "rgba(245,241,234,0.1)",
           viewTransitionName: "driver-header",
         }}
       >
@@ -61,11 +62,11 @@ export default function DriverNav({ profile }: { profile: Profile }) {
 
       {/* Bottom navigation */}
       <nav
-        className="glass-midnight fixed bottom-0 left-0 right-0 z-40"
+        className="fixed bottom-0 left-0 right-0 z-40 border-t"
         style={{
+          backgroundColor: "var(--midnight)",
+          borderColor: "rgba(245,241,234,0.1)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          /* Hairline top edge + inner highlight for depth instead of a flat border */
-          boxShadow: "0 -1px 0 rgba(245,241,234,0.08), inset 0 1px 0 rgba(245,241,234,0.04)",
           viewTransitionName: "driver-nav",
         }}
       >
@@ -99,23 +100,15 @@ export default function DriverNav({ profile }: { profile: Profile }) {
                   href={href}
                   prefetch={true}
                   className="pressable flex flex-col items-center gap-1"
-                  aria-current={active ? "page" : undefined}
                   style={{
                     flex: "1",
                     color: active ? "var(--ember)" : "rgba(245,241,234,0.38)",
-                    fontSize: "11px",
-                    fontWeight: active ? 600 : 500,
-                    letterSpacing: "0.04em",
+                    fontSize: "12px",
+                    letterSpacing: "0.05em",
                     transition: "color 280ms cubic-bezier(0.23, 1, 0.32, 1)",
                   }}
                 >
-                  <Icon
-                    className="w-5 h-5"
-                    style={{
-                      transform: active ? "translateY(-1px) scale(1.06)" : "none",
-                      transition: "transform 320ms cubic-bezier(0.23, 1, 0.32, 1)",
-                    }}
-                  />
+                  <Icon className="w-5 h-5" />
                   {label}
                 </Link>
               )

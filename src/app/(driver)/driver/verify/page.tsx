@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Upload, CheckCircle, Check, Loader2, ImageIcon } from "lucide-react"
+import { Upload, CheckCircle, Loader2, ImageIcon } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 
@@ -128,39 +128,25 @@ export default function VerifyPage() {
             <p className="eyebrow-muted">PLATAFORMA</p>
           </div>
           <div className="p-4 space-y-2">
-            {platforms.map((p) => {
-              const selected = platform === p.value
-              return (
-                <button
-                  key={p.value}
-                  type="button"
-                  onClick={() => setPlatform(p.value)}
-                  aria-pressed={selected}
-                  className="pressable w-full flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium min-h-[48px]"
-                  style={{
-                    backgroundColor: selected ? "var(--midnight)" : "var(--bone-2)",
-                    color: selected ? "var(--bone)" : "var(--midnight)",
-                    border: selected ? "1px solid transparent" : "1px solid var(--line)",
-                    boxShadow: selected ? "var(--shadow-card), inset 0 1px 0 rgba(245,241,234,0.08)" : "none",
-                    transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 200ms cubic-bezier(0.23, 1, 0.32, 1), color 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 200ms cubic-bezier(0.23, 1, 0.32, 1)",
-                  }}
-                >
-                  {p.label}
-                  <span
-                    className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0"
-                    style={{
-                      backgroundColor: "var(--ember)",
-                      transform: selected ? "scale(1)" : "scale(0.5)",
-                      opacity: selected ? 1 : 0,
-                      transition: "transform 260ms cubic-bezier(0.23, 1, 0.32, 1), opacity 180ms cubic-bezier(0.23, 1, 0.32, 1)",
-                    }}
-                    aria-hidden="true"
-                  >
-                    <Check className="w-3 h-3" strokeWidth={3} style={{ color: "#fff" }} />
-                  </span>
-                </button>
-              )
-            })}
+            {platforms.map((p) => (
+              <button
+                key={p.value}
+                type="button"
+                onClick={() => setPlatform(p.value)}
+                className="pressable w-full flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium"
+                style={{
+                  backgroundColor: platform === p.value ? "var(--midnight)" : "var(--bone-2)",
+                  color: platform === p.value ? "var(--bone)" : "var(--midnight)",
+                  border: platform === p.value ? "1px solid transparent" : "1px solid var(--line)",
+                  transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 150ms ease, color 150ms ease",
+                }}
+              >
+                {p.label}
+                {platform === p.value && (
+                  <span style={{ color: "var(--ember)" }}>✓</span>
+                )}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -229,8 +215,7 @@ export default function VerifyPage() {
             backgroundColor: canSubmit ? "var(--midnight)" : "var(--bone-2)",
             color: canSubmit ? "var(--bone)" : "var(--mute)",
             cursor: canSubmit ? "pointer" : "not-allowed",
-            boxShadow: canSubmit ? "var(--shadow-float)" : "none",
-            transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 200ms cubic-bezier(0.23, 1, 0.32, 1), color 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 300ms cubic-bezier(0.23, 1, 0.32, 1)",
+            transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 200ms ease, color 200ms ease",
           }}
         >
           {loading ? (
