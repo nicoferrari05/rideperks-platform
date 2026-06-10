@@ -67,7 +67,7 @@ export default function DashboardHero({
                   letterSpacing: "0.02em",
                   backgroundColor: view === "month" ? "rgba(245,241,234,0.14)" : "transparent",
                   color: view === "month" ? "var(--bone)" : "rgba(245,241,234,0.38)",
-                  transition: "background-color 180ms, color 180ms",
+                  transition: "background-color 180ms cubic-bezier(0.23, 1, 0.32, 1), color 180ms cubic-bezier(0.23, 1, 0.32, 1)",
                 }}
               >
                 Este mes
@@ -80,7 +80,7 @@ export default function DashboardHero({
                   letterSpacing: "0.02em",
                   backgroundColor: view === "lifetime" ? "rgba(245,241,234,0.14)" : "transparent",
                   color: view === "lifetime" ? "var(--bone)" : "rgba(245,241,234,0.38)",
-                  transition: "background-color 180ms, color 180ms",
+                  transition: "background-color 180ms cubic-bezier(0.23, 1, 0.32, 1), color 180ms cubic-bezier(0.23, 1, 0.32, 1)",
                 }}
               >
                 Total
@@ -127,7 +127,7 @@ export default function DashboardHero({
         {/* Bottom row: expiry + CTA */}
         <div className="flex items-end justify-between mt-6">
           <div>
-            <p className="font-mono-brand" style={{ fontSize: "10px", opacity: 0.4, letterSpacing: "0.1em" }}>
+            <p className="font-mono-brand" style={{ fontSize: "10px", opacity: 0.5, letterSpacing: "0.1em" }}>
               MEMBRESÍA ACTIVA HASTA
             </p>
             <p className="font-mono-brand font-medium mt-0.5" style={{ fontSize: "13px" }}>

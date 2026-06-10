@@ -159,12 +159,11 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p
-                    className="font-black leading-none"
+                    className="font-black font-mono-brand leading-none"
                     style={{
                       fontSize: "26px",
                       color: category.fg,
                       letterSpacing: "-0.03em",
-                      fontFamily: "'JetBrains Mono', 'Geist Mono', monospace",
                       fontVariantNumeric: "tabular-nums",
                     }}
                   >
@@ -173,7 +172,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                   {label && (
                     <p
                       className="font-semibold uppercase mt-0.5"
-                      style={{ fontSize: "9px", color: category.fg, opacity: 0.65, letterSpacing: "0.14em" }}
+                      style={{ fontSize: "10px", color: category.fg, opacity: 0.65, letterSpacing: "0.14em" }}
                     >
                       {label}
                     </p>
@@ -237,11 +236,10 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium" style={{ color: "var(--mute)" }}>Precio regular</span>
                       <span
-                        className="text-sm font-medium"
+                        className="text-sm font-medium font-mono-brand"
                         style={{
                           color: "var(--mute)",
                           textDecoration: "line-through",
-                          fontFamily: "'JetBrains Mono', 'Geist Mono', monospace",
                           fontVariantNumeric: "tabular-nums",
                         }}
                       >
@@ -254,11 +252,10 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-semibold" style={{ color: "var(--midnight)" }}>Precio RidePerks</span>
                       <span
-                        className="font-bold"
+                        className="font-bold font-mono-brand"
                         style={{
                           fontSize: "16px",
                           color: "var(--midnight)",
-                          fontFamily: "'JetBrains Mono', 'Geist Mono', monospace",
                           fontVariantNumeric: "tabular-nums",
                           letterSpacing: "-0.02em",
                         }}
@@ -274,10 +271,9 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                       >
                         <span className="text-xs font-semibold" style={{ color: "var(--verde)" }}>Ahorras</span>
                         <span
-                          className="text-sm font-bold"
+                          className="text-sm font-bold font-mono-brand"
                           style={{
                             color: "var(--verde)",
-                            fontFamily: "'JetBrains Mono', 'Geist Mono', monospace",
                             fontVariantNumeric: "tabular-nums",
                           }}
                         >
@@ -296,7 +292,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
             <div>
               <button
                 onClick={() => setTermsOpen(!termsOpen)}
-                className="flex items-center gap-1"
+                className="pressable flex items-center gap-1.5"
                 style={{
                   fontSize: "12px",
                   color: "var(--mute)",
@@ -306,23 +302,32 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                   cursor: "pointer",
                 }}
               >
+                Ver condiciones
                 <ChevronDown
                   className="w-3.5 h-3.5"
                   style={{
-                    transition: "transform 200ms cubic-bezier(0.23, 1, 0.32, 1)",
+                    transition: "transform 220ms cubic-bezier(0.23, 1, 0.32, 1)",
                     transform: termsOpen ? "rotate(180deg)" : "rotate(0deg)",
                   }}
                 />
-                Ver condiciones
               </button>
-              {termsOpen && (
-                <p
-                  className="mt-2 leading-relaxed"
-                  style={{ fontSize: "12px", color: "var(--mute)", paddingLeft: "18px" }}
-                >
-                  {benefit.terms}
-                </p>
-              )}
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateRows: termsOpen ? "1fr" : "0fr",
+                  transition: "grid-template-rows 220ms cubic-bezier(0.23, 1, 0.32, 1)",
+                }}
+              >
+                <div style={{ overflow: "hidden" }}>
+                  <p
+                    className="mt-2 leading-relaxed"
+                    style={{ fontSize: "12px", color: "var(--mute)" }}
+                  >
+                    {benefit.terms}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -426,12 +431,11 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                     style={{ backgroundColor: category.bg }}
                   >
                     <p
-                      className="font-black leading-none"
+                      className="font-black font-mono-brand leading-none"
                       style={{
                         fontSize: "40px",
                         color: category.fg,
                         letterSpacing: "-0.03em",
-                        fontFamily: "'JetBrains Mono', 'Geist Mono', monospace",
                       }}
                     >
                       {benefit.discount_value}

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Upload, CheckCircle, Loader2, ImageIcon } from "lucide-react"
+import { Upload, CheckCircle, Check, Loader2, ImageIcon } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 
@@ -143,7 +143,7 @@ export default function VerifyPage() {
               >
                 {p.label}
                 {platform === p.value && (
-                  <span style={{ color: "var(--ember)" }}>✓</span>
+                  <Check className="w-4 h-4" style={{ color: "var(--ember)" }} />
                 )}
               </button>
             ))}
