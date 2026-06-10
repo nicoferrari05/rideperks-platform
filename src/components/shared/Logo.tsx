@@ -19,10 +19,9 @@ export default function Logo({ size = "md", className }: LogoProps) {
         sizes[size],
         className
       )}
-      style={{ backgroundColor: "var(--midnight)" }}
+      style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
     >
-      <span style={{ color: "var(--bone)" }}>RIDE</span>
-      <span style={{ color: "var(--ember)" }}>PERKS</span>
+      RIDEPERKS
     </div>
   )
 }

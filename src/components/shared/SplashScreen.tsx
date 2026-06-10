@@ -164,7 +164,7 @@ export default function SplashScreen({ onComplete }: Props) {
           </div>
         ))}
 
-        {/* RP mark */}
+        {/* RP mark — styled as app icon */}
         <div
           ref={markRef}
           style={{
@@ -173,34 +173,30 @@ export default function SplashScreen({ onComplete }: Props) {
             top: 0,
             zIndex: 10,
             opacity: 0,
-            textAlign: "center",
+            width: "120px",
+            height: "120px",
+            backgroundColor: "var(--midnight-2)",
+            borderRadius: "26px",
+            border: "1px solid rgba(245,241,234,0.1)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 24px 56px rgba(0,0,0,0.5)",
           }}
         >
-          <div
+          <span
             style={{
-              fontSize: "84px",
+              fontSize: "56px",
               fontWeight: 800,
-              letterSpacing: "-0.06em",
+              letterSpacing: "-0.05em",
               lineHeight: 1,
               fontFamily: "var(--font-geist)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span style={{ color: "var(--bone)" }}>R</span>
-            <span style={{ color: "var(--ember)" }}>P</span>
-          </div>
-          <p
-            style={{
               color: "var(--bone)",
-              opacity: 0.3,
-              fontSize: "10px",
-              letterSpacing: "0.22em",
-              fontFamily: "var(--font-mono)",
-              marginTop: "10px",
+              userSelect: "none",
             }}
           >
-            RIDEPERKS
-          </p>
+            RP
+          </span>
         </div>
       </div>
     </div>
