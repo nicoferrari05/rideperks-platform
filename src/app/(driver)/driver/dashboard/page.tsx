@@ -83,14 +83,14 @@ export default async function DriverDashboard() {
     <DashboardAnimation>
       <div className="space-y-5">
 
-        {/* Greeting */}
+        {/* Greeting — the one serif moment in the portal; warmth before data */}
         <div className="pt-2" data-animate="greeting">
-          <p className="eyebrow-muted mb-1">
+          <p className="eyebrow-muted mb-1.5">
             {new Date().toLocaleDateString("es-PA", { weekday: "long", day: "numeric", month: "long" })}
           </p>
           <h1
-            className="font-bold"
-            style={{ fontSize: "28px", letterSpacing: "-0.025em", color: "var(--midnight)" }}
+            className="font-serif-brand font-semibold"
+            style={{ fontSize: "30px", letterSpacing: "-0.015em", color: "var(--midnight)", lineHeight: 1.1 }}
           >
             Hola, {profile?.full_name?.split(" ")[0]}.
           </h1>
@@ -198,14 +198,14 @@ export default async function DriverDashboard() {
             </div>
 
             <div
-              className="rounded-2xl overflow-hidden"
+              className="rounded-2xl overflow-hidden shadow-card"
               style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
             >
               {benefits.slice(0, 3).map((benefit, i) => (
                 <Link
                   key={benefit.id}
                   href="/driver/benefits"
-                  className="flex items-center gap-3 px-4 py-3.5 pressable"
+                  className="flex items-center gap-3 px-4 py-3.5 pressable row-interactive"
                   style={{
                     borderTop: i > 0 ? "1px solid var(--line)" : "none",
                     textDecoration: "none",
@@ -249,7 +249,7 @@ export default async function DriverDashboard() {
           <div data-animate="row">
             <p className="eyebrow-muted mb-3">ÚLTIMOS USOS</p>
             <div
-              className="rounded-2xl p-5 text-center"
+              className="rounded-2xl p-5 text-center shadow-card"
               style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
             >
               <p className="text-sm font-medium mb-1" style={{ color: "var(--midnight)" }}>

@@ -96,7 +96,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
         style={{
           backgroundColor: "var(--paper)",
           border: "1px solid var(--line)",
-          boxShadow: "0 1px 3px rgba(15,27,61,0.04), 0 4px 16px rgba(15,27,61,0.05)",
+          boxShadow: "var(--shadow-card)",
         }}
       >
         <div className="p-5 space-y-4">

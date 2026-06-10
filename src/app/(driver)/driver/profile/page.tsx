@@ -86,13 +86,17 @@ export default async function ProfilePage() {
         {/* Identity card */}
         <div
           data-stagger
-          className="rounded-2xl p-5"
+          className="rounded-2xl p-5 shadow-card"
           style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
         >
           <div className="flex items-center gap-4">
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl flex-shrink-0"
-              style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
+              style={{
+                background: "linear-gradient(145deg, var(--midnight-2), var(--midnight))",
+                color: "var(--bone)",
+                boxShadow: "inset 0 1px 0 rgba(245,241,234,0.12), 0 2px 8px rgba(15,27,61,0.18)",
+              }}
             >
               {profile?.full_name?.[0]?.toUpperCase() ?? "?"}
             </div>
@@ -117,7 +121,7 @@ export default async function ProfilePage() {
         {/* Info rows */}
         <div
           data-stagger
-          className="rounded-2xl overflow-hidden"
+          className="rounded-2xl overflow-hidden shadow-card"
           style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
         >
           <div className="px-5 pt-4 pb-2">
@@ -150,7 +154,7 @@ export default async function ProfilePage() {
         {/* Membership */}
         <div
           data-stagger
-          className="rounded-2xl overflow-hidden"
+          className="rounded-2xl overflow-hidden shadow-card"
           style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
         >
           <div className="px-5 pt-4 pb-2">
@@ -162,16 +166,19 @@ export default async function ProfilePage() {
                 { label: "Estado",            value: "Activa",              color: "var(--verde)" },
                 { label: "Vence",             value: new Date(subscription.expires_at).toLocaleDateString("es-PA", { day: "2-digit", month: "long", year: "numeric" }) },
                 ...(memberSince ? [{ label: "Miembro desde", value: memberSince }] : []),
-                { label: "Beneficios usados", value: String(redemptions?.length ?? 0) },
-                ...(lifetimeSaved > 0 ? [{ label: "Ahorro total", value: `$${lifetimeSaved.toFixed(2)}`, color: "var(--verde)" }] : []),
-              ] as { label: string; value: string; color?: string }[]).map(({ label, value, color }) => (
+                { label: "Beneficios usados", value: String(redemptions?.length ?? 0), mono: true },
+                ...(lifetimeSaved > 0 ? [{ label: "Ahorro total", value: `$${lifetimeSaved.toFixed(2)}`, color: "var(--verde)", mono: true }] : []),
+              ] as { label: string; value: string; color?: string; mono?: boolean }[]).map(({ label, value, color, mono }) => (
                 <div
                   key={label}
                   className="flex items-center justify-between px-5 py-3.5"
                   style={{ borderTop: "1px solid var(--line)" }}
                 >
                   <span className="text-sm" style={{ color: "var(--mute)" }}>{label}</span>
-                  <span className="text-sm font-semibold" style={{ color: color ?? "var(--midnight)" }}>
+                  <span
+                    className={`text-sm font-semibold${mono ? " font-mono-brand" : ""}`}
+                    style={{ color: color ?? "var(--midnight)" }}
+                  >
                     {value}
                   </span>
                 </div>

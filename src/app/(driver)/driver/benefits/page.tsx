@@ -53,16 +53,17 @@ export default async function BenefitsPage() {
           <>
             <p className="text-sm" style={{ color: "var(--mute)" }}>Esta semana podrías ahorrar</p>
             <p
-              className="font-black leading-none my-1"
+              className="font-mono-brand font-black leading-none my-1"
               style={{
                 fontSize: "48px",
                 color: "var(--midnight)",
                 letterSpacing: "-0.04em",
-                fontFamily: "'JetBrains Mono', 'Geist Mono', monospace",
-                fontVariantNumeric: "tabular-nums",
               }}
             >
-              ${catalogPotential.toFixed(2)}
+              <span style={{ fontSize: "0.55em", fontWeight: 700, opacity: 0.45, marginRight: "2px", verticalAlign: "0.32em" }}>
+                $
+              </span>
+              {catalogPotential.toFixed(2)}
             </p>
             <p className="text-sm font-medium" style={{ color: "var(--mute)" }}>
               {benefits?.length ?? 0}{" "}
