@@ -47,17 +47,23 @@ export default async function BenefitsPage() {
   return (
     <div className="space-y-5">
       <div className="pt-2 pb-1">
-        <div className="flex items-center justify-between mb-3">
-          <p className="eyebrow-muted">BENEFICIOS</p>
-          <Link
-            href="/driver/directory"
-            className="pressable inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold"
-            style={{ fontSize: "12px", backgroundColor: "var(--ember-soft)", color: "var(--ember)", textDecoration: "none" }}
-          >
-            <Map className="w-3.5 h-3.5" />
-            Ver mapa
-          </Link>
-        </div>
+        <p className="eyebrow-muted mb-4">BENEFICIOS</p>
+        <Link
+          href="/driver/directory"
+          className="pressable flex items-center justify-center gap-2 w-full rounded-2xl font-semibold"
+          style={{
+            padding: "14px",
+            backgroundColor: "var(--midnight)",
+            color: "var(--bone)",
+            textDecoration: "none",
+            fontSize: "15px",
+            letterSpacing: "0.01em",
+            marginBottom: "4px",
+          }}
+        >
+          <Map className="w-4 h-4" />
+          Ver mapa de comercios
+        </Link>
 
         {catalogPotential > 0 ? (
           <>
