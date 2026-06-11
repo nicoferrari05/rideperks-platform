@@ -67,7 +67,7 @@ export default async function BenefitsPage() {
 
         {catalogPotential > 0 ? (
           <>
-            <p className="text-sm mb-1" style={{ color: "var(--mute)" }}>Esta semana podrías ahorrar</p>
+            <p className="text-sm mb-1" style={{ color: "var(--mute)" }}>Ahorra hasta</p>
             <p
               className="font-black leading-none mt-2 mb-3"
               style={{
