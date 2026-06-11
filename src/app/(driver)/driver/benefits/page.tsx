@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { Lock, Map } from "lucide-react"
 import Link from "next/link"
 import BenefitsListAnimated from "@/components/driver/BenefitsListAnimated"
+import SavingsProgressBar from "@/components/driver/SavingsProgressBar"
 
 // Beneficios activos: iguales para todos los conductores, cambian solo cuando
 // el admin agrega o edita uno. Se cachean 5 minutos para evitar una query
@@ -28,14 +29,26 @@ export default async function BenefitsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  const [{ data: profile }, { data: subscription }, benefits] = await Promise.all([
+  const startOfMonth = new Date()
+  startOfMonth.setDate(1)
+  startOfMonth.setHours(0, 0, 0, 0)
+
+  const [{ data: profile }, { data: subscription }, benefits, { data: monthlyRaw }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("subscriptions").select("*")
       .eq("driver_id", user.id).eq("status", "active")
       .gte("expires_at", new Date().toISOString())
       .limit(1).single(),
     getActiveBenefits(),
+    supabase.from("benefit_redemptions")
+      .select("benefits(savings_value)")
+      .eq("driver_id", user.id)
+      .gte("redeemed_at", startOfMonth.toISOString()),
   ])
+
+  const monthlySaved = (monthlyRaw ?? []).reduce((sum, r) => {
+    return sum + ((r.benefits as { savings_value?: number } | null)?.savings_value ?? 0)
+  }, 0)
 
   const isVerified = profile?.status === "verified"
   const canUse = isVerified && !!subscription
@@ -73,6 +86,15 @@ export default async function BenefitsPage() {
             {benefits?.length ?? 0}{" "}
             {(benefits?.length ?? 0) === 1 ? "disponible" : "disponibles"}
           </p>
+        )}
+        {catalogPotential > 0 && (
+          <div className="mt-3">
+            <SavingsProgressBar
+              current={monthlySaved}
+              max={catalogPotential}
+              variant="mini"
+            />
+          </div>
         )}
       </div>
 

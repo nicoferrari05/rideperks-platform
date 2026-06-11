@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 import SavingsCounter from "./SavingsCounter"
+import SavingsProgressBar from "./SavingsProgressBar"
 
 interface DashboardHeroProps {
   totalSaved: number
@@ -123,6 +124,18 @@ export default function DashboardHero({
             </p>
           )}
         </div>
+
+        {/* Progress bar — monthly view only */}
+        {view === "month" && potentialMonthly > 0 && (
+          <div style={{ marginTop: "20px" }}>
+            <SavingsProgressBar
+              current={totalSaved}
+              max={potentialMonthly}
+              variant="full"
+              monthLabel={monthLabel}
+            />
+          </div>
+        )}
 
         {/* Bottom row: expiry + CTA */}
         <div className="flex items-end justify-between mt-6">
