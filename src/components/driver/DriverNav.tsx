@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, Gift, User, LogOut } from "lucide-react"
+import { LayoutDashboard, Gift, History, User, LogOut } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import Logo from "@/components/shared/Logo"
@@ -11,6 +11,7 @@ import type { Profile } from "@/types/database"
 const navItems = [
   { href: "/driver/dashboard", label: "Inicio", icon: LayoutDashboard },
   { href: "/driver/benefits", label: "Beneficios", icon: Gift },
+  { href: "/driver/history", label: "Historial", icon: History },
   { href: "/driver/profile", label: "Perfil", icon: User },
 ]
 
@@ -80,11 +81,11 @@ export default function DriverNav({ profile }: { profile: Profile }) {
                 position: "absolute",
                 top: "50%",
                 height: "44px",
-                width: "calc((100% - 40px) / 3 - 8px)",
+                width: "calc((100% - 40px) / 4 - 8px)",
                 backgroundColor: "rgba(245,241,234,0.07)",
                 borderRadius: "14px",
                 transform: "translateY(-50%)",
-                left: `calc(20px + ${activeIdx} * (100% - 40px) / 3 + 4px)`,
+                left: `calc(20px + ${activeIdx} * (100% - 40px) / 4 + 4px)`,
                 transition: "left 320ms cubic-bezier(0.23, 1, 0.32, 1)",
               }}
             />
