@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { ChevronRight, AlertTriangle, Clock } from "lucide-react"
+import { ChevronRight, Clock, Check, X } from "lucide-react"
 import DashboardAnimation from "@/components/driver/DashboardAnimation"
 import DashboardHero from "@/components/driver/DashboardHero"
 
@@ -28,6 +28,7 @@ export default async function DriverDashboard() {
     { data: monthlyRedemptions },
     { data: allRedemptions },
     { data: activeBenefits },
+    { data: latestVerification },
   ] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("subscriptions").select("*")
@@ -46,6 +47,12 @@ export default async function DriverDashboard() {
       .select("id, title, discount_value, savings_value, partner_businesses(name)")
       .eq("is_active", true)
       .order("created_at", { ascending: false }),
+    supabase.from("driver_verifications")
+      .select("id")
+      .eq("driver_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ])
 
   const benefits = (activeBenefits ?? []) as unknown as BenefitPreview[]
@@ -96,39 +103,124 @@ export default async function DriverDashboard() {
           </h1>
         </div>
 
-        {/* Verification banner */}
-        {!isVerified && (
-          <div
-            data-animate="hero"
-            className="rounded-2xl p-4 flex items-center gap-3"
-            style={{ backgroundColor: "var(--ember-soft)", border: "1px solid rgba(232,80,42,0.2)" }}
-          >
-            {profile?.status === "rejected"
-              ? <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ember)" }} />
-              : <Clock className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ember)" }} />
-            }
-            <div className="flex-1">
-              <p className="font-semibold text-sm" style={{ color: "var(--midnight)" }}>
-                {profile?.status === "rejected" ? "Verificación rechazada" : "Verificación en proceso"}
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: "var(--ember-2)" }}>
-                {profile?.status === "rejected"
-                  ? "Vuelve a enviar tu foto de perfil."
-                  : "Revisamos tu solicitud en 24 horas."}
-              </p>
+        {/* Verification step tracker */}
+        {!isVerified && (() => {
+          const hasSubmitted = !!latestVerification
+          const isRejected = profile?.status === "rejected"
+          const steps = [
+            {
+              label: "Registro completado",
+              sub: null,
+              done: true,
+              error: false,
+              active: false,
+            },
+            {
+              label: hasSubmitted ? "Foto de verificación enviada" : "Envía tu foto de verificación",
+              sub: !hasSubmitted ? "Necesitamos confirmar que eres conductor activo" : null,
+              done: hasSubmitted,
+              error: false,
+              active: !hasSubmitted,
+            },
+            {
+              label: isRejected ? "Verificación rechazada" : "Revisión del equipo",
+              sub: isRejected
+                ? "Tu foto no pasó la revisión. Envía una nueva."
+                : hasSubmitted ? "Revisamos en menos de 24 horas" : null,
+              done: false,
+              error: isRejected,
+              active: hasSubmitted && !isRejected,
+            },
+            {
+              label: "¡Membresía activa!",
+              sub: null,
+              done: false,
+              error: false,
+              active: false,
+            },
+          ]
+          return (
+            <div
+              data-animate="hero"
+              className="rounded-2xl p-5"
+              style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
+            >
+              <p className="eyebrow-muted mb-5">ESTADO DE TU CUENTA</p>
+              <div>
+                {steps.map((step, i) => (
+                  <div key={i} className="flex gap-3">
+                    {/* Icon + connector */}
+                    <div className="flex flex-col items-center">
+                      <div
+                        className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{
+                          backgroundColor: step.done
+                            ? "var(--verde)"
+                            : step.error
+                            ? "var(--ember)"
+                            : step.active
+                            ? "var(--ember-soft)"
+                            : "var(--bone-2)",
+                          border: step.active ? "1.5px solid var(--ember)" : "none",
+                        }}
+                      >
+                        {step.done ? (
+                          <Check className="w-3 h-3" style={{ color: "#fff" }} />
+                        ) : step.error ? (
+                          <X className="w-3 h-3" style={{ color: "#fff" }} />
+                        ) : step.active ? (
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--ember)" }} />
+                        ) : (
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--line)" }} />
+                        )}
+                      </div>
+                      {i < steps.length - 1 && (
+                        <div
+                          className="w-px my-1"
+                          style={{
+                            height: "20px",
+                            backgroundColor: step.done ? "rgba(47,143,110,0.35)" : "var(--line)",
+                          }}
+                        />
+                      )}
+                    </div>
+                    {/* Label + sub */}
+                    <div className="pb-4 pt-0.5">
+                      <p
+                        className="text-sm font-medium leading-none"
+                        style={{
+                          color: step.done || step.error || step.active
+                            ? "var(--midnight)"
+                            : "var(--mute)",
+                        }}
+                      >
+                        {step.label}
+                      </p>
+                      {step.sub && (
+                        <p
+                          className="mt-1 text-xs leading-relaxed"
+                          style={{ color: step.error ? "var(--ember-2)" : "var(--mute)" }}
+                        >
+                          {step.sub}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {(isRejected || !hasSubmitted) && (
+                <Link href="/driver/verify">
+                  <button
+                    className="pressable w-full mt-1 rounded-xl py-3 font-semibold text-sm"
+                    style={{ backgroundColor: "var(--ember)", color: "#fff" }}
+                  >
+                    {isRejected ? "Enviar nueva foto" : "Verificar mi cuenta"}
+                  </button>
+                </Link>
+              )}
             </div>
-            {profile?.status === "rejected" && (
-              <Link href="/driver/verify">
-                <button
-                  className="text-xs font-semibold px-3 py-1.5 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: "var(--ember)", color: "#fff" }}
-                >
-                  Reintentar
-                </button>
-              </Link>
-            )}
-          </div>
-        )}
+          )
+        })()}
 
         {/* Expiry warning — urgent (≤7 days) */}
         {hasSubscription && daysUntilExpiry !== null && daysUntilExpiry <= 7 && (
@@ -249,15 +341,24 @@ export default async function DriverDashboard() {
           <div data-animate="row">
             <p className="eyebrow-muted mb-3">ÚLTIMOS USOS</p>
             <div
-              className="rounded-2xl p-5 text-center"
+              className="rounded-2xl p-5 text-center space-y-3"
               style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
             >
-              <p className="text-sm font-medium mb-1" style={{ color: "var(--midnight)" }}>
+              <p className="text-sm font-medium" style={{ color: "var(--midnight)" }}>
                 Aún no usaste ningún beneficio este mes
               </p>
               <p className="text-sm" style={{ color: "var(--mute)" }}>
                 Cada uso suma a tu ahorro mensual.
               </p>
+              <Link href="/driver/benefits">
+                <button
+                  className="pressable inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full font-semibold text-sm mt-1"
+                  style={{ backgroundColor: "var(--ember)", color: "#fff" }}
+                >
+                  Ver beneficios
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </Link>
             </div>
           </div>
         )}
@@ -265,7 +366,17 @@ export default async function DriverDashboard() {
         {/* Recent redemptions */}
         {(monthlyRedemptions?.length ?? 0) > 0 && (
           <div>
-            <p className="eyebrow-muted mb-3">ÚLTIMOS USOS</p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="eyebrow-muted">ÚLTIMOS USOS</p>
+              <Link
+                href="/driver/history"
+                className="flex items-center gap-0.5 font-semibold"
+                style={{ fontSize: "12px", color: "var(--ember)" }}
+              >
+                Ver historial
+                <ChevronRight className="w-3 h-3" />
+              </Link>
+            </div>
             <div className="space-y-0">
               {monthlyRedemptions?.slice(0, 4).map((r, i) => {
                 const benefit = r.benefits as { savings_value?: number; title?: string } | null
