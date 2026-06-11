@@ -8,13 +8,12 @@ interface Props {
 }
 
 const CARDS = [
-  { label: "COMBUSTIBLE", figure: "20%",  bg: "var(--sol)",       color: "var(--midnight)" },
-  { label: "COMIDA",       figure: "$5", bg: "var(--verde)",     color: "#fff" },
-  { label: "TALLER",       figure: "15%",  bg: "var(--ember)",     color: "#fff" },
+  { label: "COMBUSTIBLE", figure: "20%",  bg: "var(--sol)",        color: "var(--midnight)" },
+  { label: "COMIDA",       figure: "$5",   bg: "var(--verde)",      color: "#fff" },
+  { label: "TALLER",       figure: "15%",  bg: "var(--ember)",      color: "#fff" },
   { label: "SALUD",        figure: "10%",  bg: "var(--midnight-2)", color: "var(--bone)" },
 ]
 
-// Starting positions — each from a different corner, fully off-screen
 const FROM = [
   { x: -420, y: -460, rotation: -42, scale: 0.75, autoAlpha: 0 },
   { x:  420, y: -420, rotation:  38, scale: 0.75, autoAlpha: 0 },
@@ -22,7 +21,6 @@ const FROM = [
   { x:  400, y:  440, rotation: -28, scale: 0.75, autoAlpha: 0 },
 ]
 
-// Resting positions — stacked near center, slight rotation = physical deck
 const REST = [
   { x: -14, y:  8, rotation: -10 },
   { x:  10, y: -5, rotation:   7 },
@@ -30,9 +28,13 @@ const REST = [
   { x:   8, y: -4, rotation:   5 },
 ]
 
+const RAY_COUNT = 8
+
 export default function SplashScreen({ onComplete }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const markRef      = useRef<HTMLDivElement>(null)
+  const orbRef       = useRef<HTMLDivElement>(null)
+  const innerRef     = useRef<HTMLDivElement>(null)
   const card0Ref     = useRef<HTMLDivElement>(null)
   const card1Ref     = useRef<HTMLDivElement>(null)
   const card2Ref     = useRef<HTMLDivElement>(null)
@@ -40,12 +42,23 @@ export default function SplashScreen({ onComplete }: Props) {
 
   useEffect(() => {
     const cardEls = [card0Ref.current, card1Ref.current, card2Ref.current, card3Ref.current]
-    const allEls  = [...cardEls, markRef.current]
+    const allEls  = [...cardEls, markRef.current, orbRef.current, innerRef.current]
     const mm      = gsap.matchMedia()
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       // Center every element on the origin point via percentage offset
       gsap.set(allEls, { xPercent: -50, yPercent: -50 })
+
+      // Rays: top-center on the origin (xPercent -50, yPercent 0), extending downward.
+      // transformOrigin "50% 0%" makes scaleY collapse/expand from the top (the origin point),
+      // and rotation sweeps each ray outward from that anchor.
+      const rayEls = gsap.utils.toArray<HTMLElement>(".splash-ray", containerRef.current)
+      gsap.set(rayEls, { xPercent: -50, yPercent: 0, transformOrigin: "50% 0%" })
+      rayEls.forEach((el, i) => gsap.set(el, { rotation: i * (360 / RAY_COUNT) }))
+
+      // Initial hidden states
+      gsap.set([orbRef.current, innerRef.current], { scale: 0, autoAlpha: 0 })
+      gsap.set(rayEls, { scaleY: 0, autoAlpha: 0 })
 
       const tl = gsap.timeline()
 
@@ -63,11 +76,11 @@ export default function SplashScreen({ onComplete }: Props) {
             duration: 0.72,
             ease: "expo.out",
           },
-          i * 0.22   // absolute start time — each card 220ms after the previous
+          i * 0.22
         )
       })
 
-      // ── Cards recede — scale down + fade, bottom card first ──
+      // ── Cards recede ──
       tl.to(cardEls, {
         scale: 0.5,
         autoAlpha: 0,
@@ -76,13 +89,43 @@ export default function SplashScreen({ onComplete }: Props) {
         ease: "power2.in",
       }, 1.7)
 
-      // ── RP mark emerges while last cards are still fading ──
+      // ── Glow orb erupts just before the mark appears ──
+      tl.to(orbRef.current, {
+        autoAlpha: 1, scale: 1,
+        duration: 0.7, ease: "expo.out",
+      }, 1.72)
+
+      // ── Inner bright core blooms a beat later ──
+      tl.to(innerRef.current, {
+        autoAlpha: 1, scale: 1,
+        duration: 0.45, ease: "expo.out",
+      }, 1.77)
+
+      // ── RP mark emerges through the light ──
       tl.fromTo(
         markRef.current,
         { scale: 0.78, autoAlpha: 0, y: 20 },
         { scale: 1,    autoAlpha: 1, y: 0,  duration: 0.55, ease: "expo.out" },
         1.8
       )
+
+      // ── Light rays radiate outward from center ──
+      tl.to(rayEls, {
+        scaleY: 1, autoAlpha: 1,
+        duration: 0.45, stagger: 0.03, ease: "expo.out",
+      }, 1.87)
+
+      // ── Rays extend and dissolve ──
+      tl.to(rayEls, {
+        scaleY: 1.4, autoAlpha: 0,
+        duration: 0.55, stagger: 0.025, ease: "power2.in",
+      }, 2.45)
+
+      // ── Orb settles to a calm ambient glow ──
+      tl.to([orbRef.current, innerRef.current], {
+        scale: 1.18, autoAlpha: 0.38,
+        duration: 0.9, ease: "sine.out",
+      }, 2.52)
 
       // ── Fade entire screen ──
       tl.to(containerRef.current, {
@@ -138,33 +181,83 @@ export default function SplashScreen({ onComplete }: Props) {
               border: i === 3 ? "1px solid rgba(245,241,234,0.12)" : "none",
             }}
           >
-            <p
-              style={{
-                fontSize: "8px",
-                letterSpacing: "0.15em",
-                fontFamily: "var(--font-mono)",
-                color: card.color,
-                opacity: 0.65,
-              }}
-            >
+            <p style={{
+              fontSize: "8px",
+              letterSpacing: "0.15em",
+              fontFamily: "var(--font-mono)",
+              color: card.color,
+              opacity: 0.65,
+            }}>
               {card.label}
             </p>
-            <p
-              style={{
-                fontSize: "36px",
-                fontWeight: 800,
-                letterSpacing: "-0.04em",
-                lineHeight: 1,
-                fontFamily: "var(--font-geist)",
-                color: card.color,
-              }}
-            >
+            <p style={{
+              fontSize: "36px",
+              fontWeight: 800,
+              letterSpacing: "-0.04em",
+              lineHeight: 1,
+              fontFamily: "var(--font-geist)",
+              color: card.color,
+            }}>
               {card.figure}
             </p>
           </div>
         ))}
 
-        {/* RP mark — styled as app icon */}
+        {/* Light rays — 8 lines emanating from the icon center */}
+        {Array.from({ length: RAY_COUNT }).map((_, i) => (
+          <div
+            key={`ray-${i}`}
+            className="splash-ray"
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: "1.5px",
+              height: "260px",
+              zIndex: 8,
+              pointerEvents: "none",
+              background: i % 2 === 0
+                ? "linear-gradient(to bottom, rgba(245,241,234,0.42) 0%, rgba(232,80,42,0.12) 55%, transparent 100%)"
+                : "linear-gradient(to bottom, rgba(232,80,42,0.3) 0%, rgba(245,241,234,0.04) 60%, transparent 100%)",
+            }}
+          />
+        ))}
+
+        {/* Main glow orb — large soft burst, ember-toned */}
+        <div
+          ref={orbRef}
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: "360px",
+            height: "360px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(232,80,42,0.52) 0%, rgba(232,80,42,0.18) 42%, rgba(201,167,53,0.07) 62%, transparent 80%)",
+            filter: "blur(24px)",
+            zIndex: 9,
+            pointerEvents: "none",
+          }}
+        />
+
+        {/* Inner bright core — tighter white bloom over the mark center */}
+        <div
+          ref={innerRef}
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: "140px",
+            height: "140px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(255,255,255,0.62) 0%, rgba(245,241,234,0.28) 38%, rgba(232,80,42,0.14) 62%, transparent 80%)",
+            filter: "blur(10px)",
+            zIndex: 9,
+            pointerEvents: "none",
+          }}
+        />
+
+        {/* RP mark — app icon style, sits above the light */}
         <div
           ref={markRef}
           style={{
