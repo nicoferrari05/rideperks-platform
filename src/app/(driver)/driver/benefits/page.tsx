@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { unstable_cache } from "next/cache"
 import { redirect } from "next/navigation"
-import { Lock } from "lucide-react"
+import { Lock, Map } from "lucide-react"
 import Link from "next/link"
 import BenefitsListAnimated from "@/components/driver/BenefitsListAnimated"
 
@@ -47,7 +47,17 @@ export default async function BenefitsPage() {
   return (
     <div className="space-y-5">
       <div className="pt-2 pb-1">
-        <p className="eyebrow-muted mb-3">BENEFICIOS</p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="eyebrow-muted">BENEFICIOS</p>
+          <Link
+            href="/driver/directory"
+            className="pressable inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold"
+            style={{ fontSize: "12px", backgroundColor: "var(--ember-soft)", color: "var(--ember)", textDecoration: "none" }}
+          >
+            <Map className="w-3.5 h-3.5" />
+            Ver mapa
+          </Link>
+        </div>
 
         {catalogPotential > 0 ? (
           <>
