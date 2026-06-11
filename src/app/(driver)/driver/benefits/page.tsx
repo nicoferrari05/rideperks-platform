@@ -65,35 +65,14 @@ export default async function BenefitsPage() {
           </Link>
         </div>
 
-        {catalogPotential > 0 ? (
-          <>
-            <p className="text-sm mb-1" style={{ color: "var(--mute)" }}>Ahorra hasta</p>
-            <p
-              className="font-black leading-none mt-2 mb-3"
-              style={{
-                fontSize: "48px",
-                color: "var(--midnight)",
-                letterSpacing: "-0.04em",
-                fontFamily: "'JetBrains Mono', 'Geist Mono', monospace",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              ${catalogPotential.toFixed(2)}
-            </p>
-            <p className="text-sm font-medium" style={{ color: "var(--mute)" }}>
-              {benefits?.length ?? 0}{" "}
-              {(benefits?.length ?? 0) === 1 ? "beneficio disponible" : "beneficios disponibles"}
-            </p>
-          </>
-        ) : (
-          <>
-            <h1 className="font-bold" style={{ fontSize: "28px", letterSpacing: "-0.025em", color: "var(--midnight)" }}>
-              Beneficios
-            </h1>
-            <p className="eyebrow-muted mt-1">
-              {benefits?.length ?? 0} BENEFICIOS ACTIVOS
-            </p>
-          </>
+        <h1 className="font-bold" style={{ fontSize: "28px", letterSpacing: "-0.025em", color: "var(--midnight)" }}>
+          Beneficios
+        </h1>
+        {(benefits?.length ?? 0) > 0 && (
+          <p className="text-sm mt-1" style={{ color: "var(--mute)" }}>
+            {benefits?.length ?? 0}{" "}
+            {(benefits?.length ?? 0) === 1 ? "disponible" : "disponibles"}
+          </p>
         )}
       </div>
 
