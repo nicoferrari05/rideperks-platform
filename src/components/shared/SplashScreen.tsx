@@ -28,8 +28,6 @@ const REST = [
   { x:   8, y: -4, rotation:   5 },
 ]
 
-const RAY_COUNT = 8
-
 export default function SplashScreen({ onComplete }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const markRef      = useRef<HTMLDivElement>(null)
@@ -49,16 +47,8 @@ export default function SplashScreen({ onComplete }: Props) {
       // Center every element on the origin point via percentage offset
       gsap.set(allEls, { xPercent: -50, yPercent: -50 })
 
-      // Rays: top-center on the origin (xPercent -50, yPercent 0), extending downward.
-      // transformOrigin "50% 0%" makes scaleY collapse/expand from the top (the origin point),
-      // and rotation sweeps each ray outward from that anchor.
-      const rayEls = gsap.utils.toArray<HTMLElement>(".splash-ray", containerRef.current)
-      gsap.set(rayEls, { xPercent: -50, yPercent: 0, transformOrigin: "50% 0%" })
-      rayEls.forEach((el, i) => gsap.set(el, { rotation: i * (360 / RAY_COUNT) }))
-
       // Initial hidden states
       gsap.set([orbRef.current, innerRef.current], { scale: 0, autoAlpha: 0 })
-      gsap.set(rayEls, { scaleY: 0, autoAlpha: 0 })
 
       const tl = gsap.timeline()
 
@@ -108,18 +98,6 @@ export default function SplashScreen({ onComplete }: Props) {
         { scale: 1,    autoAlpha: 1, y: 0,  duration: 0.55, ease: "expo.out" },
         1.8
       )
-
-      // ── Light rays radiate outward from center ──
-      tl.to(rayEls, {
-        scaleY: 1, autoAlpha: 1,
-        duration: 0.45, stagger: 0.03, ease: "expo.out",
-      }, 1.87)
-
-      // ── Rays extend and dissolve ──
-      tl.to(rayEls, {
-        scaleY: 1.4, autoAlpha: 0,
-        duration: 0.55, stagger: 0.025, ease: "power2.in",
-      }, 2.45)
 
       // ── Orb settles to a calm ambient glow ──
       tl.to([orbRef.current, innerRef.current], {
@@ -201,26 +179,6 @@ export default function SplashScreen({ onComplete }: Props) {
               {card.figure}
             </p>
           </div>
-        ))}
-
-        {/* Light rays — 8 lines emanating from the icon center */}
-        {Array.from({ length: RAY_COUNT }).map((_, i) => (
-          <div
-            key={`ray-${i}`}
-            className="splash-ray"
-            style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              width: "1.5px",
-              height: "260px",
-              zIndex: 8,
-              pointerEvents: "none",
-              background: i % 2 === 0
-                ? "linear-gradient(to bottom, rgba(245,241,234,0.42) 0%, rgba(232,80,42,0.12) 55%, transparent 100%)"
-                : "linear-gradient(to bottom, rgba(232,80,42,0.3) 0%, rgba(245,241,234,0.04) 60%, transparent 100%)",
-            }}
-          />
         ))}
 
         {/* Main glow orb — large soft burst, ember-toned */}
