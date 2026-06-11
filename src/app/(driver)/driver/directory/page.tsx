@@ -1,27 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { ChevronLeft, MapPin, Navigation } from "lucide-react"
-import dynamic from "next/dynamic"
-
-const BusinessMap = dynamic(
-  () => import("@/components/driver/BusinessMap"),
-  { ssr: false, loading: () => <MapPlaceholder /> }
-)
-
-function MapPlaceholder() {
-  return (
-    <div
-      className="w-full h-full flex items-center justify-center"
-      style={{ backgroundColor: "var(--midnight-2)" }}
-    >
-      <div className="flex flex-col items-center gap-2">
-        <MapPin className="w-6 h-6 animate-pulse" style={{ color: "var(--ember)" }} />
-        <p className="text-sm" style={{ color: "rgba(245,241,234,0.4)" }}>Cargando mapa…</p>
-      </div>
-    </div>
-  )
-}
+import { ChevronLeft, Navigation } from "lucide-react"
+import DirectoryMapClient from "@/components/driver/DirectoryMapClient"
 
 export default async function DirectoryPage() {
   const supabase = await createClient()
@@ -74,7 +55,7 @@ export default async function DirectoryPage() {
         className="rounded-2xl overflow-hidden flex-shrink-0"
         style={{ height: "340px", border: "1px solid rgba(245,241,234,0.08)" }}
       >
-        <BusinessMap businesses={businesses} />
+        <DirectoryMapClient businesses={businesses} />
       </div>
 
       {/* Business list */}
