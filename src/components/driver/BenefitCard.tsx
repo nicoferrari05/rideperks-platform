@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Clock, QrCode, Loader2, XCircle, Navigation, MapPin, ArrowUpRight, Wrench, Zap, Utensils, Heart, Store, ChevronDown, Tag } from "lucide-react"
 import QRCode from "react-qr-code"
@@ -40,12 +41,46 @@ function getCategoryStyle(category: string | null | undefined) {
 }
 
 export default function BenefitCard({ benefit, driverId, canUse }: Props) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [token, setToken] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number>(0)
   const [termsOpen, setTermsOpen] = useState(false)
   const [pricesOpen, setPricesOpen] = useState(false)
+  const [redeemed, setRedeemed] = useState(false)
+
+  // Listen for the business scanning this QR in real-time
+  useEffect(() => {
+    if (!open || !token) return
+
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`redemption-${benefit.id}-${driverId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "benefit_redemptions",
+          filter: `driver_id=eq.${driverId}`,
+        },
+        (payload: { new: { benefit_id?: string } }) => {
+          if (payload.new.benefit_id === benefit.id) {
+            setRedeemed(true)
+            router.refresh()
+          }
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [open, token, benefit.id, driverId, router])
+
+  function handleOpenChange(isOpen: boolean) {
+    setOpen(isOpen)
+    if (!isOpen) setRedeemed(false)
+  }
 
   async function generateQR() {
     setGenerating(true)
@@ -396,7 +431,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
       </div>
 
       {/* ─── QR MODAL ─── */}
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle
@@ -408,7 +443,60 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
           </DialogHeader>
 
           <div className="flex flex-col items-center gap-5 py-2">
-            {token && timeLeft > 0 ? (
+            {redeemed ? (
+              <div className="flex flex-col items-center gap-5 py-4 w-full" style={{ animation: "validoIn 0.45s cubic-bezier(0.23, 1, 0.32, 1) forwards" }}>
+                <style>{`
+                  @keyframes validoIn {
+                    from { opacity: 0; transform: scale(0.92) translateY(8px); }
+                    to   { opacity: 1; transform: scale(1) translateY(0); }
+                  }
+                  @keyframes validoCheck {
+                    from { opacity: 0; transform: scale(0.5); }
+                    to   { opacity: 1; transform: scale(1); }
+                  }
+                `}</style>
+                <div
+                  className="rounded-full flex items-center justify-center"
+                  style={{
+                    width: "96px", height: "96px",
+                    backgroundColor: "var(--verde)",
+                    animation: "validoCheck 0.55s 0.1s cubic-bezier(0.34, 1.56, 0.64, 1) both",
+                  }}
+                >
+                  <span style={{ fontSize: "48px", lineHeight: 1, color: "#fff" }}>✓</span>
+                </div>
+                <p
+                  className="font-bold font-mono-brand"
+                  style={{ fontSize: "40px", letterSpacing: "0.1em", color: "var(--verde)", lineHeight: 1 }}
+                >
+                  VÁLIDO
+                </p>
+                {benefit.discount_value && (
+                  <div
+                    className="w-full rounded-2xl py-5 text-center"
+                    style={{ backgroundColor: "rgba(47,143,110,0.1)" }}
+                  >
+                    <p
+                      className="font-black font-mono-brand leading-none"
+                      style={{ fontSize: "36px", color: "var(--verde)", letterSpacing: "-0.03em" }}
+                    >
+                      {benefit.discount_value}
+                    </p>
+                    {label && (
+                      <p
+                        className="mt-1.5 font-semibold uppercase"
+                        style={{ fontSize: "10px", color: "var(--verde)", opacity: 0.65, letterSpacing: "0.14em" }}
+                      >
+                        {label}
+                      </p>
+                    )}
+                  </div>
+                )}
+                <p className="text-center text-sm" style={{ color: "var(--mute)" }}>
+                  Descuento validado. ¡Disfrútalo!
+                </p>
+              </div>
+            ) : token && timeLeft > 0 ? (
               <>
                 <div className="p-4 rounded-2xl" style={{ backgroundColor: "#fff", border: "1px solid var(--line)" }}>
                   <QRCode value={token} size={190} />
