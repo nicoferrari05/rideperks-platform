@@ -21,7 +21,7 @@ const benefits = [
 
 const steps = [
   { n: "01", title: "Regístrate", desc: "Crea tu cuenta con tu foto de perfil de conductor." },
-  { n: "02", title: "Activa tu membresía", desc: "Lo coordinamos por WhatsApp. Yappy o efectivo." },
+  { n: "02", title: "Activa tu membresía", desc: "Activamos tu cuenta de inmediato." },
   { n: "03", title: "Muestra tu QR", desc: "El empleado lo escanea. Descuento aplicado al instante." },
 ]
 
