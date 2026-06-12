@@ -5,74 +5,37 @@ import gsap from "gsap"
 
 interface Props { onComplete: () => void }
 
-type Particle = {
-  x: number      // current x offset from center (GSAP animates this)
-  y: number      // current y offset from center (GSAP animates this)
-  destX: number  // target x — text pixel position
-  destY: number  // target y — text pixel position
-  size: number
-  color: string
-  alpha: number
-}
+// ── Sphere config (Living Sphere by AI Canvas, adapted for splash) ────────────
+const N_LATS      = 38
+const N_STEPS     = 200
+const WAVE_PHI    = 0.28
+const WAVE_FREQ_T = 2.0
+const WAVE_FREQ_P = 1.8
+const WAVE_SPEED  = 0.003
+const ROT_SPEED   = 0.003
+const BACK_A      = 0.04
+const ALPHA_MIN   = 0.10
+const ALPHA_MAX   = 0.30
+const LW_MIN      = 0.30
+const LW_MAX      = 0.75
+const BAND_SIGMA  = 0.35
+const BAND_FREQ   = 2.5
+const TWO_PI      = Math.PI * 2
+// Bone-colored lines (warm off-white) on midnight background
+const LINE_RGB    = "245,241,234"
 
-// Brand palette for canvas (oklch values — supported in all modern mobile browsers)
-const EMBER = "oklch(0.57 0.19 34)"   // --ember
-const BONE  = "oklch(0.96 0.01 80)"   // --bone
-const SOL   = "oklch(0.79 0.14 82)"   // --sol
-
-// Bone-heavy so the letterforms read clearly; ember/sol add warmth
-const PALETTE = [BONE, BONE, BONE, BONE, EMBER, EMBER, SOL]
-
-// ── Sample target positions by rendering "RP" to an offscreen canvas ──────────
-function sampleTargets(
-  text: string,
-  fontSize: number,
-  step: number,
-  fontFamily: string,
-): Array<{ x: number; y: number }> {
-  const cw = Math.round(fontSize * text.length + fontSize)
-  const ch = Math.round(fontSize * 1.4)
-
-  const off = document.createElement("canvas")
-  off.width  = cw
-  off.height = ch
-
-  const c = off.getContext("2d")!
-  c.clearRect(0, 0, cw, ch)
-  c.fillStyle    = "white"
-  c.font         = `800 ${fontSize}px ${fontFamily}`
-  c.textAlign    = "center"
-  c.textBaseline = "middle"
-
-  // letterSpacing supported in Chrome 99+, Safari 17+, Firefox 113+
-  if ("letterSpacing" in c) {
-    ;(c as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing =
-      `${Math.round(-0.05 * fontSize)}px`
-  }
-
-  c.fillText(text, cw / 2, ch / 2)
-
-  const { data } = c.getImageData(0, 0, cw, ch)
-  const out: Array<{ x: number; y: number }> = []
-
-  for (let y = 0; y < ch; y += step) {
-    for (let x = 0; x < cw; x += step) {
-      if (data[(y * cw + x) * 4 + 3] > 100) {
-        out.push({ x: x - cw / 2, y: y - ch / 2 })
-      }
-    }
-  }
-
-  return out
-}
-
-// ── Component ─────────────────────────────────────────────────────────────────
 export default function SplashScreen({ onComplete }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const canvasRef    = useRef<HTMLCanvasElement>(null)
+  const markRef      = useRef<HTMLDivElement>(null)
+  const orbRef       = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+    const container = containerRef.current
+    const canvas    = canvasRef.current
+    const mark      = markRef.current
+    const orb       = orbRef.current
+    if (!container || !canvas || !mark || !orb) return
 
     const mm = gsap.matchMedia()
 
@@ -82,109 +45,157 @@ export default function SplashScreen({ onComplete }: Props) {
     })
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
-      let drawFn:   (() => void) | null        = null
-      let masterTl: gsap.core.Timeline | null  = null
-      const tweens: gsap.core.Tween[]          = []
-      let cancelled = false
+      // ── Sphere canvas ──────────────────────────────────────────────────────
+      // Re-capture as non-null (null already guarded above)
+      const cv  = canvas as HTMLCanvasElement
+      const ctx = cv.getContext("2d")!
+      let cw = 0, ch = 0
+      let animId = 0
+      let alive  = true
+      let t      = 0
+      let rot    = 0
 
-      ;(async () => {
-        const W = window.innerWidth
-        const H = window.innerHeight
-        canvas.width  = W
-        canvas.height = H
-        const ctx = canvas.getContext("2d")!
-        const cx  = W / 2
-        const cy  = H / 2
+      const xs = new Float32Array(N_STEPS + 1)
+      const ys = new Float32Array(N_STEPS + 1)
 
-        // Resolve the Geist font family from the CSS variable on <html>
-        const fontVar    = getComputedStyle(document.documentElement)
-          .getPropertyValue("--font-geist").trim()
-        const fontFamily = fontVar || "system-ui, sans-serif"
+      function build() {
+        const dpr  = window.devicePixelRatio || 1
+        const rect = cv.getBoundingClientRect()
+        cw = rect.width
+        ch = rect.height
+        if (!cw || !ch) return
+        cv.width  = Math.round(cw * dpr)
+        cv.height = Math.round(ch * dpr)
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      }
 
-        // Wait for all fonts (Geist) to be available before sampling
-        await document.fonts.ready
-        if (cancelled) return
+      function frame() {
+        if (!alive) return
+        t   += WAVE_SPEED
+        rot += ROT_SPEED
 
-        // Responsive font size — large enough to fill ~30% of screen width
-        const fontSize = Math.min(Math.round(W * 0.30), 140)
-        const targets  = sampleTargets("RP", fontSize, 4, fontFamily)
-        if (!targets.length) { onComplete(); return }
+        ctx.clearRect(0, 0, cw, ch)
 
-        // Build particles — each starts at a random off-screen radial position
-        const maxR = Math.max(W, H)
-        const particles: Particle[] = targets.map((t) => {
-          const angle  = Math.random() * Math.PI * 2
-          const radius = maxR * (1.1 + Math.random() * 0.85)
-          const accent = Math.random() > 0.68   // ~32% slightly larger accent dots
+        const R          = Math.min(cw, ch) * 0.44
+        const cx         = cw / 2
+        const cy         = ch / 2
+        const bandCenter = Math.sin(t * BAND_FREQ) * (Math.PI * 0.4)
 
-          return {
-            x:     Math.cos(angle) * radius,
-            y:     Math.sin(angle) * radius,
-            destX: t.x,
-            destY: t.y,
-            size:  accent ? 1.8 + Math.random() * 1.0 : 0.9 + Math.random() * 1.1,
-            color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
-            alpha: 0.65 + Math.random() * 0.35,
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(cx, cy, R, 0, Math.PI * 2)
+        ctx.clip()
+
+        for (let i = 0; i < N_LATS; i++) {
+          const phi   = -Math.PI / 2 + (i + 1) * Math.PI / (N_LATS + 1)
+          const depth = Math.cos(phi)
+          const lineA = ALPHA_MIN + depth * (ALPHA_MAX - ALPHA_MIN)
+          const lw    = LW_MIN    + depth * (LW_MAX    - LW_MIN)
+
+          const dist    = phi - bandCenter
+          const autoEnv = Math.exp(-(dist * dist) / (2 * BAND_SIGMA * BAND_SIGMA))
+          const autoAmp = WAVE_PHI * autoEnv
+
+          // Precompute displaced 3D → 2D positions
+          for (let j = 0; j <= N_STEPS; j++) {
+            const tR      = (j * TWO_PI / N_STEPS) + rot
+            const autoDPhi = autoAmp * (
+              Math.sin(tR * WAVE_FREQ_T + phi * WAVE_FREQ_P + t) +
+              0.45 * Math.sin(tR * WAVE_FREQ_T * 1.7 + phi * WAVE_FREQ_P * 1.3 + t * 1.4)
+            )
+            const phiD = phi + autoDPhi
+            xs[j] = cx + R * Math.cos(phiD) * Math.cos(tR)
+            ys[j] = cy - R * Math.sin(phiD)
           }
-        })
 
-        const state = { masterAlpha: 0 }
-
-        // Draw all particles each GSAP tick
-        drawFn = () => {
-          ctx.clearRect(0, 0, W, H)
-          for (const p of particles) {
-            const ea = p.alpha * state.masterAlpha
-            const px = cx + p.x
-            const py = cy + p.y
-
-            // Soft glow halo — drawn first, behind the core
-            ctx.globalAlpha = ea * 0.20
-            ctx.fillStyle   = p.color
-            ctx.beginPath()
-            ctx.arc(px, py, p.size * 3.2, 0, Math.PI * 2)
-            ctx.fill()
-
-            // Solid core dot
-            ctx.globalAlpha = ea
-            ctx.beginPath()
-            ctx.arc(px, py, p.size, 0, Math.PI * 2)
-            ctx.fill()
+          // Back arc — dim ghost layer
+          ctx.strokeStyle = `rgba(${LINE_RGB},${BACK_A})`
+          ctx.lineWidth   = 0.4
+          ctx.beginPath()
+          {
+            const mx0 = (xs[N_STEPS - 1] + xs[0]) / 2
+            const my0 = (ys[N_STEPS - 1] + ys[0]) / 2
+            ctx.moveTo(mx0, my0)
+            for (let j = 0; j < N_STEPS; j++) {
+              const nx  = j + 1 < N_STEPS ? xs[j + 1] : xs[0]
+              const ny  = j + 1 < N_STEPS ? ys[j + 1] : ys[0]
+              ctx.quadraticCurveTo(xs[j], ys[j], (xs[j] + nx) / 2, (ys[j] + ny) / 2)
+            }
+            ctx.closePath()
+            ctx.stroke()
           }
-          ctx.globalAlpha = 1
+
+          // Front arc — bright hemisphere only
+          let startJ = 0
+          for (let j = 0; j < N_STEPS; j++) {
+            if (Math.sin(j * TWO_PI / N_STEPS + rot) < 0) { startJ = j; break }
+          }
+
+          ctx.strokeStyle = `rgba(${LINE_RGB},${lineA.toFixed(3)})`
+          ctx.lineWidth   = lw
+          ctx.beginPath()
+          let inFront = false
+          let prevX   = 0
+          let prevY   = 0
+          for (let jj = 0; jj <= N_STEPS; jj++) {
+            const j       = (startJ + jj) % N_STEPS
+            const isFront = Math.sin(j * TWO_PI / N_STEPS + rot) >= 0
+            const x = xs[j], y = ys[j]
+            if (isFront) {
+              if (!inFront) { ctx.moveTo(x, y); inFront = true }
+              else { ctx.quadraticCurveTo(prevX, prevY, (prevX + x) / 2, (prevY + y) / 2) }
+              prevX = x; prevY = y
+            } else if (inFront) {
+              ctx.lineTo(prevX, prevY)
+              inFront = false
+            }
+          }
+          if (inFront) ctx.lineTo(prevX, prevY)
+          ctx.stroke()
         }
 
-        gsap.ticker.add(drawFn)
+        ctx.restore()
+        animId = requestAnimationFrame(frame)
+      }
 
-        // Stagger particles toward their destinations
-        particles.forEach((p) => {
-          tweens.push(gsap.to(p, {
-            x:        p.destX,
-            y:        p.destY,
-            duration: 0.90 + Math.random() * 0.55,  // 0.90 – 1.45 s
-            delay:    Math.random() * 0.22,           // 0 – 220 ms stagger
-            ease:     "expo.out",
-          }))
-        })
+      build()
+      frame()
 
-        // Master timeline: fade in → hold assembled RP → fade out
-        masterTl = gsap.timeline({
-          onComplete: () => {
-            if (drawFn) { gsap.ticker.remove(drawFn); drawFn = null }
-            onComplete()
-          },
-        })
+      const ro = new ResizeObserver(build)
+      ro.observe(canvas.parentElement!)
 
-        masterTl
-          .to(state, { masterAlpha: 1, duration: 0.28, ease: "power2.out" }, 0)
-          .to(state, { masterAlpha: 0, duration: 0.42, ease: "power2.in"  }, 2.25)
-      })()
+      // ── GSAP entrance / exit ───────────────────────────────────────────────
+      gsap.set(container, { autoAlpha: 0 })
+      gsap.set(orb,       { autoAlpha: 0, scale: 0.55 })
+      gsap.set(mark,      { autoAlpha: 0 })
+
+      const tl = gsap.timeline({ onComplete })
+
+      // Sphere fades in
+      tl.to(container, { autoAlpha: 1, duration: 0.55, ease: "power2.out" }, 0)
+
+      // Glow orb blooms from center
+      tl.to(orb, { autoAlpha: 1, scale: 1, duration: 0.55, ease: "expo.out" }, 0.85)
+
+      // RP mark emerges through the light
+      tl.fromTo(
+        mark,
+        { autoAlpha: 0, scale: 0.84, y: 8 },
+        { autoAlpha: 1, scale: 1,    y: 0, duration: 0.48, ease: "expo.out" },
+        0.92
+      )
+
+      // Orb settles to ambient glow
+      tl.to(orb, { scale: 1.15, autoAlpha: 0.40, duration: 0.8, ease: "sine.out" }, 1.60)
+
+      // Fade everything out
+      tl.to(container, { autoAlpha: 0, duration: 0.38, ease: "power2.in" }, 3.15)
 
       return () => {
-        cancelled = true
-        if (drawFn) { gsap.ticker.remove(drawFn); drawFn = null }
-        tweens.forEach((t) => t.kill())
-        masterTl?.kill()
+        alive = false
+        cancelAnimationFrame(animId)
+        ro.disconnect()
+        tl.kill()
       }
     })
 
@@ -193,13 +204,73 @@ export default function SplashScreen({ onComplete }: Props) {
 
   return (
     <div
+      ref={containerRef}
       className="fixed inset-0 z-[9999]"
       style={{ backgroundColor: "var(--midnight)" }}
     >
+      {/* Living Sphere canvas */}
       <canvas
         ref={canvasRef}
-        style={{ position: "absolute", inset: 0, display: "block" }}
+        className="absolute inset-0"
+        style={{ width: "100%", height: "100%" }}
       />
+
+      {/* Centered RP mark with glow */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          pointerEvents: "none",
+        }}
+      >
+        {/* Ember glow orb */}
+        <div
+          ref={orbRef}
+          style={{
+            position: "absolute",
+            width: "300px",
+            height: "300px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(232,80,42,0.48) 0%, rgba(232,80,42,0.16) 42%, rgba(201,167,53,0.07) 62%, transparent 80%)",
+            filter: "blur(28px)",
+          }}
+        />
+
+        {/* App icon RP mark */}
+        <div
+          ref={markRef}
+          style={{
+            position: "relative",
+            zIndex: 1,
+            width: "120px",
+            height: "120px",
+            backgroundColor: "var(--midnight-2)",
+            borderRadius: "26px",
+            border: "1px solid rgba(245,241,234,0.10)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 24px 56px rgba(0,0,0,0.55)",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "56px",
+              fontWeight: 800,
+              letterSpacing: "-0.05em",
+              lineHeight: 1,
+              fontFamily: "var(--font-geist)",
+              color: "var(--bone)",
+              userSelect: "none",
+            }}
+          >
+            RP
+          </span>
+        </div>
+      </div>
     </div>
   )
 }
