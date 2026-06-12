@@ -1,9 +1,13 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useRef, useState, useMemo } from "react"
+import { useGSAP } from "@gsap/react"
+import gsap from "gsap"
 import { Wrench, Zap, Utensils, Heart, Store, LayoutGrid, type LucideIcon } from "lucide-react"
-import BenefitsDeck from "./BenefitsDeck"
+import BenefitCard from "./BenefitCard"
 import type { Benefit } from "@/types/database"
+
+gsap.registerPlugin(useGSAP)
 
 type BenefitWithBusiness = Benefit & {
   partner_businesses?: {
@@ -48,6 +52,7 @@ const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
 
 export default function BenefitsListAnimated({ benefits, driverId, canUse }: Props) {
   const [activeCategory, setActiveCategory] = useState("todos")
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const categories = useMemo(() => {
     const seen = new Set<string>()
@@ -67,12 +72,26 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse }: Pro
     [benefits, activeCategory]
   )
 
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.from(".benefit-card", {
+          autoAlpha: 0, y: 16, duration: 0.26, stagger: 0.05, ease: "power2.out",
+        })
+      })
+      return () => mm.revert()
+    },
+    { scope: containerRef, dependencies: [activeCategory] }
+  )
+
   return (
     <div className="space-y-4">
 
       {categories.length > 1 && (
         <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none", paddingBottom: "2px" }}>
 
+          {/* "Todos" — neutral, no category color */}
           <button
             onClick={() => setActiveCategory("todos")}
             className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
@@ -119,12 +138,19 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse }: Pro
         </div>
       )}
 
-      <BenefitsDeck
-        key={activeCategory}
-        benefits={filtered}
-        driverId={driverId}
-        canUse={canUse}
-      />
+      <div key={activeCategory} ref={containerRef} className="grid grid-cols-1 gap-4">
+        {filtered.length === 0 ? (
+          <p className="text-sm py-10 text-center" style={{ color: "var(--mute)" }}>
+            No hay beneficios en esta categoría aún.
+          </p>
+        ) : (
+          filtered.map((benefit) => (
+            <div key={benefit.id} className="benefit-card">
+              <BenefitCard benefit={benefit} driverId={driverId} canUse={canUse} />
+            </div>
+          ))
+        )}
+      </div>
 
     </div>
   )
