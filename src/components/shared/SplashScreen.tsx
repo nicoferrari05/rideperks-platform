@@ -3,253 +3,203 @@
 import { useRef, useEffect } from "react"
 import gsap from "gsap"
 
-interface Props {
-  onComplete: () => void
+interface Props { onComplete: () => void }
+
+type Particle = {
+  x: number      // current x offset from center (GSAP animates this)
+  y: number      // current y offset from center (GSAP animates this)
+  destX: number  // target x — text pixel position
+  destY: number  // target y — text pixel position
+  size: number
+  color: string
+  alpha: number
 }
 
-const CARDS = [
-  { label: "COMBUSTIBLE", figure: "20%",  bg: "var(--sol)",        color: "var(--midnight)" },
-  { label: "COMIDA",       figure: "$5",   bg: "var(--verde)",      color: "#fff" },
-  { label: "TALLER",       figure: "15%",  bg: "var(--ember)",      color: "#fff" },
-  { label: "SALUD",        figure: "10%",  bg: "var(--midnight-2)", color: "var(--bone)" },
-]
+// Brand palette for canvas (oklch values — supported in all modern mobile browsers)
+const EMBER = "oklch(0.57 0.19 34)"   // --ember
+const BONE  = "oklch(0.96 0.01 80)"   // --bone
+const SOL   = "oklch(0.79 0.14 82)"   // --sol
 
-const FROM = [
-  { x: -420, y: -460, rotation: -42, scale: 0.75, autoAlpha: 0 },
-  { x:  420, y: -420, rotation:  38, scale: 0.75, autoAlpha: 0 },
-  { x: -400, y:  460, rotation:  22, scale: 0.75, autoAlpha: 0 },
-  { x:  400, y:  440, rotation: -28, scale: 0.75, autoAlpha: 0 },
-]
+// Bone-heavy so the letterforms read clearly; ember/sol add warmth
+const PALETTE = [BONE, BONE, BONE, BONE, EMBER, EMBER, SOL]
 
-const REST = [
-  { x: -14, y:  8, rotation: -10 },
-  { x:  10, y: -5, rotation:   7 },
-  { x:  -6, y: 10, rotation:  -4 },
-  { x:   8, y: -4, rotation:   5 },
-]
+// ── Sample target positions by rendering "RP" to an offscreen canvas ──────────
+function sampleTargets(
+  text: string,
+  fontSize: number,
+  step: number,
+  fontFamily: string,
+): Array<{ x: number; y: number }> {
+  const cw = Math.round(fontSize * text.length + fontSize)
+  const ch = Math.round(fontSize * 1.4)
 
+  const off = document.createElement("canvas")
+  off.width  = cw
+  off.height = ch
+
+  const c = off.getContext("2d")!
+  c.clearRect(0, 0, cw, ch)
+  c.fillStyle    = "white"
+  c.font         = `800 ${fontSize}px ${fontFamily}`
+  c.textAlign    = "center"
+  c.textBaseline = "middle"
+
+  // letterSpacing supported in Chrome 99+, Safari 17+, Firefox 113+
+  if ("letterSpacing" in c) {
+    ;(c as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing =
+      `${Math.round(-0.05 * fontSize)}px`
+  }
+
+  c.fillText(text, cw / 2, ch / 2)
+
+  const { data } = c.getImageData(0, 0, cw, ch)
+  const out: Array<{ x: number; y: number }> = []
+
+  for (let y = 0; y < ch; y += step) {
+    for (let x = 0; x < cw; x += step) {
+      if (data[(y * cw + x) * 4 + 3] > 100) {
+        out.push({ x: x - cw / 2, y: y - ch / 2 })
+      }
+    }
+  }
+
+  return out
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 export default function SplashScreen({ onComplete }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const markRef      = useRef<HTMLDivElement>(null)
-  const orbRef       = useRef<HTMLDivElement>(null)
-  const innerRef     = useRef<HTMLDivElement>(null)
-  const card0Ref     = useRef<HTMLDivElement>(null)
-  const card1Ref     = useRef<HTMLDivElement>(null)
-  const card2Ref     = useRef<HTMLDivElement>(null)
-  const card3Ref     = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    const cardEls = [card0Ref.current, card1Ref.current, card2Ref.current, card3Ref.current]
-    const allEls  = [...cardEls, markRef.current, orbRef.current, innerRef.current]
-    const mm      = gsap.matchMedia()
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      // Center every element on the origin point via percentage offset
-      gsap.set(allEls, { xPercent: -50, yPercent: -50 })
-
-      // Initial hidden states
-      gsap.set([orbRef.current, innerRef.current], { scale: 0, autoAlpha: 0 })
-
-      const tl = gsap.timeline()
-
-      // ── Cards converge from corners ──
-      cardEls.forEach((el, i) => {
-        tl.fromTo(
-          el,
-          FROM[i],
-          {
-            x: REST[i].x,
-            y: REST[i].y,
-            rotation: REST[i].rotation,
-            scale: 1,
-            autoAlpha: 1,
-            duration: 0.72,
-            ease: "expo.out",
-          },
-          i * 0.22
-        )
-      })
-
-      // ── Cards recede ──
-      tl.to(cardEls, {
-        scale: 0.5,
-        autoAlpha: 0,
-        duration: 0.32,
-        stagger: 0.05,
-        ease: "power2.in",
-      }, 1.7)
-
-      // ── Glow orb erupts just before the mark appears ──
-      tl.to(orbRef.current, {
-        autoAlpha: 1, scale: 1,
-        duration: 0.7, ease: "expo.out",
-      }, 1.72)
-
-      // ── Inner bright core blooms a beat later ──
-      tl.to(innerRef.current, {
-        autoAlpha: 1, scale: 1,
-        duration: 0.45, ease: "expo.out",
-      }, 1.77)
-
-      // ── RP mark emerges through the light ──
-      tl.fromTo(
-        markRef.current,
-        { scale: 0.78, autoAlpha: 0, y: 20 },
-        { scale: 1,    autoAlpha: 1, y: 0,  duration: 0.55, ease: "expo.out" },
-        1.8
-      )
-
-      // ── Orb settles to a calm ambient glow ──
-      tl.to([orbRef.current, innerRef.current], {
-        scale: 1.18, autoAlpha: 0.38,
-        duration: 0.9, ease: "sine.out",
-      }, 2.52)
-
-      // ── Fade entire screen ──
-      tl.to(containerRef.current, {
-        autoAlpha: 0,
-        duration: 0.3,
-        ease: "power2.out",
-        onComplete,
-      }, 3.1)
-    })
+    const mm = gsap.matchMedia()
 
     mm.add("(prefers-reduced-motion: reduce)", () => {
-      const t = setTimeout(onComplete, 500)
+      const t = setTimeout(onComplete, 400)
       return () => clearTimeout(t)
+    })
+
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      let drawFn:   (() => void) | null        = null
+      let masterTl: gsap.core.Timeline | null  = null
+      const tweens: gsap.core.Tween[]          = []
+      let cancelled = false
+
+      ;(async () => {
+        const W = window.innerWidth
+        const H = window.innerHeight
+        canvas.width  = W
+        canvas.height = H
+        const ctx = canvas.getContext("2d")!
+        const cx  = W / 2
+        const cy  = H / 2
+
+        // Resolve the Geist font family from the CSS variable on <html>
+        const fontVar    = getComputedStyle(document.documentElement)
+          .getPropertyValue("--font-geist").trim()
+        const fontFamily = fontVar || "system-ui, sans-serif"
+
+        // Wait for all fonts (Geist) to be available before sampling
+        await document.fonts.ready
+        if (cancelled) return
+
+        // Responsive font size — large enough to fill ~30% of screen width
+        const fontSize = Math.min(Math.round(W * 0.30), 140)
+        const targets  = sampleTargets("RP", fontSize, 4, fontFamily)
+        if (!targets.length) { onComplete(); return }
+
+        // Build particles — each starts at a random off-screen radial position
+        const maxR = Math.max(W, H)
+        const particles: Particle[] = targets.map((t) => {
+          const angle  = Math.random() * Math.PI * 2
+          const radius = maxR * (1.1 + Math.random() * 0.85)
+          const accent = Math.random() > 0.68   // ~32% slightly larger accent dots
+
+          return {
+            x:     Math.cos(angle) * radius,
+            y:     Math.sin(angle) * radius,
+            destX: t.x,
+            destY: t.y,
+            size:  accent ? 1.8 + Math.random() * 1.0 : 0.9 + Math.random() * 1.1,
+            color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
+            alpha: 0.65 + Math.random() * 0.35,
+          }
+        })
+
+        const state = { masterAlpha: 0 }
+
+        // Draw all particles each GSAP tick
+        drawFn = () => {
+          ctx.clearRect(0, 0, W, H)
+          for (const p of particles) {
+            const ea = p.alpha * state.masterAlpha
+            const px = cx + p.x
+            const py = cy + p.y
+
+            // Soft glow halo — drawn first, behind the core
+            ctx.globalAlpha = ea * 0.20
+            ctx.fillStyle   = p.color
+            ctx.beginPath()
+            ctx.arc(px, py, p.size * 3.2, 0, Math.PI * 2)
+            ctx.fill()
+
+            // Solid core dot
+            ctx.globalAlpha = ea
+            ctx.beginPath()
+            ctx.arc(px, py, p.size, 0, Math.PI * 2)
+            ctx.fill()
+          }
+          ctx.globalAlpha = 1
+        }
+
+        gsap.ticker.add(drawFn)
+
+        // Stagger particles toward their destinations
+        particles.forEach((p) => {
+          tweens.push(gsap.to(p, {
+            x:        p.destX,
+            y:        p.destY,
+            duration: 0.90 + Math.random() * 0.55,  // 0.90 – 1.45 s
+            delay:    Math.random() * 0.22,           // 0 – 220 ms stagger
+            ease:     "expo.out",
+          }))
+        })
+
+        // Master timeline: fade in → hold assembled RP → fade out
+        masterTl = gsap.timeline({
+          onComplete: () => {
+            if (drawFn) { gsap.ticker.remove(drawFn); drawFn = null }
+            onComplete()
+          },
+        })
+
+        masterTl
+          .to(state, { masterAlpha: 1, duration: 0.28, ease: "power2.out" }, 0)
+          .to(state, { masterAlpha: 0, duration: 0.42, ease: "power2.in"  }, 2.25)
+      })()
+
+      return () => {
+        cancelled = true
+        if (drawFn) { gsap.ticker.remove(drawFn); drawFn = null }
+        tweens.forEach((t) => t.kill())
+        masterTl?.kill()
+      }
     })
 
     return () => mm.revert()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const cardRefs = [card0Ref, card1Ref, card2Ref, card3Ref]
-
   return (
     <div
-      ref={containerRef}
-      className="fixed inset-0 z-[9999] overflow-hidden"
+      className="fixed inset-0 z-[9999]"
       style={{ backgroundColor: "var(--midnight)" }}
     >
-      {/* Origin point — centered in viewport; all animated children live here */}
-      <div
-        aria-hidden="true"
-        style={{ position: "absolute", top: "50%", left: "50%", width: 0, height: 0 }}
-      >
-        {/* Benefit cards */}
-        {CARDS.map((card, i) => (
-          <div
-            key={i}
-            ref={cardRefs[i]}
-            style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              width: "148px",
-              height: "100px",
-              backgroundColor: card.bg,
-              borderRadius: "16px",
-              padding: "14px 16px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              zIndex: i + 1,
-              boxShadow: "0 16px 40px rgba(0,0,0,0.45), 0 4px 10px rgba(0,0,0,0.25)",
-              opacity: 0,
-              willChange: "transform, opacity",
-              border: i === 3 ? "1px solid rgba(245,241,234,0.12)" : "none",
-            }}
-          >
-            <p style={{
-              fontSize: "8px",
-              letterSpacing: "0.15em",
-              fontFamily: "var(--font-mono)",
-              color: card.color,
-              opacity: 0.65,
-            }}>
-              {card.label}
-            </p>
-            <p style={{
-              fontSize: "36px",
-              fontWeight: 800,
-              letterSpacing: "-0.04em",
-              lineHeight: 1,
-              fontFamily: "var(--font-geist)",
-              color: card.color,
-            }}>
-              {card.figure}
-            </p>
-          </div>
-        ))}
-
-        {/* Main glow orb — large soft burst, ember-toned */}
-        <div
-          ref={orbRef}
-          style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            width: "360px",
-            height: "360px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(232,80,42,0.52) 0%, rgba(232,80,42,0.18) 42%, rgba(201,167,53,0.07) 62%, transparent 80%)",
-            filter: "blur(24px)",
-            zIndex: 9,
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Inner bright core — tighter white bloom over the mark center */}
-        <div
-          ref={innerRef}
-          style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            width: "140px",
-            height: "140px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(255,255,255,0.62) 0%, rgba(245,241,234,0.28) 38%, rgba(232,80,42,0.14) 62%, transparent 80%)",
-            filter: "blur(10px)",
-            zIndex: 9,
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* RP mark — app icon style, sits above the light */}
-        <div
-          ref={markRef}
-          style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            zIndex: 10,
-            opacity: 0,
-            width: "120px",
-            height: "120px",
-            backgroundColor: "var(--midnight-2)",
-            borderRadius: "26px",
-            border: "1px solid rgba(245,241,234,0.1)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 24px 56px rgba(0,0,0,0.5)",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "56px",
-              fontWeight: 800,
-              letterSpacing: "-0.05em",
-              lineHeight: 1,
-              fontFamily: "var(--font-geist)",
-              color: "var(--bone)",
-              userSelect: "none",
-            }}
-          >
-            RP
-          </span>
-        </div>
-      </div>
+      <canvas
+        ref={canvasRef}
+        style={{ position: "absolute", inset: 0, display: "block" }}
+      />
     </div>
   )
 }
