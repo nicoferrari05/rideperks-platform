@@ -19,7 +19,14 @@ export default function Logo({ size = "md", className }: LogoProps) {
         sizes[size],
         className
       )}
-      style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
+      style={{
+        background: "linear-gradient(135deg, rgba(245,241,234,0.11) 0%, rgba(245,241,234,0.05) 100%)",
+        backdropFilter: "blur(16px) saturate(1.6)",
+        WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+        border: "1px solid rgba(245,241,234,0.14)",
+        boxShadow: "inset 0 1.5px 0 rgba(245,241,234,0.13), inset 0 -1px 0 rgba(245,241,234,0.04), 0 4px 20px rgba(0,0,0,0.28)",
+        color: "var(--bone)",
+      }}
     >
       RIDEPERKS
     </div>
