@@ -15,8 +15,21 @@ export interface Profile {
   platform: DriverPlatform | null
   status: DriverStatus
   avatar_url: string | null
+  referral_code: string | null
   created_at: string
   updated_at: string
+}
+
+export type ReferralStatus = 'active' | 'rewarded'
+
+export interface Referral {
+  id: string
+  referrer_id: string
+  referred_driver_id: string
+  status: ReferralStatus
+  created_at: string
+  rewarded_at: string | null
+  profiles?: Profile
 }
 
 export interface DriverVerification {

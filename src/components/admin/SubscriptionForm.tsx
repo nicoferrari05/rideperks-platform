@@ -28,6 +28,7 @@ export default function SubscriptionForm({ drivers }: Props) {
     payment_method: "cash",
     payment_reference: "",
     notes: "",
+    referral_code: "",
   })
 
   function set(field: string, value: string) {
@@ -61,9 +62,29 @@ export default function SubscriptionForm({ drivers }: Props) {
     if (error) {
       toast.error("Error al crear la membresía")
     } else {
+      // If a referral code was entered, register the referral
+      const code = form.referral_code.trim().toUpperCase()
+      if (code) {
+        const { data: referrer } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("referral_code", code)
+          .single()
+
+        if (referrer && referrer.id !== form.driver_id) {
+          await supabase.from("referrals").insert({
+            referrer_id: referrer.id,
+            referred_driver_id: form.driver_id,
+            status: "active",
+          })
+        } else if (!referrer) {
+          toast.warning("Código de referido no encontrado — membresía activada igual")
+        }
+      }
+
       toast.success("Membresía activada correctamente")
       setOpen(false)
-      setForm({ driver_id: "", starts_at: new Date().toISOString().slice(0, 10), expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10), amount: "", payment_method: "cash", payment_reference: "", notes: "" })
+      setForm({ driver_id: "", starts_at: new Date().toISOString().slice(0, 10), expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10), amount: "", payment_method: "cash", payment_reference: "", notes: "", referral_code: "" })
       router.refresh()
     }
     setLoading(false)
@@ -134,6 +155,15 @@ export default function SubscriptionForm({ drivers }: Props) {
           <div className="space-y-2">
             <Label>Notas internas</Label>
             <Textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Notas adicionales..." rows={2} />
+          </div>
+          <div className="space-y-2">
+            <Label>Código de referido <span style={{ color: "var(--mute)", fontWeight: 400 }}>(opcional)</span></Label>
+            <Input
+              value={form.referral_code}
+              onChange={(e) => set("referral_code", e.target.value.toUpperCase())}
+              placeholder="RP-XXXX"
+              maxLength={7}
+            />
           </div>
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="outline" className="flex-1" onClick={() => setOpen(false)}>Cancelar</Button>

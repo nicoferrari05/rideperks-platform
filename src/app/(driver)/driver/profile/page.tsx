@@ -4,6 +4,7 @@ import { User, Phone, Car, CheckCircle2, Clock, XCircle } from "lucide-react"
 import type { ElementType } from "react"
 import LogoutButton from "@/components/driver/LogoutButton"
 import StaggerEntrance from "@/components/shared/StaggerEntrance"
+import ReferralCard from "@/components/driver/ReferralCard"
 
 const platformLabel: Record<string, string> = {
   uber: "Uber",
@@ -38,7 +39,7 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  const [{ data: profile }, { data: subscription }, { data: redemptions }, { data: firstSubscription }] = await Promise.all([
+  const [{ data: profile }, { data: subscription }, { data: redemptions }, { data: firstSubscription }, { count: referralCount }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("subscriptions").select("*")
       .eq("driver_id", user.id).eq("status", "active")
@@ -52,6 +53,9 @@ export default async function ProfilePage() {
       .eq("driver_id", user.id)
       .order("starts_at", { ascending: true })
       .limit(1).single(),
+    supabase.from("referrals")
+      .select("*", { count: "exact", head: true })
+      .eq("referrer_id", user.id),
   ])
 
   const lifetimeSaved = redemptions?.reduce((sum, r) => {
@@ -186,6 +190,16 @@ export default async function ProfilePage() {
             </p>
           )}
         </div>
+
+        {/* Referral program */}
+        {profile?.referral_code && (
+          <div data-stagger>
+            <ReferralCard
+              code={profile.referral_code}
+              referralCount={referralCount ?? 0}
+            />
+          </div>
+        )}
 
         <div data-stagger className="mt-4">
           <LogoutButton />
