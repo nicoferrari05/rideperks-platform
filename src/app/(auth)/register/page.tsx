@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
@@ -19,7 +19,13 @@ export default function RegisterPage() {
     platform: "",
     password: "",
     confirm_password: "",
+    referral_code: "",
   })
+
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref")
+    if (ref) set("referral_code", ref.toUpperCase())
+  }, [])
 
   function set(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -58,9 +64,15 @@ export default function RegisterPage() {
 
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
+      const referredByCode = form.referral_code.trim().toUpperCase() || null
       await supabase
         .from("profiles")
-        .update({ phone: form.phone, platform: form.platform, full_name: form.full_name })
+        .update({
+          phone: form.phone,
+          platform: form.platform,
+          full_name: form.full_name,
+          referred_by_code: referredByCode,
+        })
         .eq("id", user.id)
     }
 
@@ -197,6 +209,31 @@ export default function RegisterPage() {
                 required
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none"
                 style={inputStyle}
+              />
+            </div>
+
+            <div className="space-y-1.5 pt-2">
+              <label className="font-mono-brand block" style={labelStyle}>
+                CÓDIGO DE REFERIDO{" "}
+                <span style={{ color: "rgba(245,241,234,0.25)", fontFamily: "inherit", letterSpacing: "normal", textTransform: "none", fontSize: "11px" }}>
+                  (opcional)
+                </span>
+              </label>
+              <input
+                type="text"
+                placeholder="RP-XXXX"
+                value={form.referral_code}
+                onChange={(e) => set("referral_code", e.target.value.toUpperCase())}
+                maxLength={7}
+                className="w-full rounded-xl px-4 py-3 text-sm outline-none font-mono"
+                style={{
+                  ...inputStyle,
+                  ...(form.referral_code ? {
+                    backgroundColor: "rgba(232,80,42,0.08)",
+                    border: "1px solid rgba(232,80,42,0.25)",
+                    color: "var(--ember)",
+                  } : {}),
+                }}
               />
             </div>
 

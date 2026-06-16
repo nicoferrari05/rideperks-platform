@@ -16,6 +16,7 @@ export interface Profile {
   status: DriverStatus
   avatar_url: string | null
   referral_code: string | null
+  referred_by_code: string | null
   created_at: string
   updated_at: string
 }
