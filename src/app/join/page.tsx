@@ -28,6 +28,16 @@ export default async function JoinPage({ searchParams }: Props) {
     referrerName = data?.full_name ?? null
   }
 
+  const waNumber = process.env.NEXT_PUBLIC_RIDEPERKS_WHATSAPP ?? ""
+  const waText = encodeURIComponent(
+    code
+      ? `Hola, quiero unirme a RidePerks. Me invitó alguien con el código *${code}*.`
+      : "Hola, quiero unirme a RidePerks."
+  )
+  const waUrl = waNumber
+    ? `https://wa.me/${waNumber}?text=${waText}`
+    : `https://wa.me/?text=${waText}`
+
   return (
     <div
       className="min-h-dvh flex flex-col"
@@ -133,21 +143,36 @@ export default async function JoinPage({ searchParams }: Props) {
         </div>
 
         {/* CTA */}
-        <a
-          href={code ? `/register?ref=${code}` : "/register"}
-          className="pressable flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-bold text-base"
-          style={{
-            backgroundColor: "var(--ember)",
-            color: "#fff",
-            boxShadow: "0 8px 24px rgba(232,80,42,0.35)",
-          }}
-        >
-          Crear mi cuenta
-          <ArrowRight className="w-5 h-5" />
-        </a>
+        {(() => {
+          const waNumber = process.env.NEXT_PUBLIC_RIDEPERKS_WHATSAPP ?? ""
+          const waText = encodeURIComponent(
+            code
+              ? `Hola, quiero unirme a RidePerks. Me invitó alguien con el código *${code}*.`
+              : "Hola, quiero unirme a RidePerks."
+          )
+          const waUrl = waNumber
+            ? `https://wa.me/${waNumber}?text=${waText}`
+            : `https://wa.me/?text=${waText}`
+          return (
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pressable flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-bold text-base"
+              style={{
+                backgroundColor: "var(--ember)",
+                color: "#fff",
+                boxShadow: "0 8px 24px rgba(232,80,42,0.35)",
+              }}
+            >
+              Quiero unirme
+              <ArrowRight className="w-5 h-5" />
+            </a>
+          )
+        })()}
 
         <p className="text-center text-xs mt-4" style={{ color: "rgba(245,241,234,0.30)" }}>
-          Es gratis. Tu membresía se activa cuando el equipo de RidePerks verifique tu cuenta.
+          Te contactaremos por WhatsApp para completar tu registro.
         </p>
       </div>
     </div>
