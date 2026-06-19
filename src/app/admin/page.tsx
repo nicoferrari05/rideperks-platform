@@ -44,8 +44,9 @@ export default async function AdminDashboard() {
     supabase.from("partner_businesses").select("*", { count: "exact", head: true }).eq("is_active", true),
     supabase.from("benefit_redemptions").select("*", { count: "exact", head: true }).gte("redeemed_at", startOfMonth.toISOString()),
     supabase.from("profiles").select("id, full_name, platform, status, created_at").eq("role", "driver").order("created_at", { ascending: false }).limit(5),
+    // Separate query — avoids FK ambiguity from driver_id + created_by both pointing to profiles
     supabase.from("subscriptions")
-      .select("id, expires_at, driver_id, profiles(full_name, phone)")
+      .select("id, expires_at, driver_id")
       .eq("status", "active")
       .gt("expires_at", now.toISOString())
       .lt("expires_at", thirtyDaysFromNow.toISOString())
@@ -60,6 +61,9 @@ export default async function AdminDashboard() {
       .gt("expires_at", now.toISOString()),
   ])
 
+  // Profile lookup map (covers verified drivers — all subscription holders should be verified)
+  const profileMap = new Map((verifiedDrivers ?? []).map((d) => [d.id, d]))
+
   // Verified drivers with no active subscription
   const activeDriverIds = new Set(activeSubIds?.map((s) => s.driver_id) ?? [])
   const noSubDrivers = (verifiedDrivers ?? []).filter((d) => !activeDriverIds.has(d.id))
@@ -73,7 +77,6 @@ export default async function AdminDashboard() {
     { label: "Verificaciones pendientes", value: pendingVerifications ?? 0, icon: Clock, urgent: (pendingVerifications ?? 0) > 0 },
   ]
 
-  const monthLabel = now.toLocaleDateString("es-PA", { month: "long" }).toUpperCase()
 
   return (
     <StaggerEntrance selector=".admin-section" stagger={0.1} y={20} duration={0.55}>
@@ -133,7 +136,7 @@ export default async function AdminDashboard() {
           ) : (
             <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}>
               {expiringSubs?.map((s, i) => {
-                const profile = s.profiles as { full_name?: string; phone?: string } | null
+                const profile = profileMap.get(s.driver_id)
                 const daysLeft = Math.floor((new Date(s.expires_at).getTime() - now.getTime()) / 86400000)
                 const urgent = daysLeft <= 7
                 const wa = waLink(profile?.phone ?? null)
