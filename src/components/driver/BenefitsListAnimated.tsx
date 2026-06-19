@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
 import { Wrench, Zap, Utensils, Heart, Store, LayoutGrid, type LucideIcon } from "lucide-react"
 import BenefitCard from "./BenefitCard"
+import ReferralCard from "./ReferralCard"
 import type { Benefit } from "@/types/database"
 
 gsap.registerPlugin(useGSAP)
@@ -24,6 +25,15 @@ interface Props {
   benefits: BenefitWithBusiness[]
   driverId: string
   canUse: boolean
+  referralCode: string | null
+  referralCount: number
+}
+
+const COMBUSTIBLE = "__combustible__"
+
+function isGasCategory(cat: string) {
+  const c = cat.toLowerCase()
+  return c.includes("combustible") || c.includes("gas") || c.includes("gasolina")
 }
 
 type ChipStyle = { bg: string; fg: string; activeBg: string; activeFg: string; Icon: LucideIcon }
@@ -50,7 +60,7 @@ function categoryRank(cat: string) {
 
 const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
 
-export default function BenefitsListAnimated({ benefits, driverId, canUse }: Props) {
+export default function BenefitsListAnimated({ benefits, driverId, canUse, referralCode, referralCount }: Props) {
   const [activeCategory, setActiveCategory] = useState("todos")
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -59,7 +69,8 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse }: Pro
     const cats: string[] = []
     for (const b of benefits) {
       const c = b.partner_businesses?.category
-      if (c && !seen.has(c)) { seen.add(c); cats.push(c) }
+      // Gas/combustible is handled by the hardcoded Combustible tab
+      if (c && !seen.has(c) && !isGasCategory(c)) { seen.add(c); cats.push(c) }
     }
     return cats.sort((a, b) => categoryRank(a) - categoryRank(b))
   }, [benefits])
@@ -135,22 +146,48 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse }: Pro
               </button>
             )
           })}
+
+          {/* Combustible — always shown, powered by referral program */}
+          <button
+            onClick={() => setActiveCategory(COMBUSTIBLE)}
+            className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+            style={{
+              fontSize: "12px",
+              height: "36px",
+              backgroundColor: activeCategory === COMBUSTIBLE ? "oklch(0.48 0.1 82)" : "rgba(242,183,59,0.18)",
+              color: activeCategory === COMBUSTIBLE ? "var(--bone)" : "oklch(0.48 0.1 82)",
+              border: "none",
+              transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
+            }}
+          >
+            <Zap className="w-3 h-3" />
+            Combustible
+          </button>
         </div>
       )}
 
-      <div key={activeCategory} ref={containerRef} className="grid grid-cols-1 gap-4">
-        {filtered.length === 0 ? (
-          <p className="text-sm py-10 text-center" style={{ color: "var(--mute)" }}>
-            No hay beneficios en esta categoría aún.
+      {activeCategory === COMBUSTIBLE ? (
+        <div className="space-y-3">
+          <p className="text-sm" style={{ color: "var(--mute)", lineHeight: 1.6 }}>
+            No tenemos gasolineras aliadas aún, pero puedes ganarte un tanque lleno invitando a otros conductores al programa.
           </p>
-        ) : (
-          filtered.map((benefit) => (
-            <div key={benefit.id} className="benefit-card">
-              <BenefitCard benefit={benefit} driverId={driverId} canUse={canUse} />
-            </div>
-          ))
-        )}
-      </div>
+          <ReferralCard code={referralCode ?? ""} referralCount={referralCount} />
+        </div>
+      ) : (
+        <div key={activeCategory} ref={containerRef} className="grid grid-cols-1 gap-4">
+          {filtered.length === 0 ? (
+            <p className="text-sm py-10 text-center" style={{ color: "var(--mute)" }}>
+              No hay beneficios en esta categoría aún.
+            </p>
+          ) : (
+            filtered.map((benefit) => (
+              <div key={benefit.id} className="benefit-card">
+                <BenefitCard benefit={benefit} driverId={driverId} canUse={canUse} />
+              </div>
+            ))
+          )}
+        </div>
+      )}
 
     </div>
   )

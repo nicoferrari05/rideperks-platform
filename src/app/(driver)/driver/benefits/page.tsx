@@ -33,7 +33,7 @@ export default async function BenefitsPage() {
   startOfMonth.setDate(1)
   startOfMonth.setHours(0, 0, 0, 0)
 
-  const [{ data: profile }, { data: subscription }, benefits, { data: monthlyRaw }] = await Promise.all([
+  const [{ data: profile }, { data: subscription }, benefits, { data: monthlyRaw }, { count: referralCount }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("subscriptions").select("*")
       .eq("driver_id", user.id).eq("status", "active")
@@ -44,6 +44,9 @@ export default async function BenefitsPage() {
       .select("benefits(savings_value)")
       .eq("driver_id", user.id)
       .gte("redeemed_at", startOfMonth.toISOString()),
+    supabase.from("referrals")
+      .select("*", { count: "exact", head: true })
+      .eq("referrer_id", user.id),
   ])
 
   const monthlySaved = (monthlyRaw ?? []).reduce((sum, r) => {
@@ -135,6 +138,8 @@ export default async function BenefitsPage() {
           benefits={benefits!}
           driverId={user.id}
           canUse={canUse}
+          referralCode={profile?.referral_code ?? null}
+          referralCount={referralCount ?? 0}
         />
       ) : (
         <div className="text-center py-20">
