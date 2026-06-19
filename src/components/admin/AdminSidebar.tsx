@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, Users, Gift, Store, CreditCard, LogOut, Menu, X } from "lucide-react"
+import { LayoutDashboard, Users, Gift, Store, CreditCard, BarChart2, LogOut, Menu, X } from "lucide-react"
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -14,6 +14,7 @@ const navItems = [
   { href: "/admin/benefits", label: "Beneficios", icon: Gift },
   { href: "/admin/businesses", label: "Comercios", icon: Store },
   { href: "/admin/subscriptions", label: "Membresías", icon: CreditCard },
+  { href: "/admin/stats", label: "Estadísticas", icon: BarChart2 },
 ]
 
 export default function AdminSidebar({ adminName }: { adminName: string }) {
