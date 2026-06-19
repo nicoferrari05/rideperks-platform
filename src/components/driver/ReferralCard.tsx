@@ -18,41 +18,31 @@ const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
 export default function ReferralCard({ code, referralCount }: Props) {
   const [copied, setCopied] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const segmentRefs = useRef<(HTMLDivElement | null)[]>([])
-  const shimmerRef = useRef<HTMLDivElement>(null)
+  const fillRefs  = useRef<(HTMLDivElement | null)[]>([])
+  const trackRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useGSAP(() => {
-    // A: filled segments sweep in from left
-    const filled = segmentRefs.current.slice(0, referralCount).filter(Boolean)
-    const empty  = segmentRefs.current.slice(referralCount).filter(Boolean)
-
-    if (filled.length > 0) {
-      gsap.fromTo(filled,
+    // A: ember fill sweeps in from left, one segment at a time
+    const fills = fillRefs.current.slice(0, referralCount).filter(Boolean)
+    if (fills.length > 0) {
+      gsap.fromTo(fills,
         { scaleX: 0, transformOrigin: "left center" },
-        { scaleX: 1, duration: 0.45, stagger: 0.1, ease: "expo.out", delay: 0.25 }
+        { scaleX: 1, duration: 0.5, stagger: 0.15, ease: "expo.out", delay: 0.3 }
       )
     }
 
-    // A: empty segments breathe in a loop
-    if (empty.length > 0) {
-      gsap.to(empty, {
-        opacity: 0.3,
+    // A: empty tracks breathe to signal "fill me"
+    const emptyTracks = trackRefs.current.slice(referralCount).filter(Boolean)
+    if (emptyTracks.length > 0) {
+      gsap.to(emptyTracks, {
+        opacity: 0.35,
         duration: 1.1,
-        stagger: 0.18,
+        stagger: 0.2,
         yoyo: true,
         repeat: -1,
         ease: "sine.inOut",
-        delay: 0.9,
+        delay: 1.0,
       })
-    }
-
-    // C: CTA shimmer sweeps every ~5 s
-    if (shimmerRef.current) {
-      gsap.timeline({ repeat: -1, repeatDelay: 4.5 })
-        .fromTo(shimmerRef.current,
-          { xPercent: -130 },
-          { xPercent: 310, duration: 0.75, ease: "power2.inOut" }
-        )
     }
   }, { scope: containerRef })
 
@@ -116,18 +106,13 @@ export default function ReferralCard({ code, referralCount }: Props) {
             transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
           }}
         >
-          {copied
-            ? <Check className="w-3.5 h-3.5" />
-            : <Copy className="w-3.5 h-3.5" />}
+          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
           {copied ? "Copiado" : "Copiar"}
         </button>
       </div>
 
       {/* Progress */}
-      <div
-        className="px-5 py-4"
-        style={{ borderTop: "1px solid var(--line)" }}
-      >
+      <div className="px-5 py-4" style={{ borderTop: "1px solid var(--line)" }}>
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-semibold" style={{ color: "var(--midnight)" }}>
             {done ? "¡Meta alcanzada!" : `${referralCount} de ${GOAL} conductores referidos`}
@@ -143,19 +128,33 @@ export default function ReferralCard({ code, referralCount }: Props) {
           </span>
         </div>
 
-        {/* Progress segments */}
+        {/* Segments: outer track (bone-2) + inner fill (ember, animated) */}
         <div className="flex gap-1.5">
           {Array.from({ length: GOAL }).map((_, i) => (
             <div
               key={i}
-              ref={el => { segmentRefs.current[i] = el }}
+              ref={el => { trackRefs.current[i] = el }}
               style={{
                 flex: 1,
-                height: "5px",
+                height: "6px",
                 borderRadius: "999px",
-                backgroundColor: i < referralCount ? "var(--ember)" : "var(--bone-2)",
+                backgroundColor: "var(--bone-2)",
+                overflow: "hidden",
+                position: "relative",
               }}
-            />
+            >
+              {i < referralCount && (
+                <div
+                  ref={el => { fillRefs.current[i] = el }}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "999px",
+                    backgroundColor: "var(--ember)",
+                  }}
+                />
+              )}
+            </div>
           ))}
         </div>
 
@@ -165,34 +164,14 @@ export default function ReferralCard({ code, referralCount }: Props) {
       </div>
 
       {/* Share CTA */}
-      <div
-        className="px-5 pb-5"
-        style={{ borderTop: "1px solid var(--line)", paddingTop: "14px" }}
-      >
+      <div className="px-5 pb-5" style={{ borderTop: "1px solid var(--line)", paddingTop: "14px" }}>
         <button
           onClick={handleShare}
           className="pressable w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm"
-          style={{
-            position: "relative",
-            overflow: "hidden",
-            backgroundColor: "var(--midnight)",
-            color: "var(--bone)",
-          }}
+          style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
         >
           <Share2 className="w-4 h-4" />
           Invitar por WhatsApp
-          {/* C: shimmer overlay */}
-          <div
-            ref={shimmerRef}
-            aria-hidden
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "45%",
-              background: "linear-gradient(90deg, transparent, rgba(245,241,234,0.13), transparent)",
-              pointerEvents: "none",
-            }}
-          />
         </button>
       </div>
     </div>
