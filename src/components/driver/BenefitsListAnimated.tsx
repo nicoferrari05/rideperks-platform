@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo } from "react"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
-import { Wrench, Zap, Utensils, Heart, Store, LayoutGrid, type LucideIcon } from "lucide-react"
+import { Wrench, Zap, Utensils, Heart, Store, LayoutGrid, Fuel, type LucideIcon } from "lucide-react"
 import BenefitCard from "./BenefitCard"
 import ReferralCard from "./ReferralCard"
 import type { Benefit } from "@/types/database"
@@ -160,7 +160,7 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
               transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
             }}
           >
-            <Zap className="w-3 h-3" />
+            <Fuel className="w-3 h-3" />
             Combustible
           </button>
         </div>
