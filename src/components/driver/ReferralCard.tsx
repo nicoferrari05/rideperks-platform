@@ -1,11 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { useGSAP } from "@gsap/react"
-import gsap from "gsap"
+import { useState } from "react"
 import { Copy, Check, Share2 } from "lucide-react"
-
-gsap.registerPlugin(useGSAP)
 
 interface Props {
   code: string
@@ -17,32 +13,6 @@ const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
 
 export default function ReferralCard({ code, referralCount }: Props) {
   const [copied, setCopied] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const fillRefs = useRef<(HTMLDivElement | null)[]>([])
-
-  useGSAP(() => {
-    // Filled segments: ember sweeps in from left, then stays
-    const fills = fillRefs.current.slice(0, referralCount).filter(Boolean)
-    if (fills.length > 0) {
-      gsap.fromTo(fills,
-        { scaleX: 0, transformOrigin: "left center" },
-        { scaleX: 1, duration: 0.5, stagger: 0.15, ease: "expo.out", delay: 0.3 }
-      )
-    }
-
-    // Empty segments: ember pulses between dim and brighter — a heartbeat
-    const emptyFills = fillRefs.current.slice(referralCount).filter(Boolean)
-    if (emptyFills.length > 0) {
-      gsap.to(emptyFills, {
-        opacity: 0.48,
-        duration: 1.1,
-        stagger: 0.2,
-        yoyo: true,
-        repeat: -1,
-        ease: "sine.inOut",
-      })
-    }
-  }, { scope: containerRef })
 
   function handleCopy() {
     navigator.clipboard.writeText(code).catch(() => {})
@@ -63,7 +33,6 @@ export default function ReferralCard({ code, referralCount }: Props) {
 
   return (
     <div
-      ref={containerRef}
       className="rounded-2xl overflow-hidden"
       style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
     >
@@ -126,8 +95,6 @@ export default function ReferralCard({ code, referralCount }: Props) {
           </span>
         </div>
 
-        {/* Segments: bone-2 track + ember fill always present.
-            Filled → scaleX sweeps to 1. Empty → pulses at low opacity. */}
         <div className="flex gap-1.5">
           {Array.from({ length: GOAL }).map((_, i) => (
             <div
@@ -136,25 +103,9 @@ export default function ReferralCard({ code, referralCount }: Props) {
                 flex: 1,
                 height: "6px",
                 borderRadius: "999px",
-                backgroundColor: "var(--bone-2)",
-                overflow: "hidden",
-                position: "relative",
+                backgroundColor: i < referralCount ? "var(--ember)" : "var(--bone-2)",
               }}
-            >
-              <div
-                ref={el => { fillRefs.current[i] = el }}
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  borderRadius: "999px",
-                  backgroundColor: "var(--ember)",
-                  opacity: i < referralCount ? 1 : 0.22,
-                  // filled ones start collapsed; GSAP sweeps them open
-                  transform: i < referralCount ? "scaleX(0)" : "scaleX(1)",
-                  transformOrigin: "left center",
-                }}
-              />
-            </div>
+            />
           ))}
         </div>
 
