@@ -1,7 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
+import { useGSAP } from "@gsap/react"
+import gsap from "gsap"
 import { Copy, Check, Share2 } from "lucide-react"
+
+gsap.registerPlugin(useGSAP)
 
 interface Props {
   code: string
@@ -13,6 +17,44 @@ const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
 
 export default function ReferralCard({ code, referralCount }: Props) {
   const [copied, setCopied] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const segmentRefs = useRef<(HTMLDivElement | null)[]>([])
+  const shimmerRef = useRef<HTMLDivElement>(null)
+
+  useGSAP(() => {
+    // A: filled segments sweep in from left
+    const filled = segmentRefs.current.slice(0, referralCount).filter(Boolean)
+    const empty  = segmentRefs.current.slice(referralCount).filter(Boolean)
+
+    if (filled.length > 0) {
+      gsap.fromTo(filled,
+        { scaleX: 0, transformOrigin: "left center" },
+        { scaleX: 1, duration: 0.45, stagger: 0.1, ease: "expo.out", delay: 0.25 }
+      )
+    }
+
+    // A: empty segments breathe in a loop
+    if (empty.length > 0) {
+      gsap.to(empty, {
+        opacity: 0.3,
+        duration: 1.1,
+        stagger: 0.18,
+        yoyo: true,
+        repeat: -1,
+        ease: "sine.inOut",
+        delay: 0.9,
+      })
+    }
+
+    // C: CTA shimmer sweeps every ~5 s
+    if (shimmerRef.current) {
+      gsap.timeline({ repeat: -1, repeatDelay: 4.5 })
+        .fromTo(shimmerRef.current,
+          { xPercent: -130 },
+          { xPercent: 310, duration: 0.75, ease: "power2.inOut" }
+        )
+    }
+  }, { scope: containerRef })
 
   function handleCopy() {
     navigator.clipboard.writeText(code).catch(() => {})
@@ -33,6 +75,7 @@ export default function ReferralCard({ code, referralCount }: Props) {
 
   return (
     <div
+      ref={containerRef}
       className="rounded-2xl overflow-hidden"
       style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
     >
@@ -105,12 +148,12 @@ export default function ReferralCard({ code, referralCount }: Props) {
           {Array.from({ length: GOAL }).map((_, i) => (
             <div
               key={i}
+              ref={el => { segmentRefs.current[i] = el }}
               style={{
                 flex: 1,
                 height: "5px",
                 borderRadius: "999px",
                 backgroundColor: i < referralCount ? "var(--ember)" : "var(--bone-2)",
-                transition: `background-color 300ms ${EASE}`,
               }}
             />
           ))}
@@ -129,10 +172,27 @@ export default function ReferralCard({ code, referralCount }: Props) {
         <button
           onClick={handleShare}
           className="pressable w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm"
-          style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
+          style={{
+            position: "relative",
+            overflow: "hidden",
+            backgroundColor: "var(--midnight)",
+            color: "var(--bone)",
+          }}
         >
           <Share2 className="w-4 h-4" />
           Invitar por WhatsApp
+          {/* C: shimmer overlay */}
+          <div
+            ref={shimmerRef}
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "45%",
+              background: "linear-gradient(90deg, transparent, rgba(245,241,234,0.13), transparent)",
+              pointerEvents: "none",
+            }}
+          />
         </button>
       </div>
     </div>
