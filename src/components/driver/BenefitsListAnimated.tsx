@@ -167,12 +167,7 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
       )}
 
       {activeCategory === COMBUSTIBLE ? (
-        <div className="space-y-3">
-          <p className="text-sm" style={{ color: "var(--mute)", lineHeight: 1.6 }}>
-            No tenemos gasolineras aliadas aún, pero puedes ganarte un tanque lleno invitando a otros conductores al programa.
-          </p>
-          <ReferralCard code={referralCode ?? ""} referralCount={referralCount} />
-        </div>
+        <ReferralCard code={referralCode ?? ""} referralCount={referralCount} />
       ) : (
         <div key={activeCategory} ref={containerRef} className="grid grid-cols-1 gap-4">
           {filtered.length === 0 ? (
