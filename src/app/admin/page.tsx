@@ -1,9 +1,29 @@
 import { createClient } from "@/lib/supabase/server"
-import { Users, Gift, Store, CreditCard, Clock, TrendingUp } from "lucide-react"
+import { Users, Gift, Store, CreditCard, Clock, TrendingUp, MessageCircle } from "lucide-react"
 import StaggerEntrance from "@/components/shared/StaggerEntrance"
+
+const platformLabel: Record<string, string> = {
+  uber: "Uber", indrive: "InDrive", pedidosya: "PedidosYa", multiple: "Múltiple",
+}
+
+const statusConfig: Record<string, { label: string; dot: string }> = {
+  pending: { label: "Pendiente", dot: "var(--sol)" },
+  verified: { label: "Verificado", dot: "var(--verde)" },
+  rejected: { label: "Rechazado", dot: "var(--ember)" },
+  suspended: { label: "Suspendido", dot: "var(--mute)" },
+}
+
+function waLink(phone: string | null) {
+  if (!phone) return null
+  return `https://wa.me/${phone.replace(/\D/g, "")}`
+}
 
 export default async function AdminDashboard() {
   const supabase = await createClient()
+
+  const now = new Date()
+  const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
   const [
     { count: totalDrivers },
@@ -13,15 +33,36 @@ export default async function AdminDashboard() {
     { count: totalBusinesses },
     { count: monthlyRedemptions },
     { data: recentDrivers },
+    { data: expiringSubs },
+    { data: verifiedDrivers },
+    { data: activeSubIds },
   ] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "driver"),
     supabase.from("driver_verifications").select("*", { count: "exact", head: true }).eq("status", "pending"),
-    supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("status", "active").gte("expires_at", new Date().toISOString()),
+    supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("status", "active").gte("expires_at", now.toISOString()),
     supabase.from("benefits").select("*", { count: "exact", head: true }).eq("is_active", true),
     supabase.from("partner_businesses").select("*", { count: "exact", head: true }).eq("is_active", true),
-    supabase.from("benefit_redemptions").select("*", { count: "exact", head: true }).gte("redeemed_at", new Date(new Date().setDate(1)).toISOString()),
+    supabase.from("benefit_redemptions").select("*", { count: "exact", head: true }).gte("redeemed_at", startOfMonth.toISOString()),
     supabase.from("profiles").select("id, full_name, platform, status, created_at").eq("role", "driver").order("created_at", { ascending: false }).limit(5),
+    supabase.from("subscriptions")
+      .select("id, expires_at, driver_id, profiles(full_name, phone)")
+      .eq("status", "active")
+      .gt("expires_at", now.toISOString())
+      .lt("expires_at", thirtyDaysFromNow.toISOString())
+      .order("expires_at", { ascending: true }),
+    supabase.from("profiles")
+      .select("id, full_name, phone, platform, created_at")
+      .eq("role", "driver")
+      .eq("status", "verified"),
+    supabase.from("subscriptions")
+      .select("driver_id")
+      .eq("status", "active")
+      .gt("expires_at", now.toISOString()),
   ])
+
+  // Verified drivers with no active subscription
+  const activeDriverIds = new Set(activeSubIds?.map((s) => s.driver_id) ?? [])
+  const noSubDrivers = (verifiedDrivers ?? []).filter((d) => !activeDriverIds.has(d.id))
 
   const stats = [
     { label: "Conductores", value: totalDrivers ?? 0, icon: Users },
@@ -29,34 +70,22 @@ export default async function AdminDashboard() {
     { label: "Beneficios activos", value: totalBenefits ?? 0, icon: Gift },
     { label: "Comercios", value: totalBusinesses ?? 0, icon: Store },
     { label: "Usos este mes", value: monthlyRedemptions ?? 0, icon: TrendingUp },
-    {
-      label: "Verificaciones pendientes",
-      value: pendingVerifications ?? 0,
-      icon: Clock,
-      urgent: (pendingVerifications ?? 0) > 0,
-    },
+    { label: "Verificaciones pendientes", value: pendingVerifications ?? 0, icon: Clock, urgent: (pendingVerifications ?? 0) > 0 },
   ]
 
-  const platformLabel: Record<string, string> = {
-    uber: "Uber", indrive: "InDrive", pedidosya: "PedidosYa", multiple: "Múltiple",
-  }
-
-  const statusConfig: Record<string, { label: string; dot: string }> = {
-    pending: { label: "Pendiente", dot: "var(--sol)" },
-    verified: { label: "Verificado", dot: "var(--verde)" },
-    rejected: { label: "Rechazado", dot: "var(--ember)" },
-    suspended: { label: "Suspendido", dot: "var(--mute)" },
-  }
+  const monthLabel = now.toLocaleDateString("es-PA", { month: "long" }).toUpperCase()
 
   return (
     <StaggerEntrance selector=".admin-section" stagger={0.1} y={20} duration={0.55}>
       <div className="space-y-8">
+
+        {/* Header */}
         <div className="admin-section">
           <h1 className="font-bold" style={{ fontSize: "28px", letterSpacing: "-0.025em", color: "var(--midnight)" }}>
             Dashboard
           </h1>
           <p className="eyebrow-muted mt-1">
-            {new Date().toLocaleDateString("es-PA", { weekday: "long", day: "numeric", month: "long" }).toUpperCase()}
+            {now.toLocaleDateString("es-PA", { weekday: "long", day: "numeric", month: "long" }).toUpperCase()}
           </p>
         </div>
 
@@ -74,32 +103,126 @@ export default async function AdminDashboard() {
                   }}
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <s.icon
-                      className="w-4 h-4"
-                      style={{ color: s.urgent ? "var(--ember)" : "var(--mute)" }}
-                    />
+                    <s.icon className="w-4 h-4" style={{ color: s.urgent ? "var(--ember)" : "var(--mute)" }} />
                   </div>
                   <p
                     className="font-bold font-mono-brand"
-                    style={{
-                      fontSize: "36px",
-                      letterSpacing: "-0.02em",
-                      color: s.urgent ? "var(--ember)" : "var(--midnight)",
-                      lineHeight: 1,
-                    }}
+                    style={{ fontSize: "36px", letterSpacing: "-0.02em", color: s.urgent ? "var(--ember)" : "var(--midnight)", lineHeight: 1 }}
                   >
                     {s.value}
                   </p>
-                  <p
-                    className="mt-1.5 text-xs"
-                    style={{ color: s.urgent ? "var(--ember-2)" : "var(--mute)" }}
-                  >
+                  <p className="mt-1.5 text-xs" style={{ color: s.urgent ? "var(--ember-2)" : "var(--mute)" }}>
                     {s.label}
                   </p>
                 </div>
               ))}
             </div>
           </StaggerEntrance>
+        </div>
+
+        {/* Expiring subscriptions */}
+        <div className="admin-section">
+          <p className="eyebrow-muted mb-4 flex items-center gap-2">
+            <Clock className="w-3.5 h-3.5" />
+            MEMBRESÍAS POR VENCER — 30 DÍAS
+          </p>
+          {(expiringSubs?.length ?? 0) === 0 ? (
+            <p className="text-sm" style={{ color: "var(--verde)" }}>
+              Todo al día — ninguna membresía vence en los próximos 30 días.
+            </p>
+          ) : (
+            <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}>
+              {expiringSubs?.map((s, i) => {
+                const profile = s.profiles as { full_name?: string; phone?: string } | null
+                const daysLeft = Math.floor((new Date(s.expires_at).getTime() - now.getTime()) / 86400000)
+                const urgent = daysLeft <= 7
+                const wa = waLink(profile?.phone ?? null)
+                return (
+                  <div
+                    key={s.id}
+                    className="flex items-center justify-between px-4 py-3.5 gap-3"
+                    style={{ borderTop: i > 0 ? "1px solid var(--line)" : "none" }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: "var(--midnight)" }}>
+                        {profile?.full_name ?? "—"}
+                      </p>
+                      <p className="font-mono-brand mt-0.5" style={{ fontSize: "11px", letterSpacing: "0.06em", color: urgent ? "var(--ember)" : "var(--sol)" }}>
+                        VENCE EN {daysLeft} {daysLeft === 1 ? "DÍA" : "DÍAS"}
+                      </p>
+                    </div>
+                    {wa && (
+                      <a
+                        href={`${wa}?text=${encodeURIComponent(`Hola ${profile?.full_name?.split(" ")[0] ?? ""}, tu membresía RidePerks vence en ${daysLeft} días. ¿Renovamos?`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="pressable flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold flex-shrink-0"
+                        style={{ backgroundColor: "rgba(37,211,102,0.10)", color: "#25D366" }}
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        WhatsApp
+                      </a>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Verified without subscription */}
+        <div className="admin-section">
+          <p className="eyebrow-muted mb-4 flex items-center gap-2">
+            <Users className="w-3.5 h-3.5" />
+            CONDUCTORES VERIFICADOS SIN MEMBRESÍA
+            {noSubDrivers.length > 0 && (
+              <span
+                className="font-mono-brand font-semibold px-2 py-0.5 rounded-full"
+                style={{ fontSize: "10px", backgroundColor: "var(--ember-soft)", color: "var(--ember)" }}
+              >
+                {noSubDrivers.length}
+              </span>
+            )}
+          </p>
+          {noSubDrivers.length === 0 ? (
+            <p className="text-sm" style={{ color: "var(--verde)" }}>
+              Todos los conductores verificados tienen membresía activa.
+            </p>
+          ) : (
+            <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}>
+              {noSubDrivers.map((d, i) => {
+                const wa = waLink(d.phone)
+                return (
+                  <div
+                    key={d.id}
+                    className="flex items-center justify-between px-4 py-3.5 gap-3"
+                    style={{ borderTop: i > 0 ? "1px solid var(--line)" : "none" }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: "var(--midnight)" }}>
+                        {d.full_name}
+                      </p>
+                      <p className="font-mono-brand mt-0.5" style={{ fontSize: "11px", letterSpacing: "0.06em", color: "var(--mute)" }}>
+                        {d.platform ? platformLabel[d.platform] : "—"} · DESDE {new Date(d.created_at).toLocaleDateString("es-PA", { day: "2-digit", month: "short" }).toUpperCase()}
+                      </p>
+                    </div>
+                    {wa && (
+                      <a
+                        href={`${wa}?text=${encodeURIComponent(`Hola ${d.full_name?.split(" ")[0] ?? ""}, ya tienes tu cuenta RidePerks verificada. ¿Activamos tu membresía?`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="pressable flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold flex-shrink-0"
+                        style={{ backgroundColor: "rgba(37,211,102,0.10)", color: "#25D366" }}
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        WhatsApp
+                      </a>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* Recent drivers */}
@@ -143,6 +266,7 @@ export default async function AdminDashboard() {
             </StaggerEntrance>
           )}
         </div>
+
       </div>
     </StaggerEntrance>
   )
