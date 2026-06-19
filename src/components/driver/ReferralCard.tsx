@@ -103,7 +103,7 @@ export default function ReferralCard({ code, referralCount }: Props) {
                 flex: 1,
                 height: "6px",
                 borderRadius: "999px",
-                backgroundColor: i < referralCount ? "var(--ember)" : "var(--bone-2)",
+                backgroundColor: i < referralCount ? "var(--verde)" : "var(--bone-2)",
               }}
             />
           ))}
