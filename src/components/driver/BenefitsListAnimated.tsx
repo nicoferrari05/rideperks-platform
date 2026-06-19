@@ -167,7 +167,17 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
       )}
 
       {activeCategory === COMBUSTIBLE ? (
-        <ReferralCard code={referralCode ?? ""} referralCount={referralCount} />
+        <div className="space-y-4">
+          <div>
+            <h2 className="font-bold" style={{ fontSize: "22px", letterSpacing: "-0.02em", color: "var(--midnight)" }}>
+              Llévate un tanque lleno
+            </h2>
+            <p className="text-sm mt-1" style={{ color: "var(--mute)", lineHeight: 1.6 }}>
+              Invita 3 conductores a RidePerks y gana tu próximo tanque gratis.
+            </p>
+          </div>
+          <ReferralCard code={referralCode ?? ""} referralCount={referralCount} />
+        </div>
       ) : (
         <div key={activeCategory} ref={containerRef} className="grid grid-cols-1 gap-4">
           {filtered.length === 0 ? (
