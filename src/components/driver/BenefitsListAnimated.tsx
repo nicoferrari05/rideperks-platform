@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo } from "react"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
-import { Wrench, Zap, Utensils, Heart, Store, LayoutGrid, Fuel, type LucideIcon } from "lucide-react"
+import { Wrench, Zap, Utensils, Heart, Store, LayoutGrid, Fuel, Settings2, type LucideIcon } from "lucide-react"
 import BenefitCard from "./BenefitCard"
 import ReferralCard from "./ReferralCard"
 import type { Benefit } from "@/types/database"
@@ -40,8 +40,8 @@ type ChipStyle = { bg: string; fg: string; activeBg: string; activeFg: string; I
 
 function getCategoryChipStyle(category: string | null | undefined): ChipStyle {
   const c = (category ?? "").toLowerCase()
-  if (c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri"))
-    return { bg: "var(--ember-soft)", fg: "var(--ember)", activeBg: "var(--ember)", activeFg: "var(--bone)", Icon: Wrench }
+  if (c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri") || c.includes("mantenimiento") || c.includes("servicio") || c.includes("automotriz") || c.includes("vehiculo"))
+    return { bg: "var(--ember-soft)", fg: "var(--ember)", activeBg: "var(--ember)", activeFg: "var(--bone)", Icon: Settings2 }
   if (c.includes("combustible") || c.includes("gas") || c.includes("gasolina"))
     return { bg: "rgba(242,183,59,0.18)", fg: "oklch(0.48 0.1 82)", activeBg: "oklch(0.48 0.1 82)", activeFg: "var(--bone)", Icon: Zap }
   if (c.includes("comida") || c.includes("restaurante") || c.includes("food") || c.includes("aliment"))
