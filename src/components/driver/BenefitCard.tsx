@@ -29,7 +29,7 @@ const discountLabel: Record<string, string> = {
 
 function getCategoryStyle(category: string | null | undefined) {
   const c = (category ?? "").toLowerCase()
-  if (c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri"))
+  if (c.includes("taller") || c.includes("mecanica") || c.includes("auto") || c.includes("chapisteri") || c.includes("mantenimiento") || c.includes("servicio") || c.includes("automotriz") || c.includes("vehiculo"))
     return { bg: "var(--ember-soft)", fg: "var(--ember)", Icon: Wrench }
   if (c.includes("combustible") || c.includes("gas") || c.includes("gasolina"))
     return { bg: "rgba(242,183,59,0.15)", fg: "oklch(0.5 0.1 82)", Icon: Zap }
