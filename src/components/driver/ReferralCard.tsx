@@ -18,11 +18,10 @@ const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
 export default function ReferralCard({ code, referralCount }: Props) {
   const [copied, setCopied] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const fillRefs  = useRef<(HTMLDivElement | null)[]>([])
-  const trackRefs = useRef<(HTMLDivElement | null)[]>([])
+  const fillRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useGSAP(() => {
-    // A: ember fill sweeps in from left, one segment at a time
+    // Filled segments: ember sweeps in from left, then stays
     const fills = fillRefs.current.slice(0, referralCount).filter(Boolean)
     if (fills.length > 0) {
       gsap.fromTo(fills,
@@ -31,17 +30,16 @@ export default function ReferralCard({ code, referralCount }: Props) {
       )
     }
 
-    // A: empty tracks breathe to signal "fill me"
-    const emptyTracks = trackRefs.current.slice(referralCount).filter(Boolean)
-    if (emptyTracks.length > 0) {
-      gsap.to(emptyTracks, {
-        opacity: 0.35,
+    // Empty segments: ember pulses between dim and brighter — a heartbeat
+    const emptyFills = fillRefs.current.slice(referralCount).filter(Boolean)
+    if (emptyFills.length > 0) {
+      gsap.to(emptyFills, {
+        opacity: 0.48,
         duration: 1.1,
         stagger: 0.2,
         yoyo: true,
         repeat: -1,
         ease: "sine.inOut",
-        delay: 1.0,
       })
     }
   }, { scope: containerRef })
@@ -128,12 +126,12 @@ export default function ReferralCard({ code, referralCount }: Props) {
           </span>
         </div>
 
-        {/* Segments: outer track (bone-2) + inner fill (ember, animated) */}
+        {/* Segments: bone-2 track + ember fill always present.
+            Filled → scaleX sweeps to 1. Empty → pulses at low opacity. */}
         <div className="flex gap-1.5">
           {Array.from({ length: GOAL }).map((_, i) => (
             <div
               key={i}
-              ref={el => { trackRefs.current[i] = el }}
               style={{
                 flex: 1,
                 height: "6px",
@@ -143,17 +141,19 @@ export default function ReferralCard({ code, referralCount }: Props) {
                 position: "relative",
               }}
             >
-              {i < referralCount && (
-                <div
-                  ref={el => { fillRefs.current[i] = el }}
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    borderRadius: "999px",
-                    backgroundColor: "var(--ember)",
-                  }}
-                />
-              )}
+              <div
+                ref={el => { fillRefs.current[i] = el }}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "999px",
+                  backgroundColor: "var(--ember)",
+                  opacity: i < referralCount ? 1 : 0.22,
+                  // filled ones start collapsed; GSAP sweeps them open
+                  transform: i < referralCount ? "scaleX(0)" : "scaleX(1)",
+                  transformOrigin: "left center",
+                }}
+              />
             </div>
           ))}
         </div>
