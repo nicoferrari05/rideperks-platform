@@ -226,9 +226,43 @@ function BusinessVerifyContent() {
     if (!codeParam) return
     setBusinessCode(codeParam)
     withVT(() => setStep("scan"))
-    startScannerWithCode(codeParam)
+    // Scanner will be started by the step useEffect below
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Start scanner once the "scan" step is active and #qr-viewport is in the DOM.
+  // Using an effect (not inline in the handler) avoids the race condition where
+  // startScanner() runs before React has rendered the #qr-viewport div.
+  // The explicit getUserMedia call forces the iOS PWA camera permission prompt —
+  // standalone apps have a separate permission context from Safari.
+  useEffect(() => {
+    if (step !== "scan" || !businessCode) return
+
+    let cancelled = false
+
+    async function init() {
+      // Explicit permission request — required for iOS home screen apps
+      if (navigator.mediaDevices?.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+          stream.getTracks().forEach(t => t.stop()) // release immediately; Html5Qrcode opens its own
+        } catch {
+          if (!cancelled) {
+            toast.error("Permite el acceso a la cámara en Ajustes del teléfono para escanear QRs.")
+          }
+          return
+        }
+      }
+
+      if (cancelled) return
+      await startScannerWithCode(businessCode)
+    }
+
+    init()
+
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, businessCode])
 
   async function startScannerWithCode(code: string) {
     const { Html5Qrcode } = await import("html5-qrcode")
@@ -241,25 +275,6 @@ function BusinessVerifyContent() {
         async (decoded) => {
           await stopScanner()
           await verifyTokenWithCode(decoded, code)
-        },
-        () => {}
-      )
-    } catch {
-      toast.error("No se pudo acceder a la cámara. Usa el ingreso manual.")
-    }
-  }
-
-  async function startScanner() {
-    const { Html5Qrcode } = await import("html5-qrcode")
-    const scanner = new Html5Qrcode("qr-viewport")
-    scannerRef.current = scanner
-    try {
-      await scanner.start(
-        { facingMode: "environment" },
-        { fps: 15, qrbox: { width: 260, height: 260 } },
-        async (decoded) => {
-          await stopScanner()
-          await verifyToken(decoded)
         },
         () => {}
       )
@@ -299,7 +314,7 @@ function BusinessVerifyContent() {
       return
     }
     withVT(() => setStep("scan"))
-    startScanner()
+    // Scanner starts via the step useEffect — not here
   }
 
   // ── CODE ENTRY STEP ─────────────────────────────────────────
