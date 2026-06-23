@@ -165,9 +165,9 @@ export default function SplashScreen({ onComplete }: Props) {
       ro.observe(canvas.parentElement!)
 
       // ── GSAP entrance / exit ───────────────────────────────────────────────
-      gsap.set(container, { autoAlpha: 0 })
-      gsap.set(orb,       { autoAlpha: 0, scale: 0.55 })
-      gsap.set(mark,      { autoAlpha: 0 })
+      // container starts at opacity:0 via inline style — no gsap.set needed
+      gsap.set(orb,  { autoAlpha: 0, scale: 0.55 })
+      gsap.set(mark, { autoAlpha: 0 })
 
       const tl = gsap.timeline({ onComplete })
 
@@ -206,7 +206,7 @@ export default function SplashScreen({ onComplete }: Props) {
     <div
       ref={containerRef}
       className="fixed inset-0 z-[9999]"
-      style={{ backgroundColor: "var(--midnight)" }}
+      style={{ backgroundColor: "#0F1B3D", opacity: 0 }}
     >
       {/* Living Sphere canvas */}
       <canvas

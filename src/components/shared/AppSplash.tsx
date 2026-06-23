@@ -24,7 +24,7 @@ export default function AppSplash() {
     return (
       <div
         className="fixed inset-0 z-[9999]"
-        style={{ backgroundColor: "var(--midnight)" }}
+        style={{ backgroundColor: "#0F1B3D" }}
       />
     )
   }
