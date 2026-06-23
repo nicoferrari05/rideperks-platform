@@ -25,7 +25,6 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const viewport: Viewport = {
   themeColor: "#0F1B3D",
-  viewportFit: "cover",
 }
 
 export const metadata: Metadata = {
@@ -34,9 +33,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     title: "RidePerks",
     capable: true,
-    // "black-translucent" = transparent status bar with white text,
-    // matching the dark midnight theme instead of showing a white bar.
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "black",
   },
 }
 
