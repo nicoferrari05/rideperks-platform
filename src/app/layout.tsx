@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist, Fraunces, JetBrains_Mono } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
 import AppSplash from "@/components/shared/AppSplash"
@@ -23,14 +23,20 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500", "600"],
 })
 
+export const viewport: Viewport = {
+  themeColor: "#0F1B3D",
+  viewportFit: "cover",
+}
+
 export const metadata: Metadata = {
   title: "RidePerks — Tu trabajo rinde más",
   description: "El club de beneficios para conductores de Uber, InDrive y PedidosYa en Panamá.",
-  themeColor: "#0F1B3D",
   appleWebApp: {
     title: "RidePerks",
     capable: true,
-    statusBarStyle: "default",
+    // "black-translucent" = transparent status bar with white text,
+    // matching the dark midnight theme instead of showing a white bar.
+    statusBarStyle: "black-translucent",
   },
 }
 

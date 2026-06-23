@@ -11,8 +11,17 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#0F1B3D",
     theme_color: "#0F1B3D",
     orientation: "portrait-primary",
+    id: "/",
     icons: [
       {
+        // Android Chrome uses "any" purpose for install prompt and splash screen
+        src: "/icon",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        // Android adaptive icon (rounded/squircle shape)
         src: "/icon",
         sizes: "512x512",
         type: "image/png",
