@@ -98,6 +98,7 @@ export default function DriverNav({ profile }: { profile: Profile }) {
                   key={href}
                   href={href}
                   prefetch={true}
+                  onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
                   className="pressable flex flex-col items-center gap-1"
                   style={{
                     flex: "1",
