@@ -272,13 +272,13 @@
 
 /* ── Driver portal ─────────────────────────────────────────── */
 /* No view transitions — loading.tsx skeleton + GSAP entrance handles the feel */
-/* Header and nav stay static: they have viewTransitionName so they're excluded
-   from the root snapshot, but we disable their animation to prevent the flash
-   caused by the browser cross-fading two identical-looking screenshots. */
-::view-transition-old(driver-header),
-::view-transition-new(driver-header),
-::view-transition-old(driver-nav),
-::view-transition-new(driver-nav) {
+
+/* Disable root cross-fade globally. Named-element transitions (admin-main etc.)
+   still work. Without this, the browser uses mix-blend-mode:plus-lighter on the
+   root snapshot pair which doubles the brightness of sticky/fixed elements and
+   causes a white flash on every navigation. */
+::view-transition-old(root),
+::view-transition-new(root) {
   animation: none;
 }
 

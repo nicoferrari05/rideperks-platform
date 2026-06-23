@@ -37,7 +37,6 @@ export default function DriverNav({ profile }: { profile: Profile }) {
         style={{
           backgroundColor: "var(--midnight)",
           borderColor: "rgba(245,241,234,0.1)",
-          viewTransitionName: "driver-header",
         }}
       >
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -68,7 +67,6 @@ export default function DriverNav({ profile }: { profile: Profile }) {
           backgroundColor: "var(--midnight)",
           borderColor: "rgba(245,241,234,0.1)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          viewTransitionName: "driver-nav",
         }}
       >
         {/* 20px side padding keeps pill away from iPhone curved-corner clip zone */}
