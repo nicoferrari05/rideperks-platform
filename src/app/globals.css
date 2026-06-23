@@ -272,6 +272,15 @@
 
 /* ── Driver portal ─────────────────────────────────────────── */
 /* No view transitions — loading.tsx skeleton + GSAP entrance handles the feel */
+/* Header and nav stay static: they have viewTransitionName so they're excluded
+   from the root snapshot, but we disable their animation to prevent the flash
+   caused by the browser cross-fading two identical-looking screenshots. */
+::view-transition-old(driver-header),
+::view-transition-new(driver-header),
+::view-transition-old(driver-nav),
+::view-transition-new(driver-nav) {
+  animation: none;
+}
 
 /* ── Admin portal ──────────────────────────────────────────── */
 /* Same pattern: old content fades out, GSAP handles new content */
