@@ -1,22 +1,22 @@
 import { createClient } from "@/lib/supabase/server"
-import { Zap, Wrench, Utensils, Heart, ArrowRight } from "lucide-react"
+import { Wrench, Utensils, Heart, Fuel } from "lucide-react"
+import JoinForm from "@/components/join/JoinForm"
 
 interface Props {
   searchParams: Promise<{ ref?: string }>
 }
 
 const BENEFITS = [
-  { Icon: Zap,      label: "Combustible",  desc: "Descuentos en gasolineras aliadas" },
-  { Icon: Wrench,   label: "Taller",       desc: "Mantenimiento y chapistería" },
-  { Icon: Utensils, label: "Comida",       desc: "Restaurantes y delivery" },
-  { Icon: Heart,    label: "Salud",        desc: "Clínicas y farmacias" },
+  { Icon: Fuel,      label: "Combustible",  desc: "Gana un tanque gratis invitando conductores" },
+  { Icon: Wrench,    label: "Taller",       desc: "Mantenimiento y chapistería" },
+  { Icon: Utensils,  label: "Comida",       desc: "Restaurantes y delivery" },
+  { Icon: Heart,     label: "Salud",        desc: "Clínicas y farmacias" },
 ]
 
 export default async function JoinPage({ searchParams }: Props) {
   const { ref } = await searchParams
   const code = ref?.toUpperCase().trim() ?? null
 
-  // Look up referrer name if a code was provided
   let referrerName: string | null = null
   if (code) {
     const supabase = await createClient()
@@ -28,24 +28,13 @@ export default async function JoinPage({ searchParams }: Props) {
     referrerName = data?.full_name ?? null
   }
 
-  const waNumber = process.env.NEXT_PUBLIC_RIDEPERKS_WHATSAPP ?? ""
-  const waText = encodeURIComponent(
-    code
-      ? `Hola, quiero unirme a RidePerks. Me invitó alguien con el código *${code}*.`
-      : "Hola, quiero unirme a RidePerks."
-  )
-  const waUrl = waNumber
-    ? `https://wa.me/${waNumber}?text=${waText}`
-    : `https://wa.me/?text=${waText}`
-
   return (
     <div
       className="min-h-dvh flex flex-col"
       style={{ backgroundColor: "var(--midnight)" }}
     >
       {/* Header */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pt-16 pb-8 text-center">
-
+      <div className="flex flex-col items-center px-6 pt-14 pb-6 text-center">
         {/* Logo mark */}
         <div
           className="w-20 h-20 rounded-[22px] flex items-center justify-center mb-8"
@@ -69,7 +58,6 @@ export default async function JoinPage({ searchParams }: Props) {
           </span>
         </div>
 
-        {/* Invitation context */}
         {referrerName ? (
           <p
             className="font-semibold mb-2"
@@ -82,7 +70,7 @@ export default async function JoinPage({ searchParams }: Props) {
             className="font-semibold mb-2"
             style={{ fontSize: "13px", letterSpacing: "0.06em", color: "var(--ember)" }}
           >
-            TE INVITARON A
+            ÚNETE A
           </p>
         )}
 
@@ -93,7 +81,6 @@ export default async function JoinPage({ searchParams }: Props) {
             letterSpacing: "-0.03em",
             color: "var(--bone)",
             lineHeight: 1.15,
-            maxWidth: "280px",
           }}
         >
           RidePerks
@@ -105,27 +92,11 @@ export default async function JoinPage({ searchParams }: Props) {
         >
           El club de beneficios exclusivo para conductores en Panamá.
         </p>
-
-        {/* Code badge */}
-        {code && (
-          <div
-            className="mt-6 px-4 py-2 rounded-full font-mono-brand font-bold"
-            style={{
-              fontSize: "14px",
-              letterSpacing: "0.08em",
-              backgroundColor: "rgba(232,80,42,0.12)",
-              color: "var(--ember)",
-              border: "1px solid rgba(232,80,42,0.25)",
-            }}
-          >
-            Código: {code}
-          </div>
-        )}
       </div>
 
       {/* Benefits grid */}
-      <div className="px-6 pb-8">
-        <div className="grid grid-cols-2 gap-3 mb-6">
+      <div className="px-6 pb-6">
+        <div className="grid grid-cols-2 gap-3">
           {BENEFITS.map(({ Icon, label, desc }) => (
             <div
               key={label}
@@ -141,40 +112,16 @@ export default async function JoinPage({ searchParams }: Props) {
             </div>
           ))}
         </div>
-
-        {/* CTA */}
-        {(() => {
-          const waNumber = process.env.NEXT_PUBLIC_RIDEPERKS_WHATSAPP ?? ""
-          const waText = encodeURIComponent(
-            code
-              ? `Hola, quiero unirme a RidePerks. Me invitó alguien con el código *${code}*.`
-              : "Hola, quiero unirme a RidePerks."
-          )
-          const waUrl = waNumber
-            ? `https://wa.me/${waNumber}?text=${waText}`
-            : `https://wa.me/?text=${waText}`
-          return (
-            <a
-              href={waUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="pressable flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-bold text-base"
-              style={{
-                backgroundColor: "var(--ember)",
-                color: "#fff",
-                boxShadow: "0 8px 24px rgba(232,80,42,0.35)",
-              }}
-            >
-              Quiero unirme
-              <ArrowRight className="w-5 h-5" />
-            </a>
-          )
-        })()}
-
-        <p className="text-center text-xs mt-4" style={{ color: "rgba(245,241,234,0.30)" }}>
-          Te contactaremos por WhatsApp para completar tu registro.
-        </p>
       </div>
+
+      {/* Divider */}
+      <div
+        className="mx-6 mb-2"
+        style={{ height: "1px", backgroundColor: "rgba(245,241,234,0.07)" }}
+      />
+
+      {/* Registration form with Yappy payment */}
+      <JoinForm referralCode={code} />
     </div>
   )
 }

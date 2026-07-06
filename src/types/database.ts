@@ -1,7 +1,7 @@
 export type UserRole = 'driver' | 'admin' | 'business'
 export type DriverStatus = 'pending' | 'verified' | 'rejected' | 'suspended'
 export type DriverPlatform = 'uber' | 'indrive' | 'pedidosya' | 'multiple'
-export type SubscriptionStatus = 'active' | 'expired' | 'cancelled'
+export type SubscriptionStatus = 'active' | 'expired' | 'cancelled' | 'pending'
 export type VerificationStatus = 'pending' | 'approved' | 'rejected'
 export type QRTokenStatus = 'pending' | 'used' | 'expired'
 export type DiscountType = 'percentage' | 'fixed' | 'free_item' | 'other'
