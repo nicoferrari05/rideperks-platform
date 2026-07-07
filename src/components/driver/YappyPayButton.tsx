@@ -26,6 +26,7 @@ export default function YappyPayButton() {
   const btnRef = useRef<YappyBtnElement | null>(null)
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
+  const [paymentOpen, setPaymentOpen] = useState(false)
 
   useEffect(() => {
     if (customElements.get("btn-yappy")) {
@@ -52,6 +53,8 @@ export default function YappyPayButton() {
     }
   }, [])
 
+  const closeBackdrop = useCallback(() => setPaymentOpen(false), [])
+
   const handleClick = useCallback(async () => {
     const btn = btnRef.current
     if (!btn) return
@@ -65,6 +68,7 @@ export default function YappyPayButton() {
         return
       }
       btn.isButtonLoading = false
+      setPaymentOpen(true)
       btn.eventPayment(data)
     } catch {
       toast.error("Error de conexión. Intenta de nuevo.")
@@ -73,11 +77,13 @@ export default function YappyPayButton() {
   }, [])
 
   const handleSuccess = useCallback(() => {
+    setPaymentOpen(false)
     toast.success("¡Pago recibido! Tu membresía estará activa en unos segundos.")
     setTimeout(() => router.refresh(), 3000)
   }, [router])
 
   const handleError = useCallback((e: Event) => {
+    setPaymentOpen(false)
     const code = (e as CustomEvent).detail?.code
     const messages: Record<string, string> = {
       E005: "Este número no está registrado en Yappy.",
@@ -121,7 +127,36 @@ export default function YappyPayButton() {
   }
 
   return (
-    // @ts-expect-error — btn-yappy is a custom web component
-    <btn-yappy ref={btnRef} theme="dark" rounded="true" />
+    <>
+      {paymentOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.75)",
+            zIndex: 9998,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          }}
+        >
+          <button
+            onClick={closeBackdrop}
+            className="pressable mb-6 px-6 py-3 rounded-full text-sm font-semibold"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.12)",
+              color: "rgba(255,255,255,0.7)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+      {/* @ts-expect-error — btn-yappy is a custom web component */}
+      <btn-yappy ref={btnRef} theme="dark" rounded="true" />
+    </>
   )
 }
