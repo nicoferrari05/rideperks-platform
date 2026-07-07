@@ -121,6 +121,23 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
           <span style={{ opacity: 0.55, fontWeight: 500 }}>({benefits.length})</span>
         </button>
 
+        {/* Comida — always shown, coming soon */}
+        <button
+          onClick={() => setActiveCategory(COMIDA)}
+          className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+          style={{
+            fontSize: "12px",
+            height: "36px",
+            backgroundColor: activeCategory === COMIDA ? "var(--verde)" : "rgba(47,143,110,0.14)",
+            color: activeCategory === COMIDA ? "var(--bone)" : "var(--verde)",
+            border: "none",
+            transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
+          }}
+        >
+          <Utensils className="w-3 h-3" />
+          Comida
+        </button>
+
         {categories.map((cat) => {
           const isActive = activeCategory === cat
           const { bg, fg, activeBg, activeFg, Icon } = getCategoryChipStyle(cat)
@@ -146,23 +163,6 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
             </button>
           )
         })}
-
-        {/* Comida — always shown, coming soon */}
-        <button
-          onClick={() => setActiveCategory(COMIDA)}
-          className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
-          style={{
-            fontSize: "12px",
-            height: "36px",
-            backgroundColor: activeCategory === COMIDA ? "var(--verde)" : "rgba(47,143,110,0.14)",
-            color: activeCategory === COMIDA ? "var(--bone)" : "var(--verde)",
-            border: "none",
-            transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
-          }}
-        >
-          <Utensils className="w-3 h-3" />
-          Comida
-        </button>
 
         {/* Combustible — always shown, powered by referral program */}
         <button
