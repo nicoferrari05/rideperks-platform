@@ -98,7 +98,7 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
   )
 
   return (
-    <div className="space-y-4">
+    <div ref={containerRef} className="space-y-4">
 
       <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none", paddingBottom: "2px" }}>
 
@@ -207,7 +207,7 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
           <ReferralCard code={referralCode ?? ""} referralCount={referralCount} />
         </div>
       ) : (
-        <div key={activeCategory} ref={containerRef} className="grid grid-cols-1 gap-4">
+        <div key={activeCategory} className="grid grid-cols-1 gap-4">
           {filtered.length === 0 ? (
             <p className="text-sm py-10 text-center" style={{ color: "var(--mute)" }}>
               No hay beneficios en esta categoría aún.
