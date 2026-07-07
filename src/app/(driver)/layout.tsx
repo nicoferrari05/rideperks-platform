@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import DriverNav from "@/components/driver/DriverNav"
 import ScrollToTop from "@/components/shared/ScrollToTop"
-import Script from "next/script"
+import YappyLoader from "@/components/driver/YappyLoader"
 
 export default async function DriverLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -21,10 +21,7 @@ export default async function DriverLayout({ children }: { children: React.React
 
   return (
     <div className="min-h-screen">
-      <Script
-        src="https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"
-        strategy="afterInteractive"
-      />
+      <YappyLoader />
       <ScrollToTop />
       <DriverNav profile={profile} />
       <main
