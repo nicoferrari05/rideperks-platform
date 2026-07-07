@@ -175,76 +175,89 @@ export default function YappyPayButton({ defaultPhone = "" }: YappyPayButtonProp
         >
           <div
             style={{
-              backgroundColor: "var(--paper)",
+              backgroundColor: "var(--midnight)",
               borderRadius: "20px 20px 0 0",
               padding: "24px 20px",
               paddingBottom: "calc(24px + env(safe-area-inset-bottom, 0px))",
+              position: "relative",
+              overflow: "hidden",
             }}
           >
-            <p
-              className="font-semibold mb-1"
-              style={{ fontSize: "17px", color: "var(--midnight)", letterSpacing: "-0.01em" }}
-            >
-              Confirma tu número de Yappy
-            </p>
-            <p className="text-sm mb-5" style={{ color: "var(--mute)" }}>
-              Este es el número al que se enviará el cobro de B/. 15.00. Cámbialo si usas otro número en Yappy.
-            </p>
-
-            <label
-              className="font-mono-brand"
-              style={{ fontSize: "10px", letterSpacing: "0.1em", color: "var(--mute)", display: "block", marginBottom: "6px" }}
-            >
-              NÚMERO DE YAPPY
-            </label>
-            <input
-              type="tel"
-              inputMode="numeric"
-              value={confirmPhone}
-              onChange={(e) => setConfirmPhone(e.target.value)}
-              placeholder="Ej: 6000-0000"
+            {/* Glow */}
+            <div
               style={{
-                width: "100%",
-                padding: "12px 14px",
-                borderRadius: "12px",
-                border: "1.5px solid var(--line)",
-                fontSize: "16px",
-                color: "var(--midnight)",
-                backgroundColor: "var(--bone-2)",
-                outline: "none",
-                marginBottom: "16px",
-                fontFamily: "inherit",
+                position: "absolute",
+                right: "-10%", top: "-40%", width: "50%", height: "60%",
+                background: "radial-gradient(circle, rgba(232,80,42,0.25), transparent 65%)",
+                pointerEvents: "none",
               }}
             />
+            <div style={{ position: "relative" }}>
+              <p
+                className="font-semibold mb-1"
+                style={{ fontSize: "17px", color: "var(--bone)", letterSpacing: "-0.01em" }}
+              >
+                Confirma tu número de Yappy
+              </p>
+              <p className="text-sm mb-5" style={{ color: "rgba(245,241,234,0.45)" }}>
+                Este es el número al que se enviará el cobro de B/. 15.00. Cámbialo si usas otro número en Yappy.
+              </p>
 
-            <button
-              onClick={handleConfirmPay}
-              disabled={submitting || !confirmPhone.trim()}
-              className="pressable w-full rounded-2xl py-4 font-semibold text-sm flex items-center justify-center gap-2 mb-3"
-              style={{
-                backgroundColor: submitting || !confirmPhone.trim() ? "rgba(232,80,42,0.4)" : "var(--ember)",
-                color: "#fff",
-                minHeight: "52px",
-              }}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Procesando...
-                </>
-              ) : (
-                "Confirmar y pagar B/. 15.00"
-              )}
-            </button>
+              <label
+                className="font-mono-brand"
+                style={{ fontSize: "10px", letterSpacing: "0.1em", color: "rgba(245,241,234,0.4)", display: "block", marginBottom: "6px" }}
+              >
+                NÚMERO DE YAPPY
+              </label>
+              <input
+                type="tel"
+                inputMode="numeric"
+                value={confirmPhone}
+                onChange={(e) => setConfirmPhone(e.target.value)}
+                placeholder="Ej: 6000-0000"
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  borderRadius: "12px",
+                  border: "1.5px solid rgba(245,241,234,0.12)",
+                  fontSize: "16px",
+                  color: "var(--bone)",
+                  backgroundColor: "rgba(245,241,234,0.07)",
+                  outline: "none",
+                  marginBottom: "16px",
+                  fontFamily: "inherit",
+                }}
+              />
 
-            <button
-              onClick={handleCancelConfirm}
-              disabled={submitting}
-              className="pressable w-full py-3 font-semibold text-sm"
-              style={{ color: "var(--mute)" }}
-            >
-              Cancelar
-            </button>
+              <button
+                onClick={handleConfirmPay}
+                disabled={submitting || !confirmPhone.trim()}
+                className="pressable w-full rounded-2xl py-4 font-semibold text-sm flex items-center justify-center gap-2 mb-3"
+                style={{
+                  backgroundColor: submitting || !confirmPhone.trim() ? "rgba(232,80,42,0.35)" : "var(--ember)",
+                  color: "#fff",
+                  minHeight: "52px",
+                }}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  "Confirmar y pagar B/. 15.00"
+                )}
+              </button>
+
+              <button
+                onClick={handleCancelConfirm}
+                disabled={submitting}
+                className="pressable w-full py-3 font-semibold text-sm"
+                style={{ color: "rgba(245,241,234,0.45)" }}
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}
