@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import { Copy, Check, Share2 } from "lucide-react"
+import { Share2 } from "lucide-react"
 
 interface Props {
   code: string
@@ -9,17 +8,8 @@ interface Props {
 }
 
 const GOAL = 3
-const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
 
 export default function ReferralCard({ code, referralCount }: Props) {
-  const [copied, setCopied] = useState(false)
-
-  function handleCopy() {
-    navigator.clipboard.writeText(code).catch(() => {})
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
   function handleShare() {
     const baseUrl = typeof window !== "undefined" ? window.location.origin : ""
     const text = encodeURIComponent(
@@ -38,44 +28,6 @@ export default function ReferralCard({ code, referralCount }: Props) {
     >
       <div className="px-5 pt-4 pb-2">
         <p className="eyebrow-muted">REFERIDOS</p>
-      </div>
-
-      {/* Code row */}
-      <div
-        className="flex items-center justify-between px-5 py-4"
-        style={{ borderTop: "1px solid var(--line)" }}
-      >
-        <div>
-          <p
-            className="font-mono-brand"
-            style={{ fontSize: "10px", letterSpacing: "0.1em", color: "var(--mute)" }}
-          >
-            TU CÓDIGO
-          </p>
-          <p
-            className="font-bold mt-0.5"
-            style={{
-              fontSize: "22px",
-              letterSpacing: "0.06em",
-              color: "var(--midnight)",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            {code}
-          </p>
-        </div>
-        <button
-          onClick={handleCopy}
-          className="pressable flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold"
-          style={{
-            backgroundColor: copied ? "rgba(47,143,110,0.10)" : "var(--bone-2)",
-            color: copied ? "var(--verde)" : "var(--midnight)",
-            transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
-          }}
-        >
-          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-          {copied ? "Copiado" : "Copiar"}
-        </button>
       </div>
 
       {/* Progress */}
