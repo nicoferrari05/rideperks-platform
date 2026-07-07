@@ -12,9 +12,12 @@ gsap.registerPlugin(useGSAP)
 interface Props {
   status: string
   phone: string
+  savingsPotential: number
+  benefitCount: number
+  partnerCount: number
 }
 
-export default function WaitingRoom({ status, phone }: Props) {
+export default function WaitingRoom({ status, phone, savingsPotential, benefitCount, partnerCount }: Props) {
   const isApproved = status === "verified"
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -67,7 +70,7 @@ export default function WaitingRoom({ status, phone }: Props) {
     >
       <YappyLoader />
 
-      <div className="wr-item w-full flex justify-center" style={{ paddingTop: "60px" }}>
+      <div className="wr-item w-full flex justify-center" style={{ paddingTop: "56px" }}>
         <span
           style={{
             fontSize: "11px",
@@ -81,21 +84,26 @@ export default function WaitingRoom({ status, phone }: Props) {
       </div>
 
       {isApproved ? (
-        <ApprovedContent phone={phone} />
+        <ApprovedContent
+          phone={phone}
+          savingsPotential={savingsPotential}
+          benefitCount={benefitCount}
+          partnerCount={partnerCount}
+        />
       ) : (
-        <PendingContent />
+        <PendingContent savingsPotential={savingsPotential} benefitCount={benefitCount} />
       )}
     </div>
   )
 }
 
-function PendingContent() {
+function PendingContent({ savingsPotential, benefitCount }: { savingsPotential: number; benefitCount: number }) {
   return (
     <div className="flex-1 w-full flex flex-col items-center justify-center pb-4">
       {/* Radar rings + RP mark */}
       <div
         className="wr-item relative flex items-center justify-center"
-        style={{ width: "108px", height: "108px", marginBottom: "44px", flexShrink: 0 }}
+        style={{ width: "108px", height: "108px", marginBottom: "40px", flexShrink: 0 }}
       >
         {[0, 1, 2].map((i) => (
           <div
@@ -155,26 +163,70 @@ function PendingContent() {
         </h1>
       </div>
 
-      {/* Body */}
-      <div className="wr-item text-center" style={{ maxWidth: "272px", marginBottom: "52px" }}>
+      <div className="wr-item text-center" style={{ maxWidth: "272px", marginBottom: "44px" }}>
         <p style={{ fontSize: "15px", lineHeight: 1.7, color: "rgba(245,241,234,0.45)" }}>
           El equipo de RidePerks está verificando tu solicitud. Normalmente toma menos de 24 horas.
         </p>
       </div>
 
-      {/* What awaits */}
-      <div className="wr-item w-full">
-        <p
+      {/* Savings teaser */}
+      {savingsPotential > 0 && (
+        <div
+          className="wr-item w-full rounded-2xl px-5 py-4"
           style={{
-            fontSize: "10px",
-            fontWeight: 600,
-            letterSpacing: "0.16em",
-            color: "rgba(245,241,234,0.22)",
-            marginBottom: "14px",
+            backgroundColor: "rgba(232,80,42,0.07)",
+            border: "1px solid rgba(232,80,42,0.14)",
+            marginBottom: "24px",
           }}
         >
-          LO QUE TE ESPERA
-        </p>
+          <p
+            style={{
+              fontSize: "10px",
+              fontWeight: 600,
+              letterSpacing: "0.14em",
+              color: "rgba(245,241,234,0.3)",
+              marginBottom: "4px",
+            }}
+          >
+            LO QUE TE ESPERA
+          </p>
+          <p
+            style={{
+              fontSize: "20px",
+              fontWeight: 800,
+              letterSpacing: "-0.02em",
+              color: "var(--bone)",
+              lineHeight: 1.2,
+            }}
+          >
+            Hasta B/. {savingsPotential.toFixed(2)}
+            <span style={{ fontSize: "13px", fontWeight: 500, color: "rgba(245,241,234,0.45)", marginLeft: "6px" }}>
+              en descuentos / mes
+            </span>
+          </p>
+          {benefitCount > 0 && (
+            <p style={{ fontSize: "12px", color: "rgba(245,241,234,0.35)", marginTop: "3px" }}>
+              {benefitCount} {benefitCount === 1 ? "beneficio disponible" : "beneficios disponibles"}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Benefit preview */}
+      <div className="wr-item w-full">
+        {savingsPotential === 0 && (
+          <p
+            style={{
+              fontSize: "10px",
+              fontWeight: 600,
+              letterSpacing: "0.16em",
+              color: "rgba(245,241,234,0.22)",
+              marginBottom: "14px",
+            }}
+          >
+            LO QUE TE ESPERA
+          </p>
+        )}
         {[
           { Icon: Wrench, label: "Talleres y mantenimiento", detail: "Descuentos" },
           { Icon: Utensils, label: "Comida", detail: "Próximamente" },
@@ -186,19 +238,12 @@ function PendingContent() {
             style={{ borderTop: "1px solid rgba(245,241,234,0.06)" }}
           >
             <div className="flex items-center gap-3">
-              <Icon
-                className="w-4 h-4 flex-shrink-0"
-                style={{ color: "rgba(245,241,234,0.3)" }}
-              />
-              <span
-                style={{ fontSize: "14px", fontWeight: 500, color: "rgba(245,241,234,0.72)" }}
-              >
+              <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(245,241,234,0.3)" }} />
+              <span style={{ fontSize: "14px", fontWeight: 500, color: "rgba(245,241,234,0.72)" }}>
                 {label}
               </span>
             </div>
-            <span style={{ fontSize: "12px", color: "rgba(245,241,234,0.28)" }}>
-              {detail}
-            </span>
+            <span style={{ fontSize: "12px", color: "rgba(245,241,234,0.28)" }}>{detail}</span>
           </div>
         ))}
       </div>
@@ -206,12 +251,21 @@ function PendingContent() {
   )
 }
 
-function ApprovedContent({ phone }: { phone: string }) {
+interface ApprovedProps {
+  phone: string
+  savingsPotential: number
+  benefitCount: number
+  partnerCount: number
+}
+
+function ApprovedContent({ phone, savingsPotential, benefitCount, partnerCount }: ApprovedProps) {
   const benefits = [
     { Icon: Wrench, label: "Talleres y mantenimiento", detail: "Descuentos exclusivos" },
     { Icon: Utensils, label: "Comida", detail: "Próximamente" },
     { Icon: Fuel, label: "Combustible gratis", detail: "Referidos" },
   ]
+
+  const showStats = savingsPotential > 0 || partnerCount > 0
 
   return (
     <>
@@ -219,38 +273,27 @@ function ApprovedContent({ phone }: { phone: string }) {
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0"
         style={{
-          height: "50vh",
+          height: "45vh",
           background:
-            "radial-gradient(ellipse 90% 70% at 50% 100%, rgba(232,80,42,0.15), transparent)",
+            "radial-gradient(ellipse 90% 70% at 50% 100%, rgba(232,80,42,0.14), transparent)",
         }}
       />
 
-      <div className="relative w-full flex flex-col flex-1 justify-between py-10">
-        {/* Price */}
+      <div className="relative w-full flex flex-col gap-5 pt-8 pb-4">
+        {/* Price block */}
         <div>
-          <div className="wr-item text-center" style={{ marginBottom: "6px" }}>
-            <p
-              style={{
-                fontSize: "10px",
-                fontWeight: 600,
-                letterSpacing: "0.18em",
-                color: "rgba(245,241,234,0.28)",
-              }}
-            >
+          <div className="wr-item text-center" style={{ marginBottom: "4px" }}>
+            <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.18em", color: "rgba(245,241,234,0.28)" }}>
               MEMBRESÍA MENSUAL
             </p>
           </div>
-
-          <div
-            className="wr-item flex items-start justify-center"
-            style={{ gap: "3px", marginBottom: "6px" }}
-          >
+          <div className="wr-item flex items-start justify-center" style={{ gap: "3px", marginBottom: "4px" }}>
             <span
               style={{
-                fontSize: "22px",
+                fontSize: "20px",
                 fontWeight: 700,
-                color: "rgba(245,241,234,0.4)",
-                paddingTop: "10px",
+                color: "rgba(245,241,234,0.38)",
+                paddingTop: "8px",
                 letterSpacing: "-0.01em",
               }}
             >
@@ -258,7 +301,7 @@ function ApprovedContent({ phone }: { phone: string }) {
             </span>
             <span
               style={{
-                fontSize: "88px",
+                fontSize: "80px",
                 fontWeight: 800,
                 letterSpacing: "-0.04em",
                 lineHeight: "1",
@@ -269,50 +312,82 @@ function ApprovedContent({ phone }: { phone: string }) {
             </span>
             <span
               style={{
-                fontSize: "22px",
+                fontSize: "20px",
                 fontWeight: 700,
-                color: "rgba(245,241,234,0.4)",
-                paddingTop: "10px",
+                color: "rgba(245,241,234,0.38)",
+                paddingTop: "8px",
                 letterSpacing: "-0.01em",
               }}
             >
               .00
             </span>
           </div>
-
           <div className="wr-item text-center">
-            <p
-              style={{
-                fontSize: "12px",
-                letterSpacing: "0.06em",
-                fontWeight: 500,
-                color: "rgba(245,241,234,0.28)",
-              }}
-            >
+            <p style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 500, color: "rgba(245,241,234,0.28)" }}>
               /mes · cancela cuando quieras
             </p>
           </div>
         </div>
 
+        {/* ROI stats */}
+        {showStats && (
+          <div
+            className="wr-item w-full rounded-2xl overflow-hidden"
+            style={{ border: "1px solid rgba(245,241,234,0.07)" }}
+          >
+            <div className="flex">
+              {savingsPotential > 0 && (
+                <div
+                  className="flex-1 px-4 py-3.5"
+                  style={{
+                    borderRight: partnerCount > 0 ? "1px solid rgba(245,241,234,0.07)" : "none",
+                  }}
+                >
+                  <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", color: "rgba(245,241,234,0.28)", marginBottom: "4px" }}>
+                    AHORRAS HASTA
+                  </p>
+                  <p style={{ fontSize: "22px", fontWeight: 800, letterSpacing: "-0.025em", color: "var(--bone)", lineHeight: 1 }}>
+                    B/. {savingsPotential.toFixed(2)}
+                  </p>
+                  <p style={{ fontSize: "11px", color: "rgba(245,241,234,0.35)", marginTop: "2px" }}>
+                    por mes
+                  </p>
+                </div>
+              )}
+              {partnerCount > 0 && (
+                <div className="flex-1 px-4 py-3.5">
+                  <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", color: "rgba(245,241,234,0.28)", marginBottom: "4px" }}>
+                    ALIADOS
+                  </p>
+                  <p style={{ fontSize: "22px", fontWeight: 800, letterSpacing: "-0.025em", color: "var(--bone)", lineHeight: 1 }}>
+                    {partnerCount}
+                  </p>
+                  <p style={{ fontSize: "11px", color: "rgba(245,241,234,0.35)", marginTop: "2px" }}>
+                    {partnerCount === 1 ? "comercio activo" : "comercios activos"}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Benefits */}
         <div
           className="wr-item w-full"
-          style={{
-            borderTop: "1px solid rgba(245,241,234,0.07)",
-          }}
+          style={{ borderTop: "1px solid rgba(245,241,234,0.07)" }}
         >
           {benefits.map(({ Icon, label, detail }) => (
             <div
               key={label}
-              className="flex items-center justify-between py-3.5"
+              className="flex items-center justify-between py-3"
               style={{ borderBottom: "1px solid rgba(245,241,234,0.07)" }}
             >
               <div className="flex items-center gap-3">
                 <div
                   style={{
-                    width: "30px",
-                    height: "30px",
-                    borderRadius: "9px",
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "8px",
                     backgroundColor: "rgba(245,241,234,0.05)",
                     display: "flex",
                     alignItems: "center",
@@ -320,20 +395,13 @@ function ApprovedContent({ phone }: { phone: string }) {
                     flexShrink: 0,
                   }}
                 >
-                  <Icon
-                    className="w-3.5 h-3.5"
-                    style={{ color: "rgba(245,241,234,0.38)" }}
-                  />
+                  <Icon className="w-3.5 h-3.5" style={{ color: "rgba(245,241,234,0.35)" }} />
                 </div>
-                <span
-                  style={{ fontSize: "14px", fontWeight: 500, color: "var(--bone)" }}
-                >
+                <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--bone)" }}>
                   {label}
                 </span>
               </div>
-              <span style={{ fontSize: "12px", color: "rgba(245,241,234,0.3)" }}>
-                {detail}
-              </span>
+              <span style={{ fontSize: "12px", color: "rgba(245,241,234,0.3)" }}>{detail}</span>
             </div>
           ))}
         </div>
@@ -352,13 +420,7 @@ function ApprovedContent({ phone }: { phone: string }) {
             ACTIVAR CON YAPPY
           </p>
           <YappyPayButton defaultPhone={phone} />
-          <p
-            style={{
-              textAlign: "center",
-              fontSize: "11px",
-              color: "rgba(245,241,234,0.2)",
-            }}
-          >
+          <p style={{ textAlign: "center", fontSize: "11px", color: "rgba(245,241,234,0.2)" }}>
             Pago seguro · Sin tarjeta de crédito
           </p>
         </div>

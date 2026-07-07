@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { redirect } from "next/navigation"
 import DriverNav from "@/components/driver/DriverNav"
 import ScrollToTop from "@/components/shared/ScrollToTop"
@@ -25,7 +26,35 @@ export default async function DriverLayout({ children }: { children: React.React
   const isFullyActive = profile.status === "verified" && !!subscription
 
   if (!isFullyActive) {
-    return <WaitingRoom status={profile.status} phone={profile.phone ?? ""} />
+    const adminClient = createAdminClient()
+    const { data: benefitsData } = await adminClient
+      .from("benefits")
+      .select("savings_value, partner_businesses(id)")
+      .eq("is_active", true)
+
+    const savingsPotential = Math.round(
+      (benefitsData ?? []).reduce(
+        (sum, b) => sum + ((b as { savings_value?: number }).savings_value ?? 0),
+        0
+      ) * 100
+    ) / 100
+
+    const benefitCount = benefitsData?.length ?? 0
+    const partnerCount = new Set(
+      (benefitsData ?? [])
+        .map(b => (b.partner_businesses as unknown as { id: string } | null)?.id)
+        .filter(Boolean)
+    ).size
+
+    return (
+      <WaitingRoom
+        status={profile.status}
+        phone={profile.phone ?? ""}
+        savingsPotential={savingsPotential}
+        benefitCount={benefitCount}
+        partnerCount={partnerCount}
+      />
+    )
   }
 
   return (
