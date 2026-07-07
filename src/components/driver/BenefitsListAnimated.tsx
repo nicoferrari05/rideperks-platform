@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo } from "react"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
-import { Wrench, Zap, Utensils, Heart, Store, Fuel, type LucideIcon } from "lucide-react"
+import { Wrench, Zap, Utensils, Heart, Store, LayoutGrid, Fuel, type LucideIcon } from "lucide-react"
 import BenefitCard from "./BenefitCard"
 import ReferralCard from "./ReferralCard"
 import type { Benefit } from "@/types/database"
@@ -61,202 +61,166 @@ function categoryRank(cat: string) {
 
 const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
 
-type Slide = {
-  id: string
-  label: string
-  Icon: LucideIcon
-  bg: string
-  fg: string
-  activeBg: string
-  activeFg: string
-}
-
 export default function BenefitsListAnimated({ benefits, driverId, canUse, referralCode, referralCount }: Props) {
-  const trackRef = useRef<HTMLDivElement>(null)
-  const isFirstRender = useRef(true)
-  const touchStartX = useRef(0)
-  const touchStartY = useRef(0)
+  const [activeCategory, setActiveCategory] = useState("todos")
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const categories = useMemo(() => {
     const seen = new Set<string>()
     const cats: string[] = []
     for (const b of benefits) {
       const c = b.partner_businesses?.category
+      // Gas/combustible is handled by the hardcoded Combustible tab
       if (c && !seen.has(c) && !isGasCategory(c)) { seen.add(c); cats.push(c) }
     }
     return cats.sort((a, b) => categoryRank(a) - categoryRank(b))
   }, [benefits])
 
-  const slides: Slide[] = useMemo(() => [
-    {
-      id: COMIDA,
-      label: "Comida",
-      Icon: Utensils,
-      bg: "rgba(47,143,110,0.14)",
-      fg: "var(--verde)",
-      activeBg: "var(--verde)",
-      activeFg: "var(--bone)",
-    },
-    ...categories.map((cat) => {
-      const { bg, fg, activeBg, activeFg, Icon } = getCategoryChipStyle(cat)
-      return { id: cat, label: cat, Icon, bg, fg, activeBg, activeFg }
-    }),
-    {
-      id: COMBUSTIBLE,
-      label: "Combustible",
-      Icon: Fuel,
-      bg: "rgba(242,183,59,0.18)",
-      fg: "oklch(0.48 0.1 82)",
-      activeBg: "oklch(0.48 0.1 82)",
-      activeFg: "var(--bone)",
-    },
-  ], [categories])
-
-  // Default to first real category (index 1), or Comida if none
-  const [activeIndex, setActiveIndex] = useState(() =>
-    benefits.some(b => b.partner_businesses?.category && !isGasCategory(b.partner_businesses.category))
-      ? 1
-      : 0
+  const filtered = useMemo(
+    () =>
+      activeCategory === "todos"
+        ? benefits
+        : benefits.filter((b) => b.partner_businesses?.category === activeCategory),
+    [benefits, activeCategory]
   )
 
-  useGSAP(() => {
-    if (!trackRef.current) return
-    if (isFirstRender.current) {
-      // Snap to initial position without animation
-      gsap.set(trackRef.current, { x: `-${activeIndex * 100}%` })
-      isFirstRender.current = false
-    } else {
-      gsap.to(trackRef.current, {
-        x: `-${activeIndex * 100}%`,
-        duration: 0.45,
-        ease: "power3.out",
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.from(".benefit-card", {
+          autoAlpha: 0, y: 16, duration: 0.26, stagger: 0.05, ease: "power2.out",
+        })
       })
-    }
-  }, { dependencies: [activeIndex] })
-
-  function goTo(index: number) {
-    setActiveIndex(Math.max(0, Math.min(slides.length - 1, index)))
-  }
-
-  function onTouchStart(e: React.TouchEvent) {
-    touchStartX.current = e.touches[0].clientX
-    touchStartY.current = e.touches[0].clientY
-  }
-
-  function onTouchEnd(e: React.TouchEvent) {
-    const dx = touchStartX.current - e.changedTouches[0].clientX
-    const dy = Math.abs(touchStartY.current - e.changedTouches[0].clientY)
-    // Only trigger on clear horizontal swipes
-    if (Math.abs(dx) > 50 && Math.abs(dx) > dy * 1.5) {
-      if (dx > 0) goTo(activeIndex + 1)
-      else goTo(activeIndex - 1)
-    }
-  }
+      return () => mm.revert()
+    },
+    { scope: containerRef, dependencies: [activeCategory] }
+  )
 
   return (
     <div className="space-y-4">
 
-      {/* Navigation chips */}
       <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none", paddingBottom: "2px" }}>
-        {slides.map((slide, i) => {
-          const isActive = i === activeIndex
+
+        {/* "Todos" — neutral, no category color */}
+        <button
+          onClick={() => setActiveCategory("todos")}
+          className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+          style={{
+            fontSize: "12px",
+            height: "36px",
+            backgroundColor: activeCategory === "todos" ? "var(--midnight)" : "transparent",
+            color: activeCategory === "todos" ? "var(--bone)" : "var(--midnight)",
+            border: "1px solid",
+            borderColor: activeCategory === "todos" ? "transparent" : "var(--line)",
+            transition: `background-color 200ms ${EASE}, color 200ms ${EASE}, border-color 200ms ${EASE}`,
+          }}
+        >
+          <LayoutGrid className="w-3 h-3" />
+          Todos
+          <span style={{ opacity: 0.55, fontWeight: 500 }}>({benefits.length})</span>
+        </button>
+
+        {/* Comida — always shown, coming soon */}
+        <button
+          onClick={() => setActiveCategory(COMIDA)}
+          className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+          style={{
+            fontSize: "12px",
+            height: "36px",
+            backgroundColor: activeCategory === COMIDA ? "var(--verde)" : "rgba(47,143,110,0.14)",
+            color: activeCategory === COMIDA ? "var(--bone)" : "var(--verde)",
+            border: "none",
+            transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
+          }}
+        >
+          <Utensils className="w-3 h-3" />
+          Comida
+        </button>
+
+        {categories.map((cat) => {
+          const isActive = activeCategory === cat
+          const { bg, fg, activeBg, activeFg, Icon } = getCategoryChipStyle(cat)
+          const count = benefits.filter((b) => b.partner_businesses?.category === cat).length
           return (
             <button
-              key={slide.id}
-              onClick={() => goTo(i)}
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
               className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
               style={{
                 fontSize: "12px",
                 height: "36px",
                 textTransform: "capitalize",
-                backgroundColor: isActive ? slide.activeBg : slide.bg,
-                color: isActive ? slide.activeFg : slide.fg,
+                backgroundColor: isActive ? activeBg : bg,
+                color: isActive ? activeFg : fg,
                 border: "none",
                 transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
               }}
             >
-              <slide.Icon className="w-3 h-3" />
-              {slide.label}
+              <Icon className="w-3 h-3" />
+              {cat}
+              <span style={{ opacity: isActive ? 0.7 : 0.55, fontWeight: 500 }}>({count})</span>
             </button>
           )
         })}
-      </div>
 
-      {/* Slides track */}
-      <div
-        className="overflow-hidden"
-        style={{ touchAction: "pan-y" }}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-      >
-        <div
-          ref={trackRef}
-          className="flex"
-          style={{ willChange: "transform" }}
+        {/* Combustible — always shown, powered by referral program */}
+        <button
+          onClick={() => setActiveCategory(COMBUSTIBLE)}
+          className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+          style={{
+            fontSize: "12px",
+            height: "36px",
+            backgroundColor: activeCategory === COMBUSTIBLE ? "oklch(0.48 0.1 82)" : "rgba(242,183,59,0.18)",
+            color: activeCategory === COMBUSTIBLE ? "var(--bone)" : "oklch(0.48 0.1 82)",
+            border: "none",
+            transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
+          }}
         >
-          {slides.map((slide) => {
-            const slideBenefits = benefits.filter(
-              (b) => b.partner_businesses?.category === slide.id
-            )
-            return (
-              <div key={slide.id} className="min-w-full space-y-4">
-                {/* Slide header */}
-                <div className="flex items-center gap-2">
-                  <slide.Icon className="w-5 h-5" style={{ color: slide.fg }} />
-                  <h2
-                    style={{
-                      fontSize: "22px",
-                      fontWeight: 800,
-                      letterSpacing: "-0.02em",
-                      color: "var(--midnight)",
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    {slide.label}
-                  </h2>
-                  {slide.id !== COMIDA && slide.id !== COMBUSTIBLE && slideBenefits.length > 0 && (
-                    <span style={{ fontSize: "13px", color: "var(--mute)", fontWeight: 500 }}>
-                      · {slideBenefits.length}
-                    </span>
-                  )}
-                </div>
-
-                {/* Slide content */}
-                {slide.id === COMIDA ? (
-                  <div
-                    className="rounded-2xl p-8 text-center"
-                    style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
-                  >
-                    <p className="font-bold mb-1" style={{ fontSize: "22px", letterSpacing: "-0.02em", color: "var(--midnight)" }}>
-                      Próximamente
-                    </p>
-                    <p className="text-sm" style={{ color: "var(--mute)" }}>
-                      Estamos sumando restaurantes y opciones de comida para conductores.
-                    </p>
-                  </div>
-                ) : slide.id === COMBUSTIBLE ? (
-                  <div className="space-y-2">
-                    <p className="text-sm" style={{ color: "var(--mute)", lineHeight: 1.6 }}>
-                      Invita 3 conductores a RidePerks y gana tu próximo tanque gratis.
-                    </p>
-                    <ReferralCard code={referralCode ?? ""} referralCount={referralCount} />
-                  </div>
-                ) : slideBenefits.length === 0 ? (
-                  <p className="text-sm py-10 text-center" style={{ color: "var(--mute)" }}>
-                    No hay beneficios en esta categoría aún.
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 gap-4">
-                    {slideBenefits.map((benefit) => (
-                      <BenefitCard key={benefit.id} benefit={benefit} driverId={driverId} canUse={canUse} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
+          <Fuel className="w-3 h-3" />
+          Combustible
+        </button>
       </div>
+
+      {activeCategory === COMIDA ? (
+        <div
+          className="rounded-2xl p-8 text-center"
+          style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
+        >
+          <p className="font-bold mb-1" style={{ fontSize: "22px", letterSpacing: "-0.02em", color: "var(--midnight)" }}>
+            Próximamente
+          </p>
+          <p className="text-sm" style={{ color: "var(--mute)" }}>
+            Estamos sumando restaurantes y opciones de comida para conductores.
+          </p>
+        </div>
+      ) : activeCategory === COMBUSTIBLE ? (
+        <div className="space-y-4">
+          <div>
+            <h2 className="font-bold" style={{ fontSize: "22px", letterSpacing: "-0.02em", color: "var(--midnight)" }}>
+              Llévate un tanque lleno
+            </h2>
+            <p className="text-sm mt-1" style={{ color: "var(--mute)", lineHeight: 1.6 }}>
+              Invita 3 conductores a RidePerks y gana tu próximo tanque gratis.
+            </p>
+          </div>
+          <ReferralCard code={referralCode ?? ""} referralCount={referralCount} />
+        </div>
+      ) : (
+        <div key={activeCategory} ref={containerRef} className="grid grid-cols-1 gap-4">
+          {filtered.length === 0 ? (
+            <p className="text-sm py-10 text-center" style={{ color: "var(--mute)" }}>
+              No hay beneficios en esta categoría aún.
+            </p>
+          ) : (
+            filtered.map((benefit) => (
+              <div key={benefit.id} className="benefit-card">
+                <BenefitCard benefit={benefit} driverId={driverId} canUse={canUse} />
+              </div>
+            ))
+          )}
+        </div>
+      )}
 
     </div>
   )
