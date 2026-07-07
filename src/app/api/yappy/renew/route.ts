@@ -75,7 +75,7 @@ export async function POST() {
 
     const validateData = await validateRes.json()
 
-    if (!validateRes.ok || validateData.status?.code !== "00") {
+    if (!validateRes.ok || !validateData.body?.token) {
       console.error("[Yappy renew] validate merchant failed:", validateData)
       await supabase.from("subscriptions").delete().eq("payment_reference", orderId)
       return NextResponse.json({ error: "No se pudo conectar con Yappy. Intenta de nuevo." }, { status: 502 })
@@ -108,7 +108,7 @@ export async function POST() {
 
     const orderData = await orderRes.json()
 
-    if (!orderRes.ok || orderData.status?.code !== "00") {
+    if (!orderRes.ok || !orderData.body?.transactionId) {
       console.error("[Yappy renew] create order failed:", orderData)
       await supabase.from("subscriptions").delete().eq("payment_reference", orderId)
       return NextResponse.json(
