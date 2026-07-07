@@ -269,7 +269,7 @@ export default async function DriverDashboard() {
               Membresía inactiva
             </p>
             <p className="text-sm" style={{ color: "var(--mute)" }}>
-              Tu membresía se activa automáticamente cuando el equipo de RidePerks verifique tu cuenta. Si ya pasaron 24 horas, escríbenos.
+              Para activar tu membresía, paga con Yappy usando el botón de arriba. Una vez confirmado el pago, tu acceso queda activo.
             </p>
           </div>
         )}
