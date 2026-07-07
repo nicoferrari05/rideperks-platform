@@ -30,6 +30,7 @@ interface Props {
 }
 
 const COMBUSTIBLE = "__combustible__"
+const COMIDA = "__comida__"
 
 function isGasCategory(cat: string) {
   const c = cat.toLowerCase()
@@ -146,6 +147,23 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
           )
         })}
 
+        {/* Comida — always shown, coming soon */}
+        <button
+          onClick={() => setActiveCategory(COMIDA)}
+          className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+          style={{
+            fontSize: "12px",
+            height: "36px",
+            backgroundColor: activeCategory === COMIDA ? "var(--verde)" : "rgba(47,143,110,0.14)",
+            color: activeCategory === COMIDA ? "var(--bone)" : "var(--verde)",
+            border: "none",
+            transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
+          }}
+        >
+          <Utensils className="w-3 h-3" />
+          Comida
+        </button>
+
         {/* Combustible — always shown, powered by referral program */}
         <button
           onClick={() => setActiveCategory(COMBUSTIBLE)}
@@ -164,7 +182,19 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
         </button>
       </div>
 
-      {activeCategory === COMBUSTIBLE ? (
+      {activeCategory === COMIDA ? (
+        <div
+          className="rounded-2xl p-8 text-center"
+          style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
+        >
+          <p className="font-bold mb-1" style={{ fontSize: "22px", letterSpacing: "-0.02em", color: "var(--midnight)" }}>
+            Próximamente
+          </p>
+          <p className="text-sm" style={{ color: "var(--mute)" }}>
+            Estamos sumando restaurantes y opciones de comida para conductores.
+          </p>
+        </div>
+      ) : activeCategory === COMBUSTIBLE ? (
         <div className="space-y-4">
           <div>
             <h2 className="font-bold" style={{ fontSize: "22px", letterSpacing: "-0.02em", color: "var(--midnight)" }}>
