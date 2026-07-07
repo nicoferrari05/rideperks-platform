@@ -21,8 +21,6 @@ interface YappyBtnElement extends HTMLElement {
   isButtonLoading: boolean
 }
 
-const YAPPY_CDN = "https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"
-
 export default function YappyPayButton() {
   const router = useRouter()
   const btnRef = useRef<YappyBtnElement | null>(null)
@@ -30,29 +28,28 @@ export default function YappyPayButton() {
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
-    // If already registered (e.g. cached from previous navigation), resolve immediately
-    if (typeof customElements !== "undefined" && customElements.get("btn-yappy")) {
+    if (customElements.get("btn-yappy")) {
       setReady(true)
       return
     }
 
-    // Inject script once
-    if (!document.querySelector(`script[data-yappy-cdn]`)) {
-      const s = document.createElement("script")
-      s.src = YAPPY_CDN
-      s.async = true
-      s.dataset.yappyCdn = "true"
-      document.head.appendChild(s)
-    }
+    const interval = setInterval(() => {
+      if (customElements.get("btn-yappy")) {
+        clearInterval(interval)
+        clearTimeout(timeout)
+        setReady(true)
+      }
+    }, 200)
 
-    const timeout = setTimeout(() => setFailed(true), 8000)
+    const timeout = setTimeout(() => {
+      clearInterval(interval)
+      setFailed(true)
+    }, 10000)
 
-    customElements.whenDefined("btn-yappy").then(() => {
+    return () => {
+      clearInterval(interval)
       clearTimeout(timeout)
-      setReady(true)
-    })
-
-    return () => clearTimeout(timeout)
+    }
   }, [])
 
   const handleClick = useCallback(async () => {
