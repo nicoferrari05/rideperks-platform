@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { revalidateBenefitsCache } from "@/app/admin/benefits/actions"
 
 interface Props {
   businessId: string
@@ -97,10 +98,24 @@ export default function BusinessRowActions({
   async function deleteBusiness() {
     setLoading(true)
     const supabase = createClient()
+
+    // Deactivate all benefits for this business first
+    const { error: benefitsError } = await supabase
+      .from("benefits")
+      .update({ is_active: false })
+      .eq("partner_business_id", businessId)
+
+    if (benefitsError) {
+      toast.error("Error al desactivar los beneficios del comercio")
+      setLoading(false)
+      return
+    }
+
     const { error } = await supabase.from("partner_businesses").delete().eq("id", businessId)
     if (error) {
       toast.error("Error al eliminar el comercio")
     } else {
+      await revalidateBenefitsCache()
       toast.success("Comercio eliminado")
       setDeleteDialog(false)
       router.refresh()
