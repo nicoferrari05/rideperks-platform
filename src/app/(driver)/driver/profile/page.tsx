@@ -1,9 +1,10 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { User, Phone, Car, CheckCircle2, Clock, XCircle } from "lucide-react"
+import { User, Phone, Car, CheckCircle2, Clock, XCircle, CalendarDays, Zap, TrendingUp } from "lucide-react"
 import type { ElementType } from "react"
 import LogoutButton from "@/components/driver/LogoutButton"
 import StaggerEntrance from "@/components/shared/StaggerEntrance"
+import YappyPayButton from "@/components/driver/YappyPayButton"
 
 const platformLabel: Record<string, string> = {
   uber: "Uber",
@@ -147,37 +148,114 @@ export default async function ProfilePage() {
           ))}
         </div>
 
-        {/* Membership */}
+        {/* Membership card */}
         <div
           data-stagger
-          className="rounded-2xl overflow-hidden"
-          style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
+          className="rounded-2xl relative overflow-hidden"
+          style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
         >
-          <div className="px-5 pt-4 pb-2">
-            <p className="eyebrow-muted">MEMBRESÍA</p>
-          </div>
-          {subscription && (
-            <>
-              {([
-                { label: "Estado",            value: "Activa",              color: "var(--verde)" },
-                { label: "Vence",             value: new Date(subscription.expires_at).toLocaleDateString("es-PA", { day: "2-digit", month: "long", year: "numeric" }) },
-                ...(memberSince ? [{ label: "Miembro desde", value: memberSince }] : []),
-                { label: "Beneficios usados", value: String(redemptions?.length ?? 0) },
-                ...(lifetimeSaved > 0 ? [{ label: "Ahorro total", value: `$${lifetimeSaved.toFixed(2)}`, color: "var(--verde)" }] : []),
-              ] as { label: string; value: string; color?: string }[]).map(({ label, value, color }) => (
-                <div
-                  key={label}
-                  className="flex items-center justify-between px-5 py-3.5"
-                  style={{ borderTop: "1px solid var(--line)" }}
+          {/* Background glow */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              right: "-15%", top: "-25%", width: "55%", height: "55%",
+              background: "radial-gradient(circle, rgba(232,80,42,0.3), transparent 60%)",
+            }}
+          />
+
+          <div className="relative p-5">
+            {/* Header row */}
+            <div className="flex items-center justify-between mb-5">
+              <p className="font-mono-brand" style={{ fontSize: "10px", letterSpacing: "0.1em", color: "rgba(245,241,234,0.45)" }}>
+                MEMBRESÍA
+              </p>
+              {subscription ? (
+                <span
+                  className="font-mono-brand font-semibold px-2.5 py-1 rounded-full"
+                  style={{ fontSize: "10px", letterSpacing: "0.08em", backgroundColor: "rgba(47,143,110,0.2)", color: "var(--verde)" }}
                 >
-                  <span className="text-sm" style={{ color: "var(--mute)" }}>{label}</span>
-                  <span className="text-sm font-semibold" style={{ color: color ?? "var(--midnight)" }}>
-                    {value}
-                  </span>
+                  ACTIVA
+                </span>
+              ) : (
+                <span
+                  className="font-mono-brand font-semibold px-2.5 py-1 rounded-full"
+                  style={{ fontSize: "10px", letterSpacing: "0.08em", backgroundColor: "rgba(232,80,42,0.18)", color: "var(--ember)" }}
+                >
+                  INACTIVA
+                </span>
+              )}
+            </div>
+
+            {subscription ? (
+              <>
+                {/* Expiry */}
+                <p className="font-mono-brand" style={{ fontSize: "10px", letterSpacing: "0.1em", color: "rgba(245,241,234,0.4)" }}>
+                  ACTIVA HASTA
+                </p>
+                <p className="font-bold mt-1 mb-5" style={{ fontSize: "22px", letterSpacing: "-0.02em", color: "var(--bone)" }}>
+                  {new Date(subscription.expires_at).toLocaleDateString("es-PA", { day: "2-digit", month: "long", year: "numeric" })}
+                </p>
+
+                {/* Stats row */}
+                <div className="grid grid-cols-3 gap-2 mb-5">
+                  {memberSince && (
+                    <div
+                      className="rounded-xl p-3"
+                      style={{ backgroundColor: "rgba(245,241,234,0.06)" }}
+                    >
+                      <CalendarDays className="w-3.5 h-3.5 mb-2" style={{ color: "rgba(245,241,234,0.4)" }} />
+                      <p className="font-mono-brand" style={{ fontSize: "9px", letterSpacing: "0.08em", color: "rgba(245,241,234,0.4)" }}>DESDE</p>
+                      <p className="font-semibold mt-0.5" style={{ fontSize: "11px", color: "var(--bone)" }}>
+                        {new Date(firstSubscription!.starts_at).toLocaleDateString("es-PA", { month: "short", year: "numeric" })}
+                      </p>
+                    </div>
+                  )}
+                  <div
+                    className="rounded-xl p-3"
+                    style={{ backgroundColor: "rgba(245,241,234,0.06)" }}
+                  >
+                    <Zap className="w-3.5 h-3.5 mb-2" style={{ color: "rgba(245,241,234,0.4)" }} />
+                    <p className="font-mono-brand" style={{ fontSize: "9px", letterSpacing: "0.08em", color: "rgba(245,241,234,0.4)" }}>USOS</p>
+                    <p className="font-semibold mt-0.5" style={{ fontSize: "11px", color: "var(--bone)" }}>
+                      {redemptions?.length ?? 0}
+                    </p>
+                  </div>
+                  {lifetimeSaved > 0 && (
+                    <div
+                      className="rounded-xl p-3"
+                      style={{ backgroundColor: "rgba(245,241,234,0.06)" }}
+                    >
+                      <TrendingUp className="w-3.5 h-3.5 mb-2" style={{ color: "var(--verde)" }} />
+                      <p className="font-mono-brand" style={{ fontSize: "9px", letterSpacing: "0.08em", color: "rgba(245,241,234,0.4)" }}>AHORRO</p>
+                      <p className="font-semibold mt-0.5" style={{ fontSize: "11px", color: "var(--verde)" }}>
+                        ${lifetimeSaved.toFixed(2)}
+                      </p>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </>
-          )}
+              </>
+            ) : (
+              <div className="mb-5">
+                <p className="font-semibold mb-1" style={{ fontSize: "17px", letterSpacing: "-0.01em", color: "var(--bone)" }}>
+                  Sin membresía activa
+                </p>
+                <p className="text-sm" style={{ color: "rgba(245,241,234,0.45)" }}>
+                  Activa tu membresía para acceder a descuentos en combustible, comida, talleres y más.
+                </p>
+              </div>
+            )}
+
+            {/* Yappy CTA */}
+            <div
+              className="flex flex-col items-center gap-2 pt-4"
+              style={{ borderTop: "1px solid rgba(245,241,234,0.08)" }}
+            >
+              <p className="font-mono-brand" style={{ fontSize: "10px", letterSpacing: "0.1em", color: "rgba(245,241,234,0.4)" }}>
+                {subscription ? "RENOVAR · B/. 15.00" : "ACTIVAR · B/. 15.00"}
+              </p>
+              <YappyPayButton defaultPhone={profile?.phone ?? ""} />
+            </div>
+          </div>
         </div>
 
         <div data-stagger className="mt-4">

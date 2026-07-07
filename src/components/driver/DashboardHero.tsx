@@ -5,8 +5,6 @@ import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 import SavingsCounter from "./SavingsCounter"
 import SavingsProgressBar from "./SavingsProgressBar"
-import YappyPayButton from "./YappyPayButton"
-
 interface DashboardHeroProps {
   totalSaved: number
   lifetimeSaved: number
@@ -17,7 +15,6 @@ interface DashboardHeroProps {
   daysUntilExpiry: number | null
   potentialMonthly: number
   monthLabel: string
-  phone?: string
 }
 
 export default function DashboardHero({
@@ -30,7 +27,6 @@ export default function DashboardHero({
   daysUntilExpiry,
   potentialMonthly,
   monthLabel,
-  phone,
 }: DashboardHeroProps) {
   const [view, setView] = useState<"month" | "lifetime">("month")
 
@@ -172,17 +168,6 @@ export default function DashboardHero({
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </Link>
-        </div>
-
-        {/* Yappy renewal button */}
-        <div
-          className="mt-4 pt-4 flex flex-col items-center gap-2"
-          style={{ borderTop: "1px solid rgba(245,241,234,0.08)" }}
-        >
-          <p className="font-mono-brand" style={{ fontSize: "10px", opacity: 0.45, letterSpacing: "0.1em" }}>
-            RENOVAR MEMBRESÍA · B/. 15.00
-          </p>
-          <YappyPayButton defaultPhone={phone} />
         </div>
 
       </div>
