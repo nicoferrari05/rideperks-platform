@@ -8,7 +8,7 @@ import { Loader2, AlertCircle } from "lucide-react"
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      "yappy-btn": React.DetailedHTMLProps<
+      "btn-yappy": React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       > & { theme?: string; rounded?: string }
@@ -31,7 +31,7 @@ export default function YappyPayButton() {
 
   useEffect(() => {
     // If already registered (e.g. cached from previous navigation), resolve immediately
-    if (typeof customElements !== "undefined" && customElements.get("yappy-btn")) {
+    if (typeof customElements !== "undefined" && customElements.get("btn-yappy")) {
       setReady(true)
       return
     }
@@ -47,7 +47,7 @@ export default function YappyPayButton() {
 
     const timeout = setTimeout(() => setFailed(true), 8000)
 
-    customElements.whenDefined("yappy-btn").then(() => {
+    customElements.whenDefined("btn-yappy").then(() => {
       clearTimeout(timeout)
       setReady(true)
     })
@@ -124,7 +124,7 @@ export default function YappyPayButton() {
   }
 
   return (
-    // @ts-expect-error — yappy-btn is a custom web component
-    <yappy-btn ref={btnRef} theme="dark" rounded="true" />
+    // @ts-expect-error — btn-yappy is a custom web component
+    <btn-yappy ref={btnRef} theme="dark" rounded="true" />
   )
 }
