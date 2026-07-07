@@ -4,7 +4,6 @@ import { User, Phone, Car, CheckCircle2, Clock, XCircle } from "lucide-react"
 import type { ElementType } from "react"
 import LogoutButton from "@/components/driver/LogoutButton"
 import StaggerEntrance from "@/components/shared/StaggerEntrance"
-import YappyPayButton from "@/components/driver/YappyPayButton"
 
 const platformLabel: Record<string, string> = {
   uber: "Uber",
@@ -179,12 +178,6 @@ export default async function ProfilePage() {
               ))}
             </>
           )}
-          <div className="px-5 py-4" style={{ borderTop: "1px solid var(--line)" }}>
-            <p className="text-xs mb-3 text-center" style={{ color: "var(--mute)" }}>
-              {subscription ? "Renovar membresía · B/. 15.00 / mes" : "Activar membresía · B/. 15.00 / mes"}
-            </p>
-            <YappyPayButton />
-          </div>
         </div>
 
         <div data-stagger className="mt-4">

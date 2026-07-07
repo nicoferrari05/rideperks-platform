@@ -1,10 +1,9 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import Script from "next/script"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { Loader2 } from "lucide-react"
+import { Loader2, AlertCircle } from "lucide-react"
 
 declare global {
   namespace JSX {
@@ -22,27 +21,52 @@ interface YappyBtnElement extends HTMLElement {
   isButtonLoading: boolean
 }
 
+const YAPPY_CDN = "https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"
+
 export default function YappyPayButton() {
   const router = useRouter()
-  const [scriptReady, setScriptReady] = useState(false)
   const btnRef = useRef<YappyBtnElement | null>(null)
+  const [ready, setReady] = useState(false)
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    // If already registered (e.g. cached from previous navigation), resolve immediately
+    if (typeof customElements !== "undefined" && customElements.get("yappy-btn")) {
+      setReady(true)
+      return
+    }
+
+    // Inject script once
+    if (!document.querySelector(`script[data-yappy-cdn]`)) {
+      const s = document.createElement("script")
+      s.src = YAPPY_CDN
+      s.async = true
+      s.dataset.yappyCdn = "true"
+      document.head.appendChild(s)
+    }
+
+    const timeout = setTimeout(() => setFailed(true), 8000)
+
+    customElements.whenDefined("yappy-btn").then(() => {
+      clearTimeout(timeout)
+      setReady(true)
+    })
+
+    return () => clearTimeout(timeout)
+  }, [])
 
   const handleClick = useCallback(async () => {
     const btn = btnRef.current
     if (!btn) return
-
     btn.isButtonLoading = true
-
     try {
       const res = await fetch("/api/yappy/renew", { method: "POST" })
       const data = await res.json()
-
       if (!res.ok) {
         toast.error(data.error ?? "Error al procesar el pago")
         btn.isButtonLoading = false
         return
       }
-
       btn.isButtonLoading = false
       btn.eventPayment(data)
     } catch {
@@ -68,39 +92,39 @@ export default function YappyPayButton() {
   }, [])
 
   useEffect(() => {
-    if (!scriptReady) return
+    if (!ready) return
     const btn = btnRef.current
     if (!btn) return
-
     btn.addEventListener("eventClick", handleClick)
     btn.addEventListener("eventSuccess", handleSuccess)
     btn.addEventListener("eventError", handleError)
-
     return () => {
       btn.removeEventListener("eventClick", handleClick)
       btn.removeEventListener("eventSuccess", handleSuccess)
       btn.removeEventListener("eventError", handleError)
     }
-  }, [scriptReady, handleClick, handleSuccess, handleError])
+  }, [ready, handleClick, handleSuccess, handleError])
+
+  if (failed) {
+    return (
+      <div className="flex items-center gap-2 text-xs" style={{ color: "rgba(245,241,234,0.45)" }}>
+        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+        No se pudo cargar el botón de Yappy. Recarga la página.
+      </div>
+    )
+  }
+
+  if (!ready) {
+    return (
+      <div className="flex items-center gap-2 text-xs" style={{ color: "rgba(245,241,234,0.45)" }}>
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        Cargando Yappy...
+      </div>
+    )
+  }
 
   return (
-    <>
-      <Script
-        src="https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"
-        strategy="afterInteractive"
-        onLoad={() => setScriptReady(true)}
-      />
-      <div className="flex justify-center py-1">
-        {scriptReady ? (
-          // @ts-expect-error — yappy-btn is a custom web component
-          <yappy-btn ref={btnRef} theme="light" rounded="true" />
-        ) : (
-          <div className="flex items-center gap-2 text-sm" style={{ color: "var(--mute)" }}>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Cargando...
-          </div>
-        )}
-      </div>
-    </>
+    // @ts-expect-error — yappy-btn is a custom web component
+    <yappy-btn ref={btnRef} theme="dark" rounded="true" />
   )
 }

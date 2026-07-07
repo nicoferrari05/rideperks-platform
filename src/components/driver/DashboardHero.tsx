@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 import SavingsCounter from "./SavingsCounter"
 import SavingsProgressBar from "./SavingsProgressBar"
+import YappyPayButton from "./YappyPayButton"
 
 interface DashboardHeroProps {
   totalSaved: number
@@ -169,6 +170,17 @@ export default function DashboardHero({
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </Link>
+        </div>
+
+        {/* Yappy renewal button */}
+        <div
+          className="mt-4 pt-4 flex flex-col items-center gap-2"
+          style={{ borderTop: "1px solid rgba(245,241,234,0.08)" }}
+        >
+          <p className="font-mono-brand" style={{ fontSize: "10px", opacity: 0.45, letterSpacing: "0.1em" }}>
+            RENOVAR MEMBRESÍA · B/. 15.00
+          </p>
+          <YappyPayButton />
         </div>
 
       </div>
