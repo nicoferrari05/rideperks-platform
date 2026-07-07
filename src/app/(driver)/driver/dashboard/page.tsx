@@ -257,6 +257,7 @@ export default async function DriverDashboard() {
               daysUntilExpiry={daysUntilExpiry}
               potentialMonthly={potentialMonthly}
               monthLabel={monthLabel}
+              phone={profile?.phone ?? ""}
             />
           </div>
         ) : (

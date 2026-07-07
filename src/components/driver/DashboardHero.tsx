@@ -17,6 +17,7 @@ interface DashboardHeroProps {
   daysUntilExpiry: number | null
   potentialMonthly: number
   monthLabel: string
+  phone?: string
 }
 
 export default function DashboardHero({
@@ -29,6 +30,7 @@ export default function DashboardHero({
   daysUntilExpiry,
   potentialMonthly,
   monthLabel,
+  phone,
 }: DashboardHeroProps) {
   const [view, setView] = useState<"month" | "lifetime">("month")
 
@@ -180,7 +182,7 @@ export default function DashboardHero({
           <p className="font-mono-brand" style={{ fontSize: "10px", opacity: 0.45, letterSpacing: "0.1em" }}>
             RENOVAR MEMBRESÍA · B/. 15.00
           </p>
-          <YappyPayButton />
+          <YappyPayButton defaultPhone={phone} />
         </div>
 
       </div>

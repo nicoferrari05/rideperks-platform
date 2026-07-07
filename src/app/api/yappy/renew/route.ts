@@ -14,7 +14,7 @@ function generateOrderId(): string {
   return "RP" + rand
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const merchantId = process.env.YAPPY_MERCHANT_ID
     const secretKey = process.env.YAPPY_SECRET_KEY
@@ -29,6 +29,13 @@ export async function POST() {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
+    // Optional phone override from request body
+    let bodyPhone: string | undefined
+    try {
+      const body = await request.json()
+      bodyPhone = body?.phone
+    } catch { /* no body is fine */ }
+
     const supabase = createAdminClient()
 
     // ── 2. Get profile (need phone for aliasYappy) ─────────────────────────
@@ -38,9 +45,11 @@ export async function POST() {
       .eq("id", user.id)
       .single()
 
-    if (profileError || !profile?.phone) {
+    if (profileError || (!profile?.phone && !bodyPhone)) {
       return NextResponse.json({ error: "No se encontró tu perfil o número de teléfono" }, { status: 400 })
     }
+
+    const phoneToUse = bodyPhone?.trim() || profile!.phone
 
     // ── 3. Create pending subscription ────────────────────────────────────
     const orderId = generateOrderId()
@@ -84,7 +93,7 @@ export async function POST() {
     const yappyToken = validateData.body.token
 
     // ── 5. Yappy: create order ─────────────────────────────────────────────
-    const phoneDigits = profile.phone.replace(/\D/g, "").slice(-8)
+    const phoneDigits = phoneToUse.replace(/\D/g, "").slice(-8)
 
     const orderRes = await fetch(`${YAPPY_BASE_URL}/payments/payment-wc`, {
       method: "POST",
