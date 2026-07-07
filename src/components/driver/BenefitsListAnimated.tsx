@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo } from "react"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
-import { Wrench, Zap, Utensils, Heart, Store, LayoutGrid, Fuel, type LucideIcon } from "lucide-react"
+import { Wrench, Zap, Utensils, Heart, Store, Fuel, type LucideIcon } from "lucide-react"
 import BenefitCard from "./BenefitCard"
 import ReferralCard from "./ReferralCard"
 import type { Benefit } from "@/types/database"
@@ -62,7 +62,11 @@ function categoryRank(cat: string) {
 const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
 
 export default function BenefitsListAnimated({ benefits, driverId, canUse, referralCode, referralCount }: Props) {
-  const [activeCategory, setActiveCategory] = useState("todos")
+  const firstCategory = benefits.find(
+    b => b.partner_businesses?.category && !isGasCategory(b.partner_businesses.category)
+  )?.partner_businesses?.category ?? COMIDA
+
+  const [activeCategory, setActiveCategory] = useState(firstCategory)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const categories = useMemo(() => {
@@ -101,25 +105,6 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
     <div className="space-y-4">
 
       <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none", paddingBottom: "2px" }}>
-
-        {/* "Todos" — neutral, no category color */}
-        <button
-          onClick={() => setActiveCategory("todos")}
-          className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
-          style={{
-            fontSize: "12px",
-            height: "36px",
-            backgroundColor: activeCategory === "todos" ? "var(--midnight)" : "transparent",
-            color: activeCategory === "todos" ? "var(--bone)" : "var(--midnight)",
-            border: "1px solid",
-            borderColor: activeCategory === "todos" ? "transparent" : "var(--line)",
-            transition: `background-color 200ms ${EASE}, color 200ms ${EASE}, border-color 200ms ${EASE}`,
-          }}
-        >
-          <LayoutGrid className="w-3 h-3" />
-          Todos
-          <span style={{ opacity: 0.55, fontWeight: 500 }}>({benefits.length})</span>
-        </button>
 
         {/* Comida — always shown, coming soon */}
         <button
