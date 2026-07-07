@@ -99,72 +99,70 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
   return (
     <div className="space-y-4">
 
-      {categories.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none", paddingBottom: "2px" }}>
+      <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none", paddingBottom: "2px" }}>
 
-          {/* "Todos" — neutral, no category color */}
-          <button
-            onClick={() => setActiveCategory("todos")}
-            className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
-            style={{
-              fontSize: "12px",
-              height: "36px",
-              backgroundColor: activeCategory === "todos" ? "var(--midnight)" : "transparent",
-              color: activeCategory === "todos" ? "var(--bone)" : "var(--midnight)",
-              border: "1px solid",
-              borderColor: activeCategory === "todos" ? "transparent" : "var(--line)",
-              transition: `background-color 200ms ${EASE}, color 200ms ${EASE}, border-color 200ms ${EASE}`,
-            }}
-          >
-            <LayoutGrid className="w-3 h-3" />
-            Todos
-            <span style={{ opacity: 0.55, fontWeight: 500 }}>({benefits.length})</span>
-          </button>
+        {/* "Todos" — neutral, no category color */}
+        <button
+          onClick={() => setActiveCategory("todos")}
+          className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+          style={{
+            fontSize: "12px",
+            height: "36px",
+            backgroundColor: activeCategory === "todos" ? "var(--midnight)" : "transparent",
+            color: activeCategory === "todos" ? "var(--bone)" : "var(--midnight)",
+            border: "1px solid",
+            borderColor: activeCategory === "todos" ? "transparent" : "var(--line)",
+            transition: `background-color 200ms ${EASE}, color 200ms ${EASE}, border-color 200ms ${EASE}`,
+          }}
+        >
+          <LayoutGrid className="w-3 h-3" />
+          Todos
+          <span style={{ opacity: 0.55, fontWeight: 500 }}>({benefits.length})</span>
+        </button>
 
-          {categories.map((cat) => {
-            const isActive = activeCategory === cat
-            const { bg, fg, activeBg, activeFg, Icon } = getCategoryChipStyle(cat)
-            const count = benefits.filter((b) => b.partner_businesses?.category === cat).length
-            return (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
-                style={{
-                  fontSize: "12px",
-                  height: "36px",
-                  textTransform: "capitalize",
-                  backgroundColor: isActive ? activeBg : bg,
-                  color: isActive ? activeFg : fg,
-                  border: "none",
-                  transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
-                }}
-              >
-                <Icon className="w-3 h-3" />
-                {cat}
-                <span style={{ opacity: isActive ? 0.7 : 0.55, fontWeight: 500 }}>({count})</span>
-              </button>
-            )
-          })}
+        {categories.map((cat) => {
+          const isActive = activeCategory === cat
+          const { bg, fg, activeBg, activeFg, Icon } = getCategoryChipStyle(cat)
+          const count = benefits.filter((b) => b.partner_businesses?.category === cat).length
+          return (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+              style={{
+                fontSize: "12px",
+                height: "36px",
+                textTransform: "capitalize",
+                backgroundColor: isActive ? activeBg : bg,
+                color: isActive ? activeFg : fg,
+                border: "none",
+                transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
+              }}
+            >
+              <Icon className="w-3 h-3" />
+              {cat}
+              <span style={{ opacity: isActive ? 0.7 : 0.55, fontWeight: 500 }}>({count})</span>
+            </button>
+          )
+        })}
 
-          {/* Combustible — always shown, powered by referral program */}
-          <button
-            onClick={() => setActiveCategory(COMBUSTIBLE)}
-            className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
-            style={{
-              fontSize: "12px",
-              height: "36px",
-              backgroundColor: activeCategory === COMBUSTIBLE ? "oklch(0.48 0.1 82)" : "rgba(242,183,59,0.18)",
-              color: activeCategory === COMBUSTIBLE ? "var(--bone)" : "oklch(0.48 0.1 82)",
-              border: "none",
-              transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
-            }}
-          >
-            <Fuel className="w-3 h-3" />
-            Combustible
-          </button>
-        </div>
-      )}
+        {/* Combustible — always shown, powered by referral program */}
+        <button
+          onClick={() => setActiveCategory(COMBUSTIBLE)}
+          className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+          style={{
+            fontSize: "12px",
+            height: "36px",
+            backgroundColor: activeCategory === COMBUSTIBLE ? "oklch(0.48 0.1 82)" : "rgba(242,183,59,0.18)",
+            color: activeCategory === COMBUSTIBLE ? "var(--bone)" : "oklch(0.48 0.1 82)",
+            border: "none",
+            transition: `background-color 200ms ${EASE}, color 200ms ${EASE}`,
+          }}
+        >
+          <Fuel className="w-3 h-3" />
+          Combustible
+        </button>
+      </div>
 
       {activeCategory === COMBUSTIBLE ? (
         <div className="space-y-4">
