@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo } from "react"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
-import { Wrench, Zap, Utensils, Heart, Store, Fuel, type LucideIcon } from "lucide-react"
+import { Wrench, Zap, Utensils, Heart, Store, Fuel, LayoutGrid, type LucideIcon } from "lucide-react"
 import BenefitCard from "./BenefitCard"
 import ReferralCard from "./ReferralCard"
 import type { Benefit } from "@/types/database"
@@ -62,11 +62,7 @@ function categoryRank(cat: string) {
 const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
 
 export default function BenefitsListAnimated({ benefits, driverId, canUse, referralCode, referralCount }: Props) {
-  const firstCategory = benefits.find(
-    b => b.partner_businesses?.category && !isGasCategory(b.partner_businesses.category)
-  )?.partner_businesses?.category ?? COMIDA
-
-  const [activeCategory, setActiveCategory] = useState(firstCategory)
+  const [activeCategory, setActiveCategory] = useState("todos")
   const containerRef = useRef<HTMLDivElement>(null)
 
   const categories = useMemo(() => {
@@ -74,17 +70,13 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
     const cats: string[] = []
     for (const b of benefits) {
       const c = b.partner_businesses?.category
-      // Gas/combustible is handled by the hardcoded Combustible tab
       if (c && !seen.has(c) && !isGasCategory(c)) { seen.add(c); cats.push(c) }
     }
     return cats.sort((a, b) => categoryRank(a) - categoryRank(b))
   }, [benefits])
 
   const filtered = useMemo(
-    () =>
-      activeCategory === "todos"
-        ? benefits
-        : benefits.filter((b) => b.partner_businesses?.category === activeCategory),
+    () => benefits.filter((b) => b.partner_businesses?.category === activeCategory),
     [benefits, activeCategory]
   )
 
@@ -105,6 +97,24 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
     <div className="space-y-4">
 
       <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none", paddingBottom: "2px" }}>
+
+        {/* Todos */}
+        <button
+          onClick={() => setActiveCategory("todos")}
+          className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
+          style={{
+            fontSize: "12px",
+            height: "36px",
+            backgroundColor: activeCategory === "todos" ? "var(--midnight)" : "transparent",
+            color: activeCategory === "todos" ? "var(--bone)" : "var(--midnight)",
+            border: "1px solid",
+            borderColor: activeCategory === "todos" ? "transparent" : "var(--line)",
+            transition: `background-color 200ms ${EASE}, color 200ms ${EASE}, border-color 200ms ${EASE}`,
+          }}
+        >
+          <LayoutGrid className="w-3 h-3" />
+          Todos
+        </button>
 
         {/* Comida — always shown, coming soon */}
         <button
@@ -167,7 +177,63 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
         </button>
       </div>
 
-      {activeCategory === COMIDA ? (
+      {activeCategory === "todos" ? (
+        /* Grouped view: one section per category + comida + combustible */
+        <div key="todos" ref={containerRef} className="space-y-6">
+          {categories.map((cat) => {
+            const catBenefits = benefits.filter((b) => b.partner_businesses?.category === cat)
+            const { fg, Icon } = getCategoryChipStyle(cat)
+            return (
+              <div key={cat}>
+                <div className="flex items-center gap-1.5 mb-3">
+                  <Icon className="w-3.5 h-3.5" style={{ color: fg }} />
+                  <p
+                    className="eyebrow-muted"
+                    style={{ textTransform: "uppercase" }}
+                  >
+                    {cat}
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                  {catBenefits.map((benefit) => (
+                    <div key={benefit.id} className="benefit-card">
+                      <BenefitCard benefit={benefit} driverId={driverId} canUse={canUse} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+
+          {/* Comida section */}
+          <div>
+            <div className="flex items-center gap-1.5 mb-3">
+              <Utensils className="w-3.5 h-3.5" style={{ color: "var(--verde)" }} />
+              <p className="eyebrow-muted">COMIDA</p>
+            </div>
+            <div
+              className="rounded-2xl p-6 text-center"
+              style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
+            >
+              <p className="font-bold mb-1" style={{ fontSize: "18px", letterSpacing: "-0.02em", color: "var(--midnight)" }}>
+                Próximamente
+              </p>
+              <p className="text-sm" style={{ color: "var(--mute)" }}>
+                Estamos sumando restaurantes y opciones de comida.
+              </p>
+            </div>
+          </div>
+
+          {/* Combustible section */}
+          <div>
+            <div className="flex items-center gap-1.5 mb-3">
+              <Fuel className="w-3.5 h-3.5" style={{ color: "oklch(0.48 0.1 82)" }} />
+              <p className="eyebrow-muted">COMBUSTIBLE</p>
+            </div>
+            <ReferralCard code={referralCode ?? ""} referralCount={referralCount} />
+          </div>
+        </div>
+      ) : activeCategory === COMIDA ? (
         <div
           className="rounded-2xl p-8 text-center"
           style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
