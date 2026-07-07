@@ -61,26 +61,26 @@ export default function DashboardHero({
             >
               <button
                 onClick={() => setView("month")}
-                className="rounded-full px-3 py-1 font-semibold"
+                className="pressable rounded-full px-3 py-1 font-semibold"
                 style={{
                   fontSize: "11px",
                   letterSpacing: "0.02em",
                   backgroundColor: view === "month" ? "rgba(245,241,234,0.14)" : "transparent",
                   color: view === "month" ? "var(--bone)" : "rgba(245,241,234,0.38)",
-                  transition: "background-color 180ms cubic-bezier(0.23, 1, 0.32, 1), color 180ms cubic-bezier(0.23, 1, 0.32, 1)",
+                  transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 180ms cubic-bezier(0.23, 1, 0.32, 1), color 180ms cubic-bezier(0.23, 1, 0.32, 1)",
                 }}
               >
                 Este mes
               </button>
               <button
                 onClick={() => setView("lifetime")}
-                className="rounded-full px-3 py-1 font-semibold"
+                className="pressable rounded-full px-3 py-1 font-semibold"
                 style={{
                   fontSize: "11px",
                   letterSpacing: "0.02em",
                   backgroundColor: view === "lifetime" ? "rgba(245,241,234,0.14)" : "transparent",
                   color: view === "lifetime" ? "var(--bone)" : "rgba(245,241,234,0.38)",
-                  transition: "background-color 180ms cubic-bezier(0.23, 1, 0.32, 1), color 180ms cubic-bezier(0.23, 1, 0.32, 1)",
+                  transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 180ms cubic-bezier(0.23, 1, 0.32, 1), color 180ms cubic-bezier(0.23, 1, 0.32, 1)",
                 }}
               >
                 Total

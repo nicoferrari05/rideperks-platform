@@ -451,7 +451,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                     to   { opacity: 1; transform: scale(1) translateY(0); }
                   }
                   @keyframes validoCheck {
-                    from { opacity: 0; transform: scale(0.5); }
+                    from { opacity: 0; transform: scale(0.75); }
                     to   { opacity: 1; transform: scale(1); }
                   }
                 `}</style>
