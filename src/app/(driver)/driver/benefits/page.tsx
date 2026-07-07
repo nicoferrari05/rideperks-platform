@@ -2,9 +2,10 @@ import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { unstable_cache } from "next/cache"
 import { redirect } from "next/navigation"
-import { Lock, Map } from "lucide-react"
+import { Map } from "lucide-react"
 import Link from "next/link"
 import BenefitsListAnimated from "@/components/driver/BenefitsListAnimated"
+import PaymentBanner from "@/components/driver/PaymentBanner"
 import SavingsProgressBar from "@/components/driver/SavingsProgressBar"
 
 // Beneficios activos: iguales para todos los conductores, cambian solo cuando
@@ -101,37 +102,7 @@ export default async function BenefitsPage() {
         )}
       </div>
 
-      {!canUse && (
-        <div
-          className="rounded-2xl p-6 text-center space-y-3"
-          style={{ backgroundColor: "var(--bone-2)", border: "1px dashed var(--line)" }}
-        >
-          <div
-            className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
-            style={{ backgroundColor: "var(--bone)" }}
-          >
-            <Lock className="w-5 h-5" style={{ color: "var(--mute)" }} />
-          </div>
-          <p className="font-semibold" style={{ color: "var(--midnight)" }}>
-            {!isVerified ? "Cuenta en revisión" : "Membresía inactiva"}
-          </p>
-          <p className="text-sm" style={{ color: "var(--mute)" }}>
-            {!isVerified
-              ? "Estamos revisando tu cuenta. En menos de 24 horas quedas activo y puedes usar todos los beneficios."
-              : "Tu membresía venció. Contacta al equipo de RidePerks para renovarla."}
-          </p>
-          {!isVerified && (
-            <Link href="/driver/verify">
-              <button
-                className="px-5 py-2.5 rounded-full text-sm font-semibold"
-                style={{ backgroundColor: "var(--ember)", color: "#fff" }}
-              >
-                Ver mi verificación
-              </button>
-            </Link>
-          )}
-        </div>
-      )}
+      {!canUse && <PaymentBanner phone={profile?.phone ?? ""} />}
 
       {(benefits?.length ?? 0) > 0 ? (
         <BenefitsListAnimated

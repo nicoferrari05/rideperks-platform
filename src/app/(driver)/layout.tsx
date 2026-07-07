@@ -3,7 +3,6 @@ import { redirect } from "next/navigation"
 import DriverNav from "@/components/driver/DriverNav"
 import ScrollToTop from "@/components/shared/ScrollToTop"
 import YappyLoader from "@/components/driver/YappyLoader"
-import PaymentBanner from "@/components/driver/PaymentBanner"
 
 export default async function DriverLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -11,20 +10,14 @@ export default async function DriverLayout({ children }: { children: React.React
 
   if (!user) redirect("/login")
 
-  const [{ data: profile }, { data: subscription }] = await Promise.all([
+  const [{ data: profile }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
-    supabase.from("subscriptions").select("id")
-      .eq("driver_id", user.id).eq("status", "active")
-      .gte("expires_at", new Date().toISOString())
-      .limit(1).single(),
   ])
 
   if (!profile) redirect("/login")
   if (profile.role === "admin") redirect("/admin")
 
   if (profile.status !== "verified") redirect("/driver/verify")
-
-  const hasSubscription = !!subscription
 
   return (
     <div className="min-h-screen">
@@ -35,7 +28,6 @@ export default async function DriverLayout({ children }: { children: React.React
         className="max-w-2xl mx-auto px-4 py-6"
         style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}
       >
-        {!hasSubscription && <PaymentBanner phone={profile.phone ?? ""} />}
         {children}
       </main>
     </div>
