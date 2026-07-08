@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ChevronRight, Clock, Check, X } from "lucide-react"
 import DashboardAnimation from "@/components/driver/DashboardAnimation"
 import DashboardHero from "@/components/driver/DashboardHero"
+import PaymentBanner from "@/components/driver/PaymentBanner"
 
 type BenefitPreview = {
   id: string
@@ -260,17 +261,8 @@ export default async function DriverDashboard() {
             />
           </div>
         ) : (
-          <div
-            data-animate="hero"
-            className="rounded-2xl p-6 text-center"
-            style={{ backgroundColor: "var(--bone-2)", border: "1px dashed var(--line)" }}
-          >
-            <p className="font-semibold mb-2" style={{ color: "var(--midnight)" }}>
-              Membresía inactiva
-            </p>
-            <p className="text-sm" style={{ color: "var(--mute)" }}>
-              Para activar tu membresía, paga con Yappy usando el botón de arriba. Una vez confirmado el pago, tu acceso queda activo.
-            </p>
+          <div data-animate="hero">
+            <PaymentBanner phone={profile?.phone ?? ""} />
           </div>
         )}
 
