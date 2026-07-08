@@ -14,7 +14,7 @@ export default function ReferralCard({ code, referralCount, canUse }: Props) {
   function handleShare() {
     const baseUrl = typeof window !== "undefined" ? window.location.origin : ""
     const text = encodeURIComponent(
-      `¡Oye! Únete a RidePerks y ahorra en combustible, taller, comida y más. Usa mi código *${code}* al registrarte 👇\n${baseUrl}/join?ref=${code}`
+      `¡Oye! Únete a RidePerks y ahorra en combustible, taller, comida y más. Regístrate con mi link 👇\n${baseUrl}/register?ref=${code}`
     )
     window.open(`https://wa.me/?text=${text}`, "_blank")
   }

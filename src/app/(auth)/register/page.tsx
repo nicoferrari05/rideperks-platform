@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [refCode, setRefCode] = useState("")
   const [form, setForm] = useState({
     full_name: "",
     email: "",
@@ -20,6 +21,12 @@ export default function RegisterPage() {
     password: "",
     confirm_password: "",
   })
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const ref = params.get("ref")
+    if (ref) setRefCode(ref.toUpperCase())
+  }, [])
 
   function set(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -60,7 +67,12 @@ export default function RegisterPage() {
     if (user) {
       await supabase
         .from("profiles")
-        .update({ phone: form.phone, platform: form.platform, full_name: form.full_name })
+        .update({
+          phone: form.phone,
+          platform: form.platform,
+          full_name: form.full_name,
+          ...(refCode ? { referred_by: refCode } : {}),
+        })
         .eq("id", user.id)
     }
 
@@ -101,9 +113,21 @@ export default function RegisterPage() {
           >
             Crea tu cuenta
           </h1>
-          <p className="text-sm mb-8" style={{ color: "rgba(245,241,234,0.4)" }}>
+          <p className="text-sm mb-6" style={{ color: "rgba(245,241,234,0.4)" }}>
             Completa tus datos para acceder a tus beneficios.
           </p>
+
+          {refCode && (
+            <div
+              className="rounded-xl px-4 py-3 mb-6 flex items-center gap-2"
+              style={{ backgroundColor: "rgba(47,143,110,0.12)", border: "1px solid rgba(47,143,110,0.2)" }}
+            >
+              <span style={{ fontSize: "16px" }}>🎁</span>
+              <p className="text-xs font-medium" style={{ color: "var(--verde)", lineHeight: 1.5 }}>
+                Registrándote con código de referido <strong>{refCode}</strong>
+              </p>
+            </div>
+          )}
 
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-1.5">

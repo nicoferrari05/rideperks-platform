@@ -68,7 +68,7 @@ export async function GET(request: Request) {
       const expiresAt = new Date(now)
       expiresAt.setMonth(expiresAt.getMonth() + 1)
 
-      await Promise.all([
+      const [, { data: driverProfile }] = await Promise.all([
         supabase
           .from("subscriptions")
           .update({
@@ -81,8 +81,29 @@ export async function GET(request: Request) {
         supabase
           .from("profiles")
           .update({ status: "verified" })
-          .eq("id", subscription.driver_id),
+          .eq("id", subscription.driver_id)
+          .select("referred_by")
+          .single(),
       ])
+
+      // Register referral if this driver was referred and hasn't been counted yet
+      if (driverProfile?.referred_by) {
+        const { data: referrer } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("referral_code", driverProfile.referred_by)
+          .single()
+
+        if (referrer && referrer.id !== subscription.driver_id) {
+          await supabase
+            .from("referrals")
+            .upsert(
+              { referrer_id: referrer.id, referred_driver_id: subscription.driver_id, status: "active" },
+              { onConflict: "referred_driver_id", ignoreDuplicates: true }
+            )
+          console.log("[Yappy IPN] referral registered for driver:", subscription.driver_id)
+        }
+      }
 
       console.log("[Yappy IPN] subscription activated:", subscription.id)
     } else {
