@@ -33,6 +33,7 @@ export default function YappyPayButton({ defaultPhone = "" }: YappyPayButtonProp
   const [ready, setReady] = useState(() =>
     typeof window !== "undefined" && !!customElements.get("btn-yappy")
   )
+  const [yappyVisible, setYappyVisible] = useState(false)
   const [failed, setFailed] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [confirming, setConfirming] = useState(false)
@@ -61,6 +62,14 @@ export default function YappyPayButton({ defaultPhone = "" }: YappyPayButtonProp
 
     return () => { if (channel) supabase.removeChannel(channel) }
   }, [router])
+
+  // Once ready, delay showing btn-yappy for 400ms so its internal
+  // "no disponible" flash resolves before the element becomes visible
+  useEffect(() => {
+    if (!ready) return
+    const t = setTimeout(() => setYappyVisible(true), 400)
+    return () => clearTimeout(t)
+  }, [ready])
 
   useEffect(() => {
     if (customElements.get("btn-yappy")) {
@@ -323,8 +332,18 @@ export default function YappyPayButton({ defaultPhone = "" }: YappyPayButtonProp
   return (
     <>
       {typeof document !== "undefined" && createPortal(overlays, document.body)}
-      {/* @ts-expect-error — btn-yappy is a custom web component */}
-      <btn-yappy ref={btnRef} theme="dark" rounded="true" />
+      {/* Spinner shown while btn-yappy is initializing internally (prevents "no disponible" flash) */}
+      {!yappyVisible && (
+        <div className="flex items-center gap-2 text-xs" style={{ color: "rgba(245,241,234,0.45)" }}>
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          Cargando Yappy...
+        </div>
+      )}
+      {/* Always in DOM once ready so web component can connect and resolve its internal state */}
+      <div style={yappyVisible ? undefined : { visibility: "hidden", height: 0, overflow: "hidden" }}>
+        {/* @ts-expect-error — btn-yappy is a custom web component */}
+        <btn-yappy ref={btnRef} theme="dark" rounded="true" />
+      </div>
     </>
   )
 }
