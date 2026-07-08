@@ -415,15 +415,17 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
           ) : (
             <button
               disabled
-              className="w-full rounded-xl font-semibold text-sm flex items-center justify-center gap-2 min-h-[44px]"
+              className="w-full rounded-xl font-semibold text-sm flex flex-col items-center justify-center gap-1.5 py-3.5 px-4 text-center"
               style={{
                 backgroundColor: "var(--bone-2)",
                 color: "var(--mute)",
                 cursor: "default",
+                minHeight: "52px",
+                lineHeight: 1.4,
               }}
             >
-              <Lock className="w-3.5 h-3.5" />
-              Activa tu membresía para canjear este beneficio
+              <Lock className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Activa tu membresía para canjear este beneficio</span>
             </button>
           )}
 
