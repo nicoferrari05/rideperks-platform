@@ -201,7 +201,7 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
               Llévate un tanque lleno
             </h2>
             <p className="text-sm mt-1" style={{ color: "var(--mute)", lineHeight: 1.6 }}>
-              Invita 3 conductores a RidePerks y gana tu próximo tanque gratis — hasta B/. 45.00.
+              Invita 3 conductores a RidePerks y gana tu próximo tanque gratis — hasta $45.00.
             </p>
           </div>
           <ReferralCard code={referralCode ?? ""} referralCount={referralCount} />

@@ -201,7 +201,7 @@ export default function YappyPayButton({ defaultPhone = "" }: YappyPayButtonProp
                 Confirma tu número de Yappy
               </p>
               <p className="text-sm mb-5" style={{ color: "rgba(245,241,234,0.45)" }}>
-                Este es el número al que se enviará el cobro de B/. 15.00. Cámbialo si usas otro número en Yappy.
+                Este es el número al que se enviará el cobro de $15.00. Cámbialo si usas otro número en Yappy.
               </p>
 
               <label
@@ -246,7 +246,7 @@ export default function YappyPayButton({ defaultPhone = "" }: YappyPayButtonProp
                     Procesando...
                   </>
                 ) : (
-                  "Confirmar y pagar B/. 15.00"
+                  "Confirmar y pagar $15.00"
                 )}
               </button>
 

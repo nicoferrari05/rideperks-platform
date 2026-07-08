@@ -251,7 +251,7 @@ export default async function ProfilePage() {
               style={{ borderTop: "1px solid rgba(245,241,234,0.08)" }}
             >
               <p className="font-mono-brand" style={{ fontSize: "10px", letterSpacing: "0.1em", color: "rgba(245,241,234,0.4)" }}>
-                {subscription ? "RENOVAR · B/. 15.00" : "ACTIVAR · B/. 15.00"}
+                {subscription ? "RENOVAR · $15.00" : "ACTIVAR · $15.00"}
               </p>
               <YappyPayButton defaultPhone={profile?.phone ?? ""} />
             </div>
