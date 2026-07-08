@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo } from "react"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
-import { Wrench, Zap, Utensils, Heart, Store, LayoutGrid, Fuel, type LucideIcon } from "lucide-react"
+import { Wrench, Zap, Utensils, Heart, Store, LayoutGrid, Fuel, Lock, type LucideIcon } from "lucide-react"
 import BenefitCard from "./BenefitCard"
 import ReferralCard from "./ReferralCard"
 import type { Benefit } from "@/types/database"
@@ -60,6 +60,34 @@ function categoryRank(cat: string) {
 }
 
 const EASE = "cubic-bezier(0.23, 1, 0.32, 1)"
+
+function LockedOverlay() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+        backgroundColor: "rgba(245,241,234,0.55)",
+        borderRadius: "16px",
+        zIndex: 10,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "8px",
+        padding: "24px",
+        textAlign: "center",
+      }}
+    >
+      <Lock className="w-5 h-5" style={{ color: "var(--mute)" }} />
+      <p className="text-sm font-semibold" style={{ color: "var(--midnight)" }}>
+        Activa tu membresía para acceder
+      </p>
+    </div>
+  )
+}
 
 export default function BenefitsListAnimated({ benefits, driverId, canUse, referralCode, referralCount }: Props) {
   const [activeCategory, setActiveCategory] = useState("todos")
@@ -195,30 +223,36 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
           </p>
         </div>
       ) : activeCategory === COMBUSTIBLE ? (
-        <div className="space-y-4">
-          <div>
-            <h2 className="font-bold" style={{ fontSize: "22px", letterSpacing: "-0.02em", color: "var(--midnight)" }}>
-              Llévate un tanque lleno
-            </h2>
-            <p className="text-sm mt-1" style={{ color: "var(--mute)", lineHeight: 1.6 }}>
-              Invita 3 conductores a RidePerks y gana tu próximo tanque gratis — hasta $45.00.
-            </p>
+        <div style={{ position: "relative" }}>
+          <div className="space-y-4">
+            <div>
+              <h2 className="font-bold" style={{ fontSize: "22px", letterSpacing: "-0.02em", color: "var(--midnight)" }}>
+                Llévate un tanque lleno
+              </h2>
+              <p className="text-sm mt-1" style={{ color: "var(--mute)", lineHeight: 1.6 }}>
+                Invita 3 conductores a RidePerks y gana tu próximo tanque gratis — hasta $45.00.
+              </p>
+            </div>
+            <ReferralCard code={referralCode ?? ""} referralCount={referralCount} />
           </div>
-          <ReferralCard code={referralCode ?? ""} referralCount={referralCount} />
+          {!canUse && <LockedOverlay />}
         </div>
       ) : (
-        <div key={activeCategory} className="grid grid-cols-1 gap-4">
-          {filtered.length === 0 ? (
-            <p className="text-sm py-10 text-center" style={{ color: "var(--mute)" }}>
-              No hay beneficios en esta categoría aún.
-            </p>
-          ) : (
-            filtered.map((benefit) => (
-              <div key={benefit.id} className="benefit-card">
-                <BenefitCard benefit={benefit} driverId={driverId} canUse={canUse} />
-              </div>
-            ))
-          )}
+        <div key={activeCategory} style={{ position: "relative" }}>
+          <div className="grid grid-cols-1 gap-4">
+            {filtered.length === 0 ? (
+              <p className="text-sm py-10 text-center" style={{ color: "var(--mute)" }}>
+                No hay beneficios en esta categoría aún.
+              </p>
+            ) : (
+              filtered.map((benefit) => (
+                <div key={benefit.id} className="benefit-card">
+                  <BenefitCard benefit={benefit} driverId={driverId} canUse={canUse} />
+                </div>
+              ))
+            )}
+          </div>
+          {!canUse && <LockedOverlay />}
         </div>
       )}
 
