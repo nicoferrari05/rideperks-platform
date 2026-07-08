@@ -5,6 +5,7 @@ import { createPortal } from "react-dom"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { Loader2, AlertCircle } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 
 declare global {
   namespace JSX {
@@ -35,6 +36,34 @@ export default function YappyPayButton({ defaultPhone = "" }: YappyPayButtonProp
   const [confirming, setConfirming] = useState(false)
   const [confirmPhone, setConfirmPhone] = useState("")
   const [submitting, setSubmitting] = useState(false)
+
+  // Listen for subscription activation in real-time so UI updates without manual refresh
+  useEffect(() => {
+    const supabase = createClient()
+    let channelCleanup: (() => void) | null = null
+
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data.user?.id
+      if (!uid) return
+
+      const channel = supabase
+        .channel("subscription-activation")
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "subscriptions", filter: `driver_id=eq.${uid}` },
+          (payload: { new: { status?: string } }) => {
+            if (payload.new.status === "active") {
+              router.refresh()
+            }
+          }
+        )
+        .subscribe()
+
+      channelCleanup = () => supabase.removeChannel(channel)
+    })
+
+    return () => { channelCleanup?.() }
+  }, [router])
 
   useEffect(() => {
     if (customElements.get("btn-yappy")) {
