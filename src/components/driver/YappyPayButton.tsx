@@ -30,7 +30,9 @@ interface YappyPayButtonProps {
 export default function YappyPayButton({ defaultPhone = "" }: YappyPayButtonProps) {
   const router = useRouter()
   const btnRef = useRef<YappyBtnElement | null>(null)
-  const [ready, setReady] = useState(false)
+  const [ready, setReady] = useState(() =>
+    typeof window !== "undefined" && !!customElements.get("btn-yappy")
+  )
   const [failed, setFailed] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [confirming, setConfirming] = useState(false)
@@ -40,29 +42,24 @@ export default function YappyPayButton({ defaultPhone = "" }: YappyPayButtonProp
   // Listen for subscription activation in real-time so UI updates without manual refresh
   useEffect(() => {
     const supabase = createClient()
-    let channelCleanup: (() => void) | null = null
+    let channel: ReturnType<typeof supabase.channel> | null = null
 
-    supabase.auth.getUser().then(({ data }) => {
-      const uid = data.user?.id
-      if (!uid) return
-
-      const channel = supabase
+    ;(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      channel = supabase
         .channel("subscription-activation")
         .on(
           "postgres_changes",
-          { event: "UPDATE", schema: "public", table: "subscriptions", filter: `driver_id=eq.${uid}` },
+          { event: "UPDATE", schema: "public", table: "subscriptions", filter: `driver_id=eq.${user.id}` },
           (payload: { new: { status?: string } }) => {
-            if (payload.new.status === "active") {
-              router.refresh()
-            }
+            if (payload.new.status === "active") router.refresh()
           }
         )
         .subscribe()
+    })()
 
-      channelCleanup = () => supabase.removeChannel(channel)
-    })
-
-    return () => { channelCleanup?.() }
+    return () => { if (channel) supabase.removeChannel(channel) }
   }, [router])
 
   useEffect(() => {
