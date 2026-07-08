@@ -237,8 +237,8 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
             </p>
           )}
 
-          {/* PRICE COMPARISON — collapsible, only when both prices set */}
-          {benefit.regular_price != null && benefit.rideperks_price != null && (
+          {/* PRICE COMPARISON — collapsible, only when both prices set and membership active */}
+          {canUse && benefit.regular_price != null && benefit.rideperks_price != null && (
             <div>
               <button
                 onClick={() => setPricesOpen(!pricesOpen)}
@@ -322,8 +322,8 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
             </div>
           )}
 
-          {/* TERMS: collapsible */}
-          {benefit.terms && (
+          {/* TERMS: collapsible, only when membership active */}
+          {canUse && benefit.terms && (
             <div>
               <button
                 onClick={() => setTermsOpen(!termsOpen)}
