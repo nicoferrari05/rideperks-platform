@@ -322,8 +322,8 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
             </div>
           )}
 
-          {/* TERMS: collapsible, only when membership active */}
-          {canUse && benefit.terms && (
+          {/* TERMS: collapsible, always visible */}
+          {benefit.terms && (
             <div>
               <button
                 onClick={() => setTermsOpen(!termsOpen)}
