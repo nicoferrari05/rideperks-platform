@@ -1,15 +1,16 @@
 "use client"
 
-import { Share2 } from "lucide-react"
+import { Share2, Lock } from "lucide-react"
 
 interface Props {
   code: string
   referralCount: number
+  canUse: boolean
 }
 
 const GOAL = 3
 
-export default function ReferralCard({ code, referralCount }: Props) {
+export default function ReferralCard({ code, referralCount, canUse }: Props) {
   function handleShare() {
     const baseUrl = typeof window !== "undefined" ? window.location.origin : ""
     const text = encodeURIComponent(
@@ -69,12 +70,18 @@ export default function ReferralCard({ code, referralCount }: Props) {
       {/* Share CTA */}
       <div className="px-5 pb-5" style={{ borderTop: "1px solid var(--line)", paddingTop: "14px" }}>
         <button
-          onClick={handleShare}
+          onClick={canUse ? handleShare : undefined}
+          disabled={!canUse}
           className="pressable w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm"
-          style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
+          style={{
+            backgroundColor: canUse ? "var(--midnight)" : "var(--bone-2)",
+            color: canUse ? "var(--bone)" : "var(--mute)",
+            cursor: canUse ? "pointer" : "default",
+            transition: "background-color 180ms cubic-bezier(0.23, 1, 0.32, 1), color 180ms cubic-bezier(0.23, 1, 0.32, 1)",
+          }}
         >
-          <Share2 className="w-4 h-4" />
-          Invitar por WhatsApp
+          {canUse ? <Share2 className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+          {canUse ? "Invitar por WhatsApp" : "Activa tu membresía para invitar"}
         </button>
       </div>
     </div>
