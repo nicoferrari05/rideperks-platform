@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Clock, QrCode, Loader2, XCircle, Navigation, MapPin, ArrowUpRight, Wrench, Zap, Utensils, Heart, Store, ChevronDown, Tag } from "lucide-react"
+import { Clock, QrCode, Loader2, XCircle, Navigation, MapPin, ArrowUpRight, Wrench, Zap, Utensils, Heart, Store, ChevronDown, Tag, Lock } from "lucide-react"
 import QRCode from "react-qr-code"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -413,18 +413,44 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
               )}
             </div>
           ) : (
-            hasAddress && (
-              <a
-                href={wazeUrl ?? `https://waze.com/ul?q=${encodeURIComponent(address!)}&navigate=yes`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5"
-                style={{ fontSize: "12px", color: "var(--mute)", textDecoration: "none" }}
+            <div className="flex gap-2.5 pt-0.5">
+              <button
+                disabled
+                className="flex-1 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 min-h-[44px]"
+                style={{
+                  backgroundColor: "var(--bone-2)",
+                  color: "var(--mute)",
+                  cursor: "default",
+                }}
               >
-                <MapPin className="w-3 h-3 flex-shrink-0" />
-                <span>{address ?? "Ver ubicación en Waze"}</span>
-              </a>
-            )
+                <Lock className="w-3.5 h-3.5" />
+                Requiere membresía activa
+              </button>
+
+              {hasAddress && (
+                <a
+                  href={wazeUrl ?? `https://waze.com/ul?q=${encodeURIComponent(address!)}&navigate=yes`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 rounded-xl text-sm flex items-center justify-center gap-2 min-h-[44px]"
+                  style={{
+                    backgroundColor: "rgba(15,27,61,0.05)",
+                    border: "1px solid rgba(15,27,61,0.14)",
+                    color: "var(--midnight)",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1)",
+                  }}
+                  onPointerDown={(e) => { e.currentTarget.style.transform = "scale(0.97)" }}
+                  onPointerUp={(e) => { e.currentTarget.style.transform = "" }}
+                  onPointerLeave={(e) => { e.currentTarget.style.transform = "" }}
+                >
+                  <Navigation className="w-3.5 h-3.5" style={{ flexShrink: 0 }} />
+                  <span>Ir con Waze</span>
+                  <ArrowUpRight className="w-3 h-3" style={{ opacity: 0.4, flexShrink: 0 }} />
+                </a>
+              )}
+            </div>
           )}
 
         </div>
