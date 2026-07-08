@@ -322,50 +322,6 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
             </div>
           )}
 
-          {/* TERMS: collapsible, always visible */}
-          {benefit.terms && (
-            <div>
-              <button
-                onClick={() => setTermsOpen(!termsOpen)}
-                className="pressable flex items-center gap-1.5"
-                style={{
-                  fontSize: "12px",
-                  color: "var(--mute)",
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                }}
-              >
-                Ver condiciones
-                <ChevronDown
-                  className="w-3.5 h-3.5"
-                  style={{
-                    transition: "transform 220ms cubic-bezier(0.23, 1, 0.32, 1)",
-                    transform: termsOpen ? "rotate(180deg)" : "rotate(0deg)",
-                  }}
-                />
-              </button>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateRows: termsOpen ? "1fr" : "0fr",
-                  transition: "grid-template-rows 220ms cubic-bezier(0.23, 1, 0.32, 1)",
-                }}
-              >
-                <div style={{ overflow: "hidden" }}>
-                  <p
-                    className="mt-2 leading-relaxed"
-                    style={{ fontSize: "12px", color: "var(--mute)" }}
-                  >
-                    {benefit.terms}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* ACTION BUTTONS */}
           {canUse ? (
             <div className="flex gap-2.5 pt-0.5">
@@ -427,6 +383,50 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
               <Lock className="w-3.5 h-3.5 flex-shrink-0" />
               <span>Activa tu membresía para canjear este beneficio</span>
             </button>
+          )}
+
+          {/* TERMS: collapsible, always visible, below action buttons */}
+          {benefit.terms && (
+            <div>
+              <button
+                onClick={() => setTermsOpen(!termsOpen)}
+                className="pressable flex items-center gap-1.5"
+                style={{
+                  fontSize: "12px",
+                  color: "var(--mute)",
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                }}
+              >
+                Ver condiciones
+                <ChevronDown
+                  className="w-3.5 h-3.5"
+                  style={{
+                    transition: "transform 220ms cubic-bezier(0.23, 1, 0.32, 1)",
+                    transform: termsOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+              </button>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateRows: termsOpen ? "1fr" : "0fr",
+                  transition: "grid-template-rows 220ms cubic-bezier(0.23, 1, 0.32, 1)",
+                }}
+              >
+                <div style={{ overflow: "hidden" }}>
+                  <p
+                    className="mt-2 leading-relaxed"
+                    style={{ fontSize: "12px", color: "var(--mute)" }}
+                  >
+                    {benefit.terms}
+                  </p>
+                </div>
+              </div>
+            </div>
           )}
 
         </div>
