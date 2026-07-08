@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
+import { createPortal } from "react-dom"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { Loader2, AlertCircle } from "lucide-react"
@@ -157,7 +158,7 @@ export default function YappyPayButton({ defaultPhone = "" }: YappyPayButtonProp
     )
   }
 
-  return (
+  const overlays = (
     <>
       {/* Phone confirmation sheet */}
       {confirming && (
@@ -290,7 +291,12 @@ export default function YappyPayButton({ defaultPhone = "" }: YappyPayButtonProp
           </button>
         </div>
       )}
+    </>
+  )
 
+  return (
+    <>
+      {typeof document !== "undefined" && createPortal(overlays, document.body)}
       {/* @ts-expect-error — btn-yappy is a custom web component */}
       <btn-yappy ref={btnRef} theme="dark" rounded="true" />
     </>
