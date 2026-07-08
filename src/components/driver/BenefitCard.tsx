@@ -423,7 +423,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
               }}
             >
               <Lock className="w-3.5 h-3.5" />
-              Requiere membresía activa
+              Activa tu membresía para canjear este beneficio
             </button>
           )}
 
