@@ -43,7 +43,7 @@ export default function DashboardHero({
       <div
         className="absolute rounded-full pointer-events-none"
         style={{
-          right: "-15%", top: "-25%", width: "55%", height: "55%",
+          right: "-15%", top: "-25%", width: "27.5%", height: "27.5%",
           backgroundColor: "rgba(232,80,42,0.55)",
           filter: "blur(50px)",
         }}
@@ -52,7 +52,7 @@ export default function DashboardHero({
       <div
         className="absolute rounded-full pointer-events-none"
         style={{
-          left: "-10%", bottom: "-18%", width: "38%", height: "38%",
+          left: "-10%", bottom: "-18%", width: "19%", height: "19%",
           backgroundColor: "rgba(201,167,53,0.3)",
           filter: "blur(45px)",
         }}
