@@ -237,6 +237,69 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
             </p>
           )}
 
+          {/* ACTION BUTTONS */}
+          {canUse ? (
+            <div className="flex gap-2.5 pt-0.5">
+              <button
+                onClick={generateQR}
+                disabled={generating}
+                className="flex-1 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 min-h-[44px]"
+                style={{
+                  backgroundColor: "var(--midnight)",
+                  color: "var(--bone)",
+                  transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1)",
+                }}
+                onPointerDown={(e) => { e.currentTarget.style.transform = "scale(0.97)" }}
+                onPointerUp={(e) => { e.currentTarget.style.transform = "" }}
+                onPointerLeave={(e) => { e.currentTarget.style.transform = "" }}
+              >
+                {generating
+                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generando...</>
+                  : <><QrCode className="w-3.5 h-3.5" /> Ver QR</>
+                }
+              </button>
+
+              {hasAddress && (
+                <a
+                  href={wazeUrl ?? `https://waze.com/ul?q=${encodeURIComponent(address!)}&navigate=yes`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 rounded-xl text-sm flex items-center justify-center gap-2 min-h-[44px]"
+                  style={{
+                    backgroundColor: "rgba(15,27,61,0.05)",
+                    border: "1px solid rgba(15,27,61,0.14)",
+                    color: "var(--midnight)",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1)",
+                  }}
+                  onPointerDown={(e) => { e.currentTarget.style.transform = "scale(0.97)" }}
+                  onPointerUp={(e) => { e.currentTarget.style.transform = "" }}
+                  onPointerLeave={(e) => { e.currentTarget.style.transform = "" }}
+                >
+                  <Navigation className="w-3.5 h-3.5" style={{ flexShrink: 0 }} />
+                  <span>Ir con Waze</span>
+                  <ArrowUpRight className="w-3 h-3" style={{ opacity: 0.4, flexShrink: 0 }} />
+                </a>
+              )}
+            </div>
+          ) : (
+            <button
+              disabled
+              className="w-full rounded-xl font-semibold text-sm flex flex-col items-center justify-center gap-1.5 py-3.5 px-4 text-center"
+              style={{
+                backgroundColor: "var(--bone-2)",
+                color: "var(--mute)",
+                cursor: "default",
+                minHeight: "52px",
+                lineHeight: 1.4,
+              }}
+            >
+              <Lock className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Activa tu membresía para canjear este beneficio</span>
+            </button>
+          )}
+
           {/* PRICE COMPARISON — collapsible, only when both prices set and membership active */}
           {canUse && benefit.regular_price != null && benefit.rideperks_price != null && (
             <div>
@@ -320,69 +383,6 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                 </div>
               </div>
             </div>
-          )}
-
-          {/* ACTION BUTTONS */}
-          {canUse ? (
-            <div className="flex gap-2.5 pt-0.5">
-              <button
-                onClick={generateQR}
-                disabled={generating}
-                className="flex-1 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 min-h-[44px]"
-                style={{
-                  backgroundColor: "var(--midnight)",
-                  color: "var(--bone)",
-                  transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1)",
-                }}
-                onPointerDown={(e) => { e.currentTarget.style.transform = "scale(0.97)" }}
-                onPointerUp={(e) => { e.currentTarget.style.transform = "" }}
-                onPointerLeave={(e) => { e.currentTarget.style.transform = "" }}
-              >
-                {generating
-                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generando...</>
-                  : <><QrCode className="w-3.5 h-3.5" /> Ver QR</>
-                }
-              </button>
-
-              {hasAddress && (
-                <a
-                  href={wazeUrl ?? `https://waze.com/ul?q=${encodeURIComponent(address!)}&navigate=yes`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 rounded-xl text-sm flex items-center justify-center gap-2 min-h-[44px]"
-                  style={{
-                    backgroundColor: "rgba(15,27,61,0.05)",
-                    border: "1px solid rgba(15,27,61,0.14)",
-                    color: "var(--midnight)",
-                    fontWeight: 600,
-                    textDecoration: "none",
-                    transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1)",
-                  }}
-                  onPointerDown={(e) => { e.currentTarget.style.transform = "scale(0.97)" }}
-                  onPointerUp={(e) => { e.currentTarget.style.transform = "" }}
-                  onPointerLeave={(e) => { e.currentTarget.style.transform = "" }}
-                >
-                  <Navigation className="w-3.5 h-3.5" style={{ flexShrink: 0 }} />
-                  <span>Ir con Waze</span>
-                  <ArrowUpRight className="w-3 h-3" style={{ opacity: 0.4, flexShrink: 0 }} />
-                </a>
-              )}
-            </div>
-          ) : (
-            <button
-              disabled
-              className="w-full rounded-xl font-semibold text-sm flex flex-col items-center justify-center gap-1.5 py-3.5 px-4 text-center"
-              style={{
-                backgroundColor: "var(--bone-2)",
-                color: "var(--mute)",
-                cursor: "default",
-                minHeight: "52px",
-                lineHeight: 1.4,
-              }}
-            >
-              <Lock className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>Activa tu membresía para canjear este beneficio</span>
-            </button>
           )}
 
           {/* TERMS: collapsible, always visible, below action buttons */}
