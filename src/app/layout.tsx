@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next"
 import { Geist, Fraunces, JetBrains_Mono } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
 import AppSplash from "@/components/shared/AppSplash"
-import StatusBarStrip from "@/components/shared/StatusBarStrip"
 import "./globals.css"
 
 const geist = Geist({
@@ -26,7 +25,6 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const viewport: Viewport = {
   themeColor: "#0F1B3D",
-  viewportFit: "cover",
 }
 
 export const metadata: Metadata = {
@@ -35,7 +33,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     title: "RidePerks",
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "black",
   },
 }
 
@@ -50,7 +48,6 @@ export default function RootLayout({
       className={`${geist.variable} ${fraunces.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <StatusBarStrip />
         <AppSplash />
         {children}
         <Toaster richColors position="top-right" />
