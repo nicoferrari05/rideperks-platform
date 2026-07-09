@@ -43,18 +43,9 @@ export default function DashboardHero({
       <div
         className="absolute rounded-full pointer-events-none"
         style={{
-          right: "-15%", top: "-25%", width: "27.5%", height: "27.5%",
+          right: "-15%", top: "-25%", width: "48%", height: "48%",
           backgroundColor: "rgba(232,80,42,0.55)",
           filter: "blur(50px)",
-        }}
-      />
-      {/* Secondary glow — bottom left, adds depth without competing for attention */}
-      <div
-        className="absolute rounded-full pointer-events-none"
-        style={{
-          left: "-10%", bottom: "-18%", width: "19%", height: "19%",
-          backgroundColor: "rgba(201,167,53,0.3)",
-          filter: "blur(45px)",
         }}
       />
       {/* Grain texture — subtle, keeps the flat gradient from looking cheap */}
