@@ -158,10 +158,11 @@ export default async function ProfilePage() {
         >
           {/* Background glow */}
           <div
-            className="absolute pointer-events-none"
+            className="absolute rounded-full pointer-events-none"
             style={{
-              right: "-15%", top: "-25%", width: "55%", height: "55%",
-              background: "radial-gradient(circle, rgba(232,80,42,0.3), transparent 60%)",
+              right: "-15%", top: "-25%", width: "48%", height: "48%",
+              backgroundColor: "rgba(232,80,42,0.55)",
+              filter: "blur(50px)",
             }}
           />
 

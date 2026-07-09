@@ -221,10 +221,12 @@ export default function YappyPayButton({ defaultPhone = "" }: YappyPayButtonProp
           >
             {/* Glow */}
             <div
+              className="rounded-full"
               style={{
                 position: "absolute",
-                right: "-10%", top: "-40%", width: "50%", height: "60%",
-                background: "radial-gradient(circle, rgba(232,80,42,0.25), transparent 65%)",
+                right: "-15%", top: "-25%", width: "48%", height: "48%",
+                backgroundColor: "rgba(232,80,42,0.55)",
+                filter: "blur(50px)",
                 pointerEvents: "none",
               }}
             />

@@ -84,10 +84,11 @@ export default async function HistoryPage() {
             style={{ backgroundColor: "var(--midnight)" }}
           >
             <div
-              className="absolute pointer-events-none"
+              className="absolute rounded-full pointer-events-none"
               style={{
-                right: "-15%", top: "-40%", width: "60%", height: "60%",
-                background: "radial-gradient(circle, rgba(232,80,42,0.3), transparent 65%)",
+                right: "-15%", top: "-25%", width: "48%", height: "48%",
+                backgroundColor: "rgba(232,80,42,0.55)",
+                filter: "blur(50px)",
               }}
             />
             <div className="relative">
