@@ -26,7 +26,7 @@ export default async function DriverLayout({ children }: { children: React.React
       <DriverNav profile={profile} />
       <main
         className="max-w-2xl mx-auto px-4 py-6"
-        style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}
+        style={{ paddingBottom: "7rem" }}
       >
         {children}
       </main>

@@ -38,11 +38,30 @@ export default function DashboardHero({
       className="rounded-2xl p-6 relative overflow-hidden"
       style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
     >
+      {/* Primary glow — top right */}
       <div
         className="absolute pointer-events-none"
         style={{
           right: "-20%", top: "-30%", width: "70%", height: "70%",
           background: "radial-gradient(circle, rgba(232,80,42,0.35), transparent 60%)",
+        }}
+      />
+      {/* Secondary glow — bottom left, adds depth without competing for attention */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          left: "-15%", bottom: "-25%", width: "55%", height: "55%",
+          background: "radial-gradient(circle, rgba(201,167,53,0.14), transparent 65%)",
+        }}
+      />
+      {/* Grain texture — subtle, keeps the flat gradient from looking cheap */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          opacity: 0.5,
+          mixBlendMode: "overlay",
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E\")",
         }}
       />
 
