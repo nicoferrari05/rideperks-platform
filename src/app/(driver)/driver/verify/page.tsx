@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Upload, CheckCircle, Check, Loader2, ImageIcon } from "lucide-react"
+import { Upload, CheckCircle, Check, Loader2, ImageIcon, MessageCircle } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
+import { SUPPORT_WHATSAPP_URL } from "@/lib/support"
 
 const platforms = [
   { value: "uber",      label: "Uber" },
@@ -100,6 +101,16 @@ export default function VerifyPage() {
           >
             Ir al inicio
           </button>
+          <a
+            href={SUPPORT_WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pressable flex items-center justify-center gap-1.5 text-sm font-medium"
+            style={{ color: "var(--verde)" }}
+          >
+            <MessageCircle className="w-4 h-4" />
+            ¿Necesitas ayuda? Escríbenos
+          </a>
         </div>
       </div>
     )
@@ -224,6 +235,17 @@ export default function VerifyPage() {
             <><Upload className="w-4 h-4" />Enviar verificación</>
           )}
         </button>
+
+        <a
+          href={SUPPORT_WHATSAPP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pressable flex items-center justify-center gap-1.5 text-sm font-medium py-2"
+          style={{ color: "var(--mute)" }}
+        >
+          <MessageCircle className="w-3.5 h-3.5" />
+          ¿Necesitas ayuda? Escríbenos
+        </a>
       </form>
     </div>
   )

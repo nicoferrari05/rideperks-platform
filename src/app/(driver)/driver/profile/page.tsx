@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { User, Phone, Car, CheckCircle2, Clock, XCircle, CalendarDays, Zap, TrendingUp } from "lucide-react"
+import Link from "next/link"
+import { User, Phone, Car, CheckCircle2, Clock, XCircle, CalendarDays, Zap, TrendingUp, MessageCircle } from "lucide-react"
 import type { ElementType } from "react"
 import LogoutButton from "@/components/driver/LogoutButton"
 import StaggerEntrance from "@/components/shared/StaggerEntrance"
 import YappyPayButton from "@/components/driver/YappyPayButton"
+import { SUPPORT_WHATSAPP_URL } from "@/lib/support"
 
 const platformLabel: Record<string, string> = {
   uber: "Uber",
@@ -258,8 +260,42 @@ export default async function ProfilePage() {
           </div>
         </div>
 
+        <a
+          data-stagger
+          href={SUPPORT_WHATSAPP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pressable flex items-center gap-3 rounded-2xl px-5 py-4"
+          style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
+        >
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: "rgba(47,143,110,0.12)" }}
+          >
+            <MessageCircle className="w-4 h-4" style={{ color: "var(--verde)" }} />
+          </div>
+          <div>
+            <p className="font-semibold text-sm" style={{ color: "var(--midnight)" }}>
+              Contactar soporte
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: "var(--mute)" }}>
+              Escríbenos por WhatsApp
+            </p>
+          </div>
+        </a>
+
         <div data-stagger className="mt-4">
           <LogoutButton />
+        </div>
+
+        <div data-stagger className="flex items-center justify-center gap-3 pt-1 pb-2">
+          <Link href="/terminos" className="text-xs" style={{ color: "var(--mute)" }}>
+            Términos
+          </Link>
+          <span className="text-xs" style={{ color: "var(--line)" }}>·</span>
+          <Link href="/privacidad" className="text-xs" style={{ color: "var(--mute)" }}>
+            Privacidad
+          </Link>
         </div>
       </div>
     </StaggerEntrance>

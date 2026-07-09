@@ -234,7 +234,19 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <p className="text-center text-sm mt-6" style={{ color: "rgba(245,241,234,0.3)" }}>
+          <p className="text-center text-xs mt-4" style={{ color: "rgba(245,241,234,0.25)", lineHeight: 1.6 }}>
+            Al crear tu cuenta aceptas nuestros{" "}
+            <Link href="/terminos" className="font-medium" style={{ color: "rgba(245,241,234,0.45)" }}>
+              Términos
+            </Link>{" "}
+            y{" "}
+            <Link href="/privacidad" className="font-medium" style={{ color: "rgba(245,241,234,0.45)" }}>
+              Política de Privacidad
+            </Link>
+            .
+          </p>
+
+          <p className="text-center text-sm mt-4" style={{ color: "rgba(245,241,234,0.3)" }}>
             ¿Ya tienes cuenta?{" "}
             <Link href="/login" className="font-medium" style={{ color: "var(--ember)" }}>
               Ingresar
