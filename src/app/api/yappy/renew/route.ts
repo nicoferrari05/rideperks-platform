@@ -95,9 +95,6 @@ export async function POST(request: Request) {
     // ── 5. Yappy: create order ─────────────────────────────────────────────
     const phoneDigits = phoneToUse.replace(/\D/g, "").slice(-8)
 
-    const ipnUrl = `https://${YAPPY_DOMAIN}/api/yappy/ipn`
-    console.log("[Yappy renew] creating order", { orderId, ipnUrl, aliasYappy: phoneDigits })
-
     const orderRes = await fetch(`${YAPPY_BASE_URL}/payments/payment-wc`, {
       method: "POST",
       headers: {
@@ -110,7 +107,7 @@ export async function POST(request: Request) {
         domain: YAPPY_DOMAIN,
         paymentDate: Date.now(),
         aliasYappy: phoneDigits,
-        ipnUrl,
+        ipnUrl: `https://${YAPPY_DOMAIN}/api/yappy/ipn`,
         discount: "0.00",
         taxes: "0.00",
         subtotal: SUBSCRIPTION_AMOUNT.toFixed(2),
