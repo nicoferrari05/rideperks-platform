@@ -25,6 +25,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const viewport: Viewport = {
   themeColor: "#0F1B3D",
+  viewportFit: "cover",
 }
 
 export const metadata: Metadata = {
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     title: "RidePerks",
     capable: true,
-    statusBarStyle: "black",
+    statusBarStyle: "black-translucent",
   },
 }
 
@@ -48,6 +49,20 @@ export default function RootLayout({
       className={`${geist.variable} ${fraunces.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* Fixed dark strip behind the iOS status bar so it never shows the page's own background color */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "env(safe-area-inset-top, 0px)",
+            backgroundColor: "#0F1B3D",
+            zIndex: 9999,
+            pointerEvents: "none",
+          }}
+        />
         <AppSplash />
         {children}
         <Toaster richColors position="top-right" />

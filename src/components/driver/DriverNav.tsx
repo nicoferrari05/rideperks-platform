@@ -37,6 +37,7 @@ export default function DriverNav({ profile }: { profile: Profile }) {
         style={{
           backgroundColor: "var(--midnight)",
           borderColor: "rgba(245,241,234,0.1)",
+          paddingTop: "env(safe-area-inset-top, 0px)",
         }}
       >
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
