@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Geist, Fraunces, JetBrains_Mono } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
 import AppSplash from "@/components/shared/AppSplash"
+import StatusBarStrip from "@/components/shared/StatusBarStrip"
 import "./globals.css"
 
 const geist = Geist({
@@ -49,22 +50,7 @@ export default function RootLayout({
       className={`${geist.variable} ${fraunces.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {/* Fixed dark strip behind the iOS status bar so it never shows the page's own background color.
-            Uses var(--midnight) — the same token the login/register/driver-nav screens use — not the
-            splash screen's raw hex, so the strip matches once the splash overlay (which sits above it) is gone. */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "env(safe-area-inset-top, 0px)",
-            backgroundColor: "var(--midnight)",
-            zIndex: 9999,
-            pointerEvents: "none",
-          }}
-        />
+        <StatusBarStrip />
         <AppSplash />
         {children}
         <Toaster richColors position="top-right" />
