@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 gsap.registerPlugin(useGSAP)
 
 interface LogoProps {
-  size?: "sm" | "md" | "lg"
+  size?: "sm" | "md" | "lg" | "xl"
   className?: string
 }
 
@@ -16,6 +16,7 @@ const sizes = {
   sm: "px-3 py-1.5 text-base",
   md: "px-4 py-2 text-xl",
   lg: "px-6 py-3 text-2xl",
+  xl: "px-8 py-4 text-4xl",
 }
 
 const LETTERS = "RIDEPERKS".split("")

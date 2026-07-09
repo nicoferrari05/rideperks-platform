@@ -1,7 +1,8 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import gsap from "gsap"
+import Logo from "./Logo"
 
 interface Props { onComplete: () => void }
 
@@ -27,15 +28,14 @@ const LINE_RGB    = "245,241,234"
 export default function SplashScreen({ onComplete }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
-  const markRef      = useRef<HTMLDivElement>(null)
   const orbRef       = useRef<HTMLDivElement>(null)
+  const [showMark, setShowMark] = useState(false)
 
   useEffect(() => {
     const container = containerRef.current
     const canvas    = canvasRef.current
-    const mark      = markRef.current
     const orb       = orbRef.current
-    if (!container || !canvas || !mark || !orb) return
+    if (!container || !canvas || !orb) return
 
     const mm = gsap.matchMedia()
 
@@ -166,8 +166,7 @@ export default function SplashScreen({ onComplete }: Props) {
 
       // ── GSAP entrance / exit ───────────────────────────────────────────────
       // container starts at opacity:0 via inline style — no gsap.set needed
-      gsap.set(orb,  { autoAlpha: 0, scale: 0.55 })
-      gsap.set(mark, { autoAlpha: 0 })
+      gsap.set(orb, { autoAlpha: 0, scale: 0.55 })
 
       const tl = gsap.timeline({ onComplete })
 
@@ -177,13 +176,8 @@ export default function SplashScreen({ onComplete }: Props) {
       // Glow orb blooms from center
       tl.to(orb, { autoAlpha: 1, scale: 1, duration: 0.55, ease: "expo.out" }, 0.85)
 
-      // RP mark emerges through the light
-      tl.fromTo(
-        mark,
-        { autoAlpha: 0, scale: 0.84, y: 8 },
-        { autoAlpha: 1, scale: 1,    y: 0, duration: 0.48, ease: "expo.out" },
-        0.92
-      )
+      // Pill mark mounts here — Logo runs its own bloom + letter-stagger animation
+      tl.call(() => setShowMark(true), [], 0.92)
 
       // Orb settles to ambient glow
       tl.to(orb, { scale: 1.15, autoAlpha: 0.40, duration: 0.8, ease: "sine.out" }, 1.60)
@@ -208,14 +202,20 @@ export default function SplashScreen({ onComplete }: Props) {
       className="fixed inset-0 z-[9999]"
       style={{ backgroundColor: "#0F1B3D", opacity: 0 }}
     >
-      {/* Living Sphere canvas */}
+      {/* Living Sphere canvas — masked so lines fade out near the center,
+          leaving clean space for the pill mark to sit in */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0"
-        style={{ width: "100%", height: "100%" }}
+        style={{
+          width: "100%",
+          height: "100%",
+          maskImage: "radial-gradient(circle at center, transparent 0px, transparent 150px, black 300px)",
+          WebkitMaskImage: "radial-gradient(circle at center, transparent 0px, transparent 150px, black 300px)",
+        }}
       />
 
-      {/* Centered RP mark with glow */}
+      {/* Centered pill mark with glow */}
       <div
         style={{
           position: "absolute",
@@ -239,37 +239,13 @@ export default function SplashScreen({ onComplete }: Props) {
           }}
         />
 
-        {/* App icon RP mark */}
-        <div
-          ref={markRef}
-          style={{
-            position: "relative",
-            zIndex: 1,
-            width: "120px",
-            height: "120px",
-            backgroundColor: "var(--midnight-2)",
-            borderRadius: "26px",
-            border: "1px solid rgba(245,241,234,0.10)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 24px 56px rgba(0,0,0,0.55)",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "56px",
-              fontWeight: 800,
-              letterSpacing: "-0.05em",
-              lineHeight: 1,
-              fontFamily: "var(--font-geist)",
-              color: "var(--bone)",
-              userSelect: "none",
-            }}
-          >
-            RP
-          </span>
-        </div>
+        {/* RIDEPERKS pill — same mark used on login/register, so the brand
+            treatment carries through the transition instead of switching */}
+        {showMark && (
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <Logo size="xl" />
+          </div>
+        )}
       </div>
     </div>
   )
