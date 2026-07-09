@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LayoutDashboard, Gift, History, User, LogOut } from "lucide-react"
@@ -20,6 +21,19 @@ export default function DriverNav({ profile }: { profile: Profile }) {
   const router = useRouter()
 
   const activeIdx = navItems.findIndex(({ href }) => pathname.startsWith(href))
+
+  // Bottom border on the identity row fades in once the page scrolls,
+  // giving a sense of separation without making the row a fixed bar.
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 8)
+    }
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
 
   async function handleLogout() {
     const supabase = createClient()
@@ -69,6 +83,18 @@ export default function DriverNav({ profile }: { profile: Profile }) {
             </button>
           </div>
         </div>
+
+        {/* Separator — invisible at rest, fades in once the page scrolls */}
+        <div
+          aria-hidden="true"
+          className="absolute bottom-0 left-0 right-0"
+          style={{
+            height: "1px",
+            backgroundColor: "var(--line)",
+            opacity: scrolled ? 1 : 0,
+            transition: "opacity 200ms ease",
+          }}
+        />
       </div>
 
       {/* Bottom navigation — floating pill, inset from all edges */}
