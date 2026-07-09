@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { LayoutDashboard, Gift, History, User, LogOut } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
+import Logo from "@/components/shared/Logo"
 import type { Profile } from "@/types/database"
 
 const navItems = [
@@ -30,29 +31,43 @@ export default function DriverNav({ profile }: { profile: Profile }) {
 
   return (
     <>
-      {/* Identity row — flows with the page, no fixed bar or separate background */}
-      <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-        <span
-          className="font-extrabold"
-          style={{ fontSize: "15px", letterSpacing: "-0.02em", color: "var(--midnight)" }}
-        >
-          RIDEPERKS
-        </span>
-        <div className="flex items-center gap-3">
-          <span
-            className="text-sm hidden sm:block"
-            style={{ color: "var(--mute)" }}
-          >
-            {profile.full_name?.split(" ")[0]}
-          </span>
-          <button
-            onClick={handleLogout}
-            className="pressable p-1.5 rounded-lg"
-            style={{ color: "var(--mute)" }}
-            aria-label="Cerrar sesión"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+      {/* Identity row — flows with the page, no fixed bar. Soft glow keeps the
+          top from reading as empty white space without reintroducing a solid bar. */}
+      <div className="relative overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="absolute pointer-events-none"
+          style={{
+            left: "-10%", top: "-60%", width: "60%", height: "180%",
+            background: "radial-gradient(circle, rgba(232,80,42,0.10), transparent 65%)",
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="absolute pointer-events-none"
+          style={{
+            right: "-15%", top: "-80%", width: "50%", height: "180%",
+            background: "radial-gradient(circle, rgba(47,143,110,0.08), transparent 65%)",
+          }}
+        />
+        <div className="relative max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Logo size="sm" theme="light" />
+          <div className="flex items-center gap-3">
+            <span
+              className="text-sm hidden sm:block"
+              style={{ color: "var(--mute)" }}
+            >
+              {profile.full_name?.split(" ")[0]}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="pressable p-1.5 rounded-lg"
+              style={{ color: "var(--mute)" }}
+              aria-label="Cerrar sesión"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 

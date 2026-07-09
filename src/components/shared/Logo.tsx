@@ -9,6 +9,7 @@ gsap.registerPlugin(useGSAP)
 
 interface LogoProps {
   size?: "sm" | "md" | "lg"
+  theme?: "dark" | "light"
   className?: string
 }
 
@@ -18,9 +19,26 @@ const sizes = {
   lg: "px-6 py-3 text-2xl",
 }
 
+const themes = {
+  // Glass pill for dark backgrounds (login, register, splash)
+  dark: {
+    background: "linear-gradient(135deg, rgba(245,241,234,0.11) 0%, rgba(245,241,234,0.05) 100%)",
+    border: "1px solid rgba(245,241,234,0.14)",
+    boxShadow: "inset 0 1.5px 0 rgba(245,241,234,0.13), inset 0 -1px 0 rgba(245,241,234,0.04), 0 4px 20px rgba(0,0,0,0.28)",
+    color: "var(--bone)",
+  },
+  // Glass pill for light backgrounds (driver app pages)
+  light: {
+    background: "linear-gradient(135deg, rgba(15,27,61,0.05) 0%, rgba(15,27,61,0.02) 100%)",
+    border: "1px solid rgba(15,27,61,0.08)",
+    boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(15,27,61,0.03), 0 4px 16px rgba(15,27,61,0.06)",
+    color: "var(--midnight)",
+  },
+}
+
 const LETTERS = "RIDEPERKS".split("")
 
-export default function Logo({ size = "md", className }: LogoProps) {
+export default function Logo({ size = "md", theme = "dark", className }: LogoProps) {
   const pillRef = useRef<HTMLDivElement>(null)
   const lettersRef = useRef<(HTMLSpanElement | null)[]>([])
 
@@ -57,12 +75,9 @@ export default function Logo({ size = "md", className }: LogoProps) {
         className
       )}
       style={{
-        background: "linear-gradient(135deg, rgba(245,241,234,0.11) 0%, rgba(245,241,234,0.05) 100%)",
         backdropFilter: "blur(16px) saturate(1.6)",
         WebkitBackdropFilter: "blur(16px) saturate(1.6)",
-        border: "1px solid rgba(245,241,234,0.14)",
-        boxShadow: "inset 0 1.5px 0 rgba(245,241,234,0.13), inset 0 -1px 0 rgba(245,241,234,0.04), 0 4px 20px rgba(0,0,0,0.28)",
-        color: "var(--bone)",
+        ...themes[theme],
       }}
     >
       {LETTERS.map((char, i) => (
