@@ -30,25 +30,9 @@ export default function DriverNav({ profile }: { profile: Profile }) {
 
   return (
     <>
-      {/* Identity row — flows with the page, no fixed bar. Soft glow keeps the
-          top from reading as empty white space without reintroducing a solid bar. */}
-      <div className="relative overflow-hidden">
-        <div
-          aria-hidden="true"
-          className="absolute pointer-events-none"
-          style={{
-            left: "-10%", top: "-60%", width: "60%", height: "180%",
-            background: "radial-gradient(circle, rgba(232,80,42,0.10), transparent 65%)",
-          }}
-        />
-        <div
-          aria-hidden="true"
-          className="absolute pointer-events-none"
-          style={{
-            right: "-15%", top: "-80%", width: "50%", height: "180%",
-            background: "radial-gradient(circle, rgba(47,143,110,0.08), transparent 65%)",
-          }}
-        />
+      {/* Identity row — flows with the page, no fixed bar. A row this short (64px)
+          can't fit a glow without it reading as a flat color banner, so it stays plain. */}
+      <div className="relative">
         <div className="relative max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
           <span
             className="font-extrabold"

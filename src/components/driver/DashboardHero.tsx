@@ -38,20 +38,23 @@ export default function DashboardHero({
       className="rounded-2xl p-6 relative overflow-hidden"
       style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
     >
-      {/* Primary glow — top right */}
+      {/* Primary glow — top right. A blurred solid circle, not a radial-gradient —
+          the browser's blur gives a true soft falloff instead of a visible ring. */}
       <div
-        className="absolute pointer-events-none"
+        className="absolute rounded-full pointer-events-none"
         style={{
-          right: "-20%", top: "-30%", width: "70%", height: "70%",
-          background: "radial-gradient(circle, rgba(232,80,42,0.35), transparent 60%)",
+          right: "-15%", top: "-25%", width: "55%", height: "55%",
+          backgroundColor: "rgba(232,80,42,0.55)",
+          filter: "blur(50px)",
         }}
       />
       {/* Secondary glow — bottom left, adds depth without competing for attention */}
       <div
-        className="absolute pointer-events-none"
+        className="absolute rounded-full pointer-events-none"
         style={{
-          left: "-15%", bottom: "-25%", width: "55%", height: "55%",
-          background: "radial-gradient(circle, rgba(201,167,53,0.14), transparent 65%)",
+          left: "-10%", bottom: "-18%", width: "38%", height: "38%",
+          backgroundColor: "rgba(201,167,53,0.3)",
+          filter: "blur(45px)",
         }}
       />
       {/* Grain texture — subtle, keeps the flat gradient from looking cheap */}
