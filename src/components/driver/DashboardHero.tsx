@@ -36,7 +36,15 @@ export default function DashboardHero({
   return (
     <div
       className="rounded-2xl p-6 relative overflow-hidden"
-      style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
+      style={{
+        backgroundColor: "var(--midnight)",
+        color: "var(--bone)",
+        // iOS Safari sometimes fails to paint a blurred child inside an
+        // overflow-hidden + border-radius parent unless the parent gets
+        // its own GPU compositing layer — this forces that layer.
+        transform: "translateZ(0)",
+        WebkitTransform: "translateZ(0)",
+      }}
     >
       {/* Primary glow — top right. A blurred solid circle, not a radial-gradient —
           the browser's blur gives a true soft falloff instead of a visible ring. */}

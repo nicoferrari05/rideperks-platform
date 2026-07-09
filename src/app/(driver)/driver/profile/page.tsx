@@ -154,7 +154,15 @@ export default async function ProfilePage() {
         <div
           data-stagger
           className="rounded-2xl relative overflow-hidden"
-          style={{ backgroundColor: "var(--midnight)", color: "var(--bone)" }}
+          style={{
+            backgroundColor: "var(--midnight)",
+            color: "var(--bone)",
+            // iOS Safari sometimes fails to paint a blurred child inside an
+            // overflow-hidden + border-radius parent unless the parent gets
+            // its own GPU compositing layer — this forces that layer.
+            transform: "translateZ(0)",
+            WebkitTransform: "translateZ(0)",
+          }}
         >
           {/* Background glow */}
           <div
