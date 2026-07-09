@@ -67,7 +67,7 @@ const sections: { title: string; body: string[] }[] = [
 
 export default function PrivacidadPage() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bone)" }}>
+    <div className="min-h-dvh" style={{ backgroundColor: "var(--bone)" }}>
       <div className="max-w-2xl mx-auto px-5 py-10">
         <Link
           href="/"

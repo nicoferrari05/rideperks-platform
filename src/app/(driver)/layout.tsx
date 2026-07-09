@@ -20,13 +20,13 @@ export default async function DriverLayout({ children }: { children: React.React
   if (profile.status !== "verified") redirect("/driver/verify")
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       <YappyLoader />
       <ScrollToTop />
       <DriverNav profile={profile} />
       <main
         className="max-w-2xl mx-auto px-4 py-6"
-        style={{ paddingBottom: "7rem" }}
+        style={{ paddingBottom: "calc(112px + env(safe-area-inset-bottom, 0px))" }}
       >
         {children}
       </main>

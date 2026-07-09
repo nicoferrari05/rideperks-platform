@@ -35,7 +35,10 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
   }
 
   const sidebar = (
-    <div className="flex flex-col h-full" style={{ backgroundColor: "var(--midnight)" }}>
+    <div
+      className="flex flex-col h-full"
+      style={{ backgroundColor: "var(--midnight)", paddingTop: "env(safe-area-inset-top, 0px)" }}
+    >
       {/* Logo */}
       <div className="px-5 py-5 border-b" style={{ borderColor: "rgba(245,241,234,0.08)" }}>
         <Logo size="sm" />
@@ -90,14 +93,19 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
   return (
     <>
       {/* Desktop */}
-      <aside className="hidden md:flex w-56 flex-col sticky top-0 h-screen flex-shrink-0">
+      <aside className="hidden md:flex w-56 flex-col sticky top-0 h-dvh flex-shrink-0">
         {sidebar}
       </aside>
 
       {/* Mobile top bar */}
       <div
-        className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 flex items-center px-4 justify-between border-b"
-        style={{ backgroundColor: "var(--midnight)", borderColor: "rgba(245,241,234,0.08)" }}
+        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center px-4 justify-between border-b"
+        style={{
+          backgroundColor: "var(--midnight)",
+          borderColor: "rgba(245,241,234,0.08)",
+          height: "calc(3.5rem + env(safe-area-inset-top, 0px))",
+          paddingTop: "env(safe-area-inset-top, 0px)",
+        }}
       >
         <Logo size="sm" />
         <button

@@ -60,7 +60,14 @@ export default function DriverNav({ profile }: { profile: Profile }) {
       </div>
 
       {/* Bottom navigation — floating pill, inset from all edges */}
-      <nav className="fixed z-40" style={{ left: "16px", right: "16px", bottom: "20px" }}>
+      <nav
+        className="fixed z-40"
+        style={{
+          left: "max(16px, env(safe-area-inset-left, 0px))",
+          right: "max(16px, env(safe-area-inset-right, 0px))",
+          bottom: "max(20px, calc(env(safe-area-inset-bottom, 0px) + 8px))",
+        }}
+      >
         <div
           className="relative max-w-2xl mx-auto h-[64px]"
           style={{

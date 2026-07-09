@@ -25,6 +25,11 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const viewport: Viewport = {
   themeColor: "#0F1B3D",
+  width: "device-width",
+  initialScale: 1,
+  // Extends the layout under the notch/home indicator so env(safe-area-inset-*)
+  // reports real values on iOS — every fixed surface relies on those insets.
+  viewportFit: "cover",
 }
 
 export const metadata: Metadata = {

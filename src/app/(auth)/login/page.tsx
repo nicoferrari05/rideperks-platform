@@ -69,7 +69,7 @@ export default function LoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4"
+      className="min-h-dvh flex items-center justify-center px-4"
       style={{ backgroundColor: "var(--midnight)" }}
     >
       <div className="w-full max-w-sm">

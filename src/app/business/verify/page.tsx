@@ -76,7 +76,7 @@ function ResultScreen({
   return (
     <div
       ref={containerRef}
-      className="min-h-screen flex flex-col"
+      className="min-h-dvh flex flex-col"
       style={{ backgroundColor: bg, transition: "background-color 0.3s ease" }}
     >
       <div className="h-1 w-full" style={{ backgroundColor: "rgba(0,0,0,0.2)" }}>
@@ -320,7 +320,7 @@ function BusinessVerifyContent() {
   // ── CODE ENTRY STEP ─────────────────────────────────────────
   if (step === "code") {
     return (
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--midnight)" }}>
+      <div className="min-h-dvh flex flex-col" style={{ backgroundColor: "var(--midnight)" }}>
         <header className="px-6 pt-8 pb-4">
           <Logo size="sm" />
         </header>
@@ -385,7 +385,7 @@ function BusinessVerifyContent() {
   // ── SCAN STEP ───────────────────────────────────────────────
   if (step === "scan") {
     return (
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--midnight)" }}>
+      <div className="min-h-dvh flex flex-col" style={{ backgroundColor: "var(--midnight)" }}>
         <header className="px-6 pt-8 pb-4 flex items-center justify-between">
           <Logo size="sm" />
           <span
