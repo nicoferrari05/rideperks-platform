@@ -50,7 +50,11 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <AppSplash />
         {children}
-        <Toaster richColors position="top-right" />
+        <Toaster
+          richColors
+          position="top-center"
+          mobileOffset={{ top: "max(16px, calc(env(safe-area-inset-top, 0px) + 8px))" }}
+        />
       </body>
     </html>
   )

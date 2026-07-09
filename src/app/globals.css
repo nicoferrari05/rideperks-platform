@@ -116,9 +116,14 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    /* No gray flash on tap — .pressable provides the press feedback instead */
+    -webkit-tap-highlight-color: transparent;
   }
   html {
     scroll-behavior: smooth;
+    /* iOS inflates text after orientation changes without this */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   body {
     background-color: var(--bone);
