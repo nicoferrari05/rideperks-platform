@@ -200,7 +200,9 @@ export default function SplashScreen({ onComplete }: Props) {
     <div
       ref={containerRef}
       className="fixed inset-0 z-[9999]"
-      style={{ backgroundColor: "#0F1B3D", opacity: 0 }}
+      // See AppSplash.tsx — explicit height guards against the same
+      // fixed-position bottom-edge gap under viewport-fit:cover.
+      style={{ backgroundColor: "#0F1B3D", opacity: 0, height: "100dvh", width: "100vw" }}
     >
       {/* Living Sphere canvas — masked so lines fade out near the center,
           leaving clean space for the pill mark to sit in */}

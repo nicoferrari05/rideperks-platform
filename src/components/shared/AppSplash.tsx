@@ -24,7 +24,10 @@ export default function AppSplash() {
     return (
       <div
         className="fixed inset-0 z-[9999]"
-        style={{ backgroundColor: "#0F1B3D" }}
+        // Explicit height (not just inset:0) — iOS Safari's fixed-position
+        // containing block can come up short of the true bottom edge under
+        // viewport-fit:cover; height:100dvh forces full coverage regardless.
+        style={{ backgroundColor: "#0F1B3D", height: "100dvh", width: "100vw" }}
       />
     )
   }

@@ -31,8 +31,10 @@ export default function DriverNav({ profile }: { profile: Profile }) {
   return (
     <>
       {/* Identity row — flows with the page, no fixed bar. A row this short (64px)
-          can't fit a glow without it reading as a flat color banner, so it stays plain. */}
-      <div className="relative">
+          can't fit a glow without it reading as a flat color banner, so it stays plain.
+          black-translucent status bar means iOS no longer reserves space for it,
+          so this row must clear the notch/Dynamic Island itself. */}
+      <div className="relative" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
         <div className="relative max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
           <span
             className="font-extrabold"

@@ -321,7 +321,10 @@ function BusinessVerifyContent() {
   if (step === "code") {
     return (
       <div className="min-h-dvh flex flex-col" style={{ backgroundColor: "var(--midnight)" }}>
-        <header className="px-6 pt-8 pb-4">
+        <header
+          className="px-6 pb-4"
+          style={{ paddingTop: "max(2rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))" }}
+        >
           <Logo size="sm" />
         </header>
 
@@ -386,7 +389,10 @@ function BusinessVerifyContent() {
   if (step === "scan") {
     return (
       <div className="min-h-dvh flex flex-col" style={{ backgroundColor: "var(--midnight)" }}>
-        <header className="px-6 pt-8 pb-4 flex items-center justify-between">
+        <header
+          className="px-6 pb-4 flex items-center justify-between"
+          style={{ paddingTop: "max(2rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))" }}
+        >
           <Logo size="sm" />
           <span
             className="font-mono-brand px-3 py-1.5 rounded-full"
