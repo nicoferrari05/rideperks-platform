@@ -306,7 +306,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
               <button
                 onClick={() => setPricesOpen(!pricesOpen)}
                 className="pressable flex items-center gap-1.5"
-                style={{ fontSize: "12px", color: "var(--mute)", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                style={{ fontSize: "12px", color: "var(--mute)", background: "none", border: "none", padding: "14px 8px", margin: "-14px -8px", cursor: "pointer" }}
               >
                 <Tag className="w-3 h-3" />
                 Ver precios
@@ -396,7 +396,8 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
                   color: "var(--mute)",
                   background: "none",
                   border: "none",
-                  padding: 0,
+                  padding: "14px 8px",
+                  margin: "-14px -8px",
                   cursor: "pointer",
                 }}
               >

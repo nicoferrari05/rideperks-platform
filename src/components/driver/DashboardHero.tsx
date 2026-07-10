@@ -82,7 +82,7 @@ export default function DashboardHero({
             >
               <button
                 onClick={() => setView("month")}
-                className="pressable rounded-full px-3 py-1 font-semibold"
+                className="pressable rounded-full px-3 py-1.5 font-semibold"
                 style={{
                   fontSize: "11px",
                   letterSpacing: "0.02em",
@@ -95,7 +95,7 @@ export default function DashboardHero({
               </button>
               <button
                 onClick={() => setView("lifetime")}
-                className="pressable rounded-full px-3 py-1 font-semibold"
+                className="pressable rounded-full px-3 py-1.5 font-semibold"
                 style={{
                   fontSize: "11px",
                   letterSpacing: "0.02em",

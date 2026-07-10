@@ -436,7 +436,7 @@ function BusinessVerifyContent() {
               value={manualToken}
               onChange={(e) => setManualToken(e.target.value)}
               placeholder="Pega el código del QR..."
-              className="flex-1 rounded-xl px-4 py-3 text-sm font-mono-brand outline-none"
+              className="flex-1 rounded-xl px-4 py-3 text-base md:text-sm font-mono-brand outline-none"
               style={{
                 backgroundColor: "rgba(245,241,234,0.07)",
                 border: "1px solid rgba(245,241,234,0.12)",

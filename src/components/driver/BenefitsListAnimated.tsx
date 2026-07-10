@@ -109,7 +109,7 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
           className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
           style={{
             fontSize: "12px",
-            height: "36px",
+            height: "40px",
             backgroundColor: activeCategory === "todos" ? "var(--midnight)" : "transparent",
             color: activeCategory === "todos" ? "var(--bone)" : "var(--midnight)",
             border: "1px solid",
@@ -128,7 +128,7 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
           className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
           style={{
             fontSize: "12px",
-            height: "36px",
+            height: "40px",
             backgroundColor: activeCategory === COMIDA ? "var(--verde)" : "rgba(47,143,110,0.14)",
             color: activeCategory === COMIDA ? "var(--bone)" : "var(--verde)",
             border: "none",
@@ -150,7 +150,7 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
               className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
               style={{
                 fontSize: "12px",
-                height: "36px",
+                height: "40px",
                 textTransform: "capitalize",
                 backgroundColor: isActive ? activeBg : bg,
                 color: isActive ? activeFg : fg,
@@ -171,7 +171,7 @@ export default function BenefitsListAnimated({ benefits, driverId, canUse, refer
           className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
           style={{
             fontSize: "12px",
-            height: "36px",
+            height: "40px",
             backgroundColor: activeCategory === COMBUSTIBLE ? "oklch(0.48 0.1 82)" : "rgba(242,183,59,0.18)",
             color: activeCategory === COMBUSTIBLE ? "var(--bone)" : "oklch(0.48 0.1 82)",
             border: "none",

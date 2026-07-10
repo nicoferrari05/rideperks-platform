@@ -40,6 +40,11 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "black",
   },
+  // Stops iOS from turning amounts, IDs and dates into blue tel: links;
+  // real phone actions use explicit tel:/wa.me links.
+  formatDetection: {
+    telephone: false,
+  },
 }
 
 export default function RootLayout({

@@ -215,7 +215,7 @@ export default async function ProfilePage() {
                       style={{ backgroundColor: "rgba(245,241,234,0.06)" }}
                     >
                       <CalendarDays className="w-3.5 h-3.5 mb-2" style={{ color: "rgba(245,241,234,0.4)" }} />
-                      <p className="font-mono-brand" style={{ fontSize: "9px", letterSpacing: "0.08em", color: "rgba(245,241,234,0.4)" }}>DESDE</p>
+                      <p className="font-mono-brand" style={{ fontSize: "10px", letterSpacing: "0.08em", color: "rgba(245,241,234,0.4)" }}>DESDE</p>
                       <p className="font-semibold mt-0.5" style={{ fontSize: "11px", color: "var(--bone)" }}>
                         {new Date(firstSubscription!.starts_at).toLocaleDateString("es-PA", { month: "short", year: "numeric" })}
                       </p>
@@ -226,7 +226,7 @@ export default async function ProfilePage() {
                     style={{ backgroundColor: "rgba(245,241,234,0.06)" }}
                   >
                     <Zap className="w-3.5 h-3.5 mb-2" style={{ color: "rgba(245,241,234,0.4)" }} />
-                    <p className="font-mono-brand" style={{ fontSize: "9px", letterSpacing: "0.08em", color: "rgba(245,241,234,0.4)" }}>USOS</p>
+                    <p className="font-mono-brand" style={{ fontSize: "10px", letterSpacing: "0.08em", color: "rgba(245,241,234,0.4)" }}>USOS</p>
                     <p className="font-semibold mt-0.5" style={{ fontSize: "11px", color: "var(--bone)" }}>
                       {redemptions?.length ?? 0}
                     </p>
@@ -237,7 +237,7 @@ export default async function ProfilePage() {
                       style={{ backgroundColor: "rgba(245,241,234,0.06)" }}
                     >
                       <TrendingUp className="w-3.5 h-3.5 mb-2" style={{ color: "var(--verde)" }} />
-                      <p className="font-mono-brand" style={{ fontSize: "9px", letterSpacing: "0.08em", color: "rgba(245,241,234,0.4)" }}>AHORRO</p>
+                      <p className="font-mono-brand" style={{ fontSize: "10px", letterSpacing: "0.08em", color: "rgba(245,241,234,0.4)" }}>AHORRO</p>
                       <p className="font-semibold mt-0.5" style={{ fontSize: "11px", color: "var(--verde)" }}>
                         ${lifetimeSaved.toFixed(2)}
                       </p>

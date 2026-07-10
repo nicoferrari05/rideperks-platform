@@ -107,7 +107,7 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
             className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
             style={{
               fontSize: "12px",
-              height: "36px",
+              height: "40px",
               backgroundColor: activeCategory === "todos" ? "var(--midnight)" : "transparent",
               color: activeCategory === "todos" ? "var(--bone)" : "var(--midnight)",
               border: "1px solid",
@@ -131,7 +131,7 @@ export default function AdminBenefitsList({ benefits, businesses }: Props) {
                 className="pressable flex items-center gap-1.5 rounded-full px-3.5 flex-shrink-0 font-semibold"
                 style={{
                   fontSize: "12px",
-                  height: "36px",
+                  height: "40px",
                   textTransform: "capitalize",
                   backgroundColor: isActive ? activeBg : bg,
                   color: isActive ? activeFg : fg,

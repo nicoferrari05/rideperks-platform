@@ -110,8 +110,9 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
         <Logo size="sm" />
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="pressable"
+          className="pressable p-3 -m-3 rounded-lg"
           style={{ color: "rgba(245,241,234,0.5)" }}
+          aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
         >
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>

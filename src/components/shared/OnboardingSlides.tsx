@@ -402,7 +402,7 @@ export default function OnboardingSlides({ onRegister, onLogin }: Props) {
                 >
                   <p
                     style={{
-                      fontSize: "clamp(9px, 0.9vw, 11px)",
+                      fontSize: "clamp(10px, 0.9vw, 11px)",
                       letterSpacing: "0.12em",
                       opacity: 0.65,
                       marginBottom: "8px",

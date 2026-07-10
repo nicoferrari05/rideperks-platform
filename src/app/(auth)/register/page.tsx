@@ -13,6 +13,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [refCode, setRefCode] = useState("")
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [form, setForm] = useState({
     full_name: "",
     email: "",
@@ -30,21 +31,30 @@ export default function RegisterPage() {
 
   function set(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
+    setErrors((prev) => {
+      if (!prev[field]) return prev
+      const next = { ...prev }
+      delete next[field]
+      return next
+    })
   }
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault()
 
-    if (form.password !== form.confirm_password) {
-      toast.error("Las contraseñas no coinciden")
-      return
-    }
+    const nextErrors: Record<string, string> = {}
     if (form.password.length < 6) {
-      toast.error("La contraseña debe tener al menos 6 caracteres")
-      return
+      nextErrors.password = "La contraseña debe tener al menos 6 caracteres"
+    }
+    if (form.password !== form.confirm_password) {
+      nextErrors.confirm_password = "Las contraseñas no coinciden"
     }
     if (!form.platform) {
-      toast.error("Selecciona tu plataforma")
+      nextErrors.platform = "Selecciona tu plataforma"
+    }
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors)
+      toast.error(Object.values(nextErrors)[0])
       return
     }
 
@@ -86,6 +96,15 @@ export default function RegisterPage() {
     border: "1px solid rgba(245,241,234,0.12)",
     color: "var(--bone)",
   }
+
+  function fieldStyle(field: string) {
+    return {
+      ...inputStyle,
+      border: errors[field] ? "1px solid rgba(252,165,165,0.55)" : inputStyle.border,
+    }
+  }
+
+  const errorTextStyle = { color: "#FCA5A5" }
 
   const labelStyle = {
     fontSize: "11px" as const,
@@ -134,11 +153,13 @@ export default function RegisterPage() {
               <label className="font-mono-brand block" style={labelStyle}>NOMBRE COMPLETO</label>
               <input
                 type="text"
+                autoComplete="name"
+                enterKeyHint="next"
                 placeholder="Juan Pérez"
                 value={form.full_name}
                 onChange={(e) => set("full_name", e.target.value)}
                 required
-                className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+                className="w-full rounded-xl px-4 py-3 text-base md:text-sm outline-none"
                 style={inputStyle}
               />
             </div>
@@ -147,11 +168,14 @@ export default function RegisterPage() {
               <label className="font-mono-brand block" style={labelStyle}>EMAIL</label>
               <input
                 type="email"
+                inputMode="email"
+                autoComplete="email"
+                enterKeyHint="next"
                 placeholder="tu@email.com"
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
                 required
-                className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+                className="w-full rounded-xl px-4 py-3 text-base md:text-sm outline-none"
                 style={inputStyle}
               />
             </div>
@@ -160,11 +184,14 @@ export default function RegisterPage() {
               <label className="font-mono-brand block" style={labelStyle}>TELÉFONO</label>
               <input
                 type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                enterKeyHint="next"
                 placeholder="+507 6000-0000"
                 value={form.phone}
                 onChange={(e) => set("phone", e.target.value)}
                 required
-                className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+                className="w-full rounded-xl px-4 py-3 text-base md:text-sm outline-none"
                 style={inputStyle}
               />
             </div>
@@ -175,8 +202,9 @@ export default function RegisterPage() {
                 value={form.platform}
                 onChange={(e) => set("platform", e.target.value)}
                 required
-                className="w-full rounded-xl px-4 py-3 text-sm outline-none appearance-none"
-                style={inputStyle}
+                aria-invalid={!!errors.platform}
+                className="w-full rounded-xl px-4 py-3 text-base md:text-sm outline-none appearance-none"
+                style={fieldStyle("platform")}
               >
                 <option value="" disabled style={{ backgroundColor: "var(--midnight-2)" }}>
                   Selecciona tu plataforma
@@ -186,6 +214,9 @@ export default function RegisterPage() {
                 <option value="pedidosya" style={{ backgroundColor: "var(--midnight-2)" }}>PedidosYa</option>
                 <option value="multiple" style={{ backgroundColor: "var(--midnight-2)" }}>Varias plataformas</option>
               </select>
+              {errors.platform && (
+                <p role="alert" className="text-sm" style={errorTextStyle}>{errors.platform}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -193,41 +224,54 @@ export default function RegisterPage() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  enterKeyHint="next"
                   placeholder="Mínimo 6 caracteres"
                   value={form.password}
                   onChange={(e) => set("password", e.target.value)}
                   required
-                  className="w-full rounded-xl px-4 py-3 text-sm outline-none pr-11"
-                  style={inputStyle}
+                  aria-invalid={!!errors.password}
+                  className="w-full rounded-xl px-4 py-3 text-base md:text-sm outline-none pr-11"
+                  style={fieldStyle("password")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  className="pressable absolute right-0 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center"
                   style={{ color: "rgba(245,241,234,0.3)" }}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {errors.password && (
+                <p role="alert" className="text-sm" style={errorTextStyle}>{errors.password}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
               <label className="font-mono-brand block" style={labelStyle}>CONFIRMAR CONTRASEÑA</label>
               <input
                 type="password"
+                autoComplete="new-password"
+                enterKeyHint="go"
                 placeholder="Repite tu contraseña"
                 value={form.confirm_password}
                 onChange={(e) => set("confirm_password", e.target.value)}
                 required
-                className="w-full rounded-xl px-4 py-3 text-sm outline-none"
-                style={inputStyle}
+                aria-invalid={!!errors.confirm_password}
+                className="w-full rounded-xl px-4 py-3 text-base md:text-sm outline-none"
+                style={fieldStyle("confirm_password")}
               />
+              {errors.confirm_password && (
+                <p role="alert" className="text-sm" style={errorTextStyle}>{errors.confirm_password}</p>
+              )}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl py-3 font-semibold text-sm flex items-center justify-center gap-2 mt-2"
+              className="pressable w-full rounded-xl py-3 font-semibold text-sm flex items-center justify-center gap-2 mt-2 min-h-[48px]"
               style={{ backgroundColor: "var(--ember)", color: "#fff" }}
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Crear cuenta gratis"}

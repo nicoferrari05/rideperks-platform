@@ -18,6 +18,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
 
   // Business state
   const [businessCode, setBusinessCode] = useState("")
@@ -28,9 +29,11 @@ export default function LoginPage() {
   async function handleDriverLogin(e: { preventDefault(): void }) {
     e.preventDefault()
     setLoading(true)
+    setLoginError(null)
     const supabase = createClient()
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
+      setLoginError("Email o contraseña incorrectos")
       toast.error("Email o contraseña incorrectos")
       setLoading(false)
       return
@@ -93,7 +96,7 @@ export default function LoginPage() {
                 key={m}
                 type="button"
                 onClick={() => setMode(m)}
-                className="flex-1 rounded-lg py-2.5 font-semibold text-sm"
+                className="pressable flex-1 rounded-lg py-3 font-semibold text-sm"
                 style={{
                   backgroundColor: mode === m ? "rgba(245,241,234,0.1)" : "transparent",
                   color: mode === m ? "var(--bone)" : "rgba(245,241,234,0.32)",
@@ -131,14 +134,20 @@ export default function LoginPage() {
                   <input
                     id="email"
                     type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    enterKeyHint="next"
                     placeholder="tu@email.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => { setEmail(e.target.value); setLoginError(null) }}
                     required
-                    className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+                    aria-invalid={!!loginError}
+                    className="w-full rounded-xl px-4 py-3 text-base md:text-sm outline-none"
                     style={{
                       backgroundColor: "rgba(245,241,234,0.07)",
-                      border: "1px solid rgba(245,241,234,0.12)",
+                      border: loginError
+                        ? "1px solid rgba(252,165,165,0.55)"
+                        : "1px solid rgba(245,241,234,0.12)",
                       color: "var(--bone)",
                     }}
                   />
@@ -156,32 +165,43 @@ export default function LoginPage() {
                     <input
                       id="password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      enterKeyHint="go"
                       placeholder="••••••••"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => { setPassword(e.target.value); setLoginError(null) }}
                       required
-                      className="w-full rounded-xl px-4 py-3 text-sm outline-none pr-11"
+                      aria-invalid={!!loginError}
+                      className="w-full rounded-xl px-4 py-3 text-base md:text-sm outline-none pr-11"
                       style={{
                         backgroundColor: "rgba(245,241,234,0.07)",
-                        border: "1px solid rgba(245,241,234,0.12)",
+                        border: loginError
+                          ? "1px solid rgba(252,165,165,0.55)"
+                          : "1px solid rgba(245,241,234,0.12)",
                         color: "var(--bone)",
                       }}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                      aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                      className="pressable absolute right-0 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center"
                       style={{ color: "rgba(245,241,234,0.3)" }}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
+                  {loginError && (
+                    <p role="alert" className="text-sm" style={{ color: "#FCA5A5", marginTop: "8px" }}>
+                      {loginError}
+                    </p>
+                  )}
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-xl py-3 font-semibold text-sm flex items-center justify-center gap-2 mt-2"
+                  className="pressable w-full rounded-xl py-3 font-semibold text-sm flex items-center justify-center gap-2 mt-2 min-h-[48px]"
                   style={{ backgroundColor: "var(--ember)", color: "#fff" }}
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Ingresar"}
@@ -230,6 +250,7 @@ export default function LoginPage() {
                     autoCorrect="off"
                     spellCheck={false}
                     inputMode="text"
+                    enterKeyHint="go"
                     className="w-full rounded-xl text-center font-mono-brand font-bold outline-none"
                     style={{
                       fontSize: "28px",

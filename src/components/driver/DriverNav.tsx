@@ -49,7 +49,7 @@ export default function DriverNav({ profile }: { profile: Profile }) {
             </span>
             <button
               onClick={handleLogout}
-              className="pressable p-1.5 rounded-lg"
+              className="pressable p-3.5 -m-2 rounded-lg"
               style={{ color: "var(--mute)" }}
               aria-label="Cerrar sesión"
             >
