@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LayoutDashboard, Users, Gift, Store, CreditCard, BarChart2, LogOut, Menu, X } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import Logo from "@/components/shared/Logo"
@@ -21,6 +21,15 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Lock body scroll while the mobile drawer is open so the page
+  // behind it can't scroll under the finger.
+  useEffect(() => {
+    if (!mobileOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => { document.body.style.overflow = prev }
+  }, [mobileOpen])
 
   async function handleLogout() {
     const supabase = createClient()
