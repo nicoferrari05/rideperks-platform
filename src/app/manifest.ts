@@ -5,6 +5,9 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "RidePerks",
     short_name: "RidePerks",
     description: "El club de beneficios para conductores en Panamá.",
+    lang: "es",
+    dir: "ltr",
+    categories: ["finance", "lifestyle"],
     start_url: "/",
     scope: "/",
     display: "standalone",
@@ -14,21 +17,27 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     icons: [
       {
-        // Android Chrome uses "any" purpose for install prompt and splash screen
-        src: "/icon",
+        src: "/icon-192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        // Android adaptive icon (rounded/squircle shape)
-        src: "/icon",
+        src: "/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        // Full-bleed square with the mark in the safe zone — Android
+        // masks this into its circle/squircle adaptive shape.
+        src: "/icon-maskable-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
       },
       {
-        src: "/apple-icon",
+        src: "/apple-touch-icon.png",
         sizes: "180x180",
         type: "image/png",
       },

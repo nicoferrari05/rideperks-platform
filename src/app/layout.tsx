@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Geist, Fraunces, JetBrains_Mono } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
 import AppSplash from "@/components/shared/AppSplash"
+import ServiceWorkerRegister from "@/components/shared/ServiceWorkerRegister"
 import "./globals.css"
 
 const geist = Geist({
@@ -33,8 +34,27 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
+  metadataBase: process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? new URL(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`)
+    : new URL("http://localhost:3000"),
   title: "RidePerks — Tu trabajo rinde más",
   description: "El club de beneficios para conductores de Uber, InDrive y PedidosYa en Panamá.",
+  openGraph: {
+    title: "RidePerks — Tu trabajo rinde más",
+    description: "El club de beneficios para conductores de Uber, InDrive y PedidosYa en Panamá.",
+    siteName: "RidePerks",
+    locale: "es_PA",
+    type: "website",
+    images: [{ url: "/icon-512.png", width: 512, height: 512 }],
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     title: "RidePerks",
     capable: true,
@@ -58,6 +78,7 @@ export default function RootLayout({
       className={`${geist.variable} ${fraunces.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <ServiceWorkerRegister />
         <AppSplash />
         {children}
         <Toaster
