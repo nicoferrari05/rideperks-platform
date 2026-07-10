@@ -58,7 +58,10 @@ export const metadata: Metadata = {
   appleWebApp: {
     title: "RidePerks",
     capable: true,
-    statusBarStyle: "black",
+    // Must pair with viewportFit:"cover" — "black" (opaque) contradicts
+    // the edge-to-edge request and iOS resolves the conflict inconsistently,
+    // producing a stray color strip around the notch/status bar.
+    statusBarStyle: "black-translucent",
   },
   // Stops iOS from turning amounts, IDs and dates into blue tel: links;
   // real phone actions use explicit tel:/wa.me links.

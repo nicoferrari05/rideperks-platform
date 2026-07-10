@@ -124,6 +124,11 @@
     /* iOS inflates text after orientation changes without this */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Root canvas color — what iOS paints under the notch/status bar and in
+       any overscroll/safe-area gap before a page's own background renders.
+       Matches the brand navy (most screens are dark); light pages (admin,
+       legal) paint their own full-height --bone wrapper on top of this. */
+    background-color: var(--midnight);
   }
   body {
     background-color: var(--bone);
@@ -271,6 +276,14 @@
   .pressable { transition: none; }
   .pressable:active { transform: none; }
   .stagger-item { animation: none; opacity: 1; }
+}
+
+/* ── Toast safe-area reinforcement ──────────────────────────────
+   Belt-and-suspenders alongside the mobileOffset prop: guarantees the
+   toast never sits under the notch/Dynamic Island even on the very
+   first paint, regardless of hydration timing. */
+[data-sonner-toaster][data-y-position="top"] {
+  top: max(16px, calc(env(safe-area-inset-top, 0px) + 12px)) !important;
 }
 
 /* ── View Transitions ───────────────────────────────────────── */
