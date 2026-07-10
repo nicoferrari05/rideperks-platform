@@ -86,13 +86,16 @@ export default function DriverNav({ profile }: { profile: Profile }) {
               style={{
                 position: "absolute",
                 top: "50%",
+                left: "16px",
                 height: "42px",
                 width: "calc((100% - 24px) / 4 - 8px)",
                 backgroundColor: "rgba(245,241,234,0.08)",
                 borderRadius: "14px",
-                transform: "translateY(-50%)",
-                left: `calc(12px + ${activeIdx} * (100% - 24px) / 4 + 4px)`,
-                transition: "left 320ms cubic-bezier(0.23, 1, 0.32, 1)",
+                // Slide with transform (compositor-only) instead of `left`,
+                // which forces layout on every frame. translateX % is relative
+                // to the pill's own width; one slot = pill width + 8px gap.
+                transform: `translate(calc(${activeIdx} * (100% + 8px)), -50%)`,
+                transition: "transform 320ms cubic-bezier(0.23, 1, 0.32, 1)",
               }}
             />
           )}

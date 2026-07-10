@@ -82,6 +82,36 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
     if (!isOpen) setRedeemed(false)
   }
 
+  // Keep the screen awake while the QR is visible — the token only lives
+  // 2 minutes and the phone sleeping mid-scan would kill the redemption.
+  useEffect(() => {
+    if (!open) return
+    let lock: WakeLockSentinel | null = null
+    let cancelled = false
+
+    async function acquire() {
+      try {
+        if ("wakeLock" in navigator) {
+          lock = await navigator.wakeLock.request("screen")
+        }
+      } catch {
+        // Unsupported or denied — the QR still works, the screen may just dim.
+      }
+    }
+    function onVisibility() {
+      // The lock is auto-released when the tab is backgrounded; re-acquire.
+      if (document.visibilityState === "visible" && !cancelled) acquire()
+    }
+
+    acquire()
+    document.addEventListener("visibilitychange", onVisibility)
+    return () => {
+      cancelled = true
+      document.removeEventListener("visibilitychange", onVisibility)
+      lock?.release().catch(() => {})
+    }
+  }, [open])
+
   async function generateQR() {
     setGenerating(true)
     const supabase = createClient()
@@ -502,7 +532,7 @@ export default function BenefitCard({ benefit, driverId, canUse }: Props) {
             ) : token && timeLeft > 0 ? (
               <>
                 <div className="p-4 rounded-2xl" style={{ backgroundColor: "#fff", border: "1px solid var(--line)" }}>
-                  <QRCode value={token} size={190} />
+                  <QRCode value={token} size={230} />
                 </div>
 
                 <div

@@ -27,26 +27,32 @@ export default function Logo({ size = "md", className }: LogoProps) {
 
   useGSAP(() => {
     const letters = lettersRef.current.filter(Boolean)
+    const mm = gsap.matchMedia()
 
-    gsap.set(pillRef.current, { autoAlpha: 0, scale: 0.86 })
-    gsap.set(letters, { autoAlpha: 0, y: 6 })
+    // Reduced-motion users get the logo rendered statically — no sets, no timeline.
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      gsap.set(pillRef.current, { autoAlpha: 0, scale: 0.86 })
+      gsap.set(letters, { autoAlpha: 0, y: 6 })
 
-    gsap.timeline()
-      // B — pill blooms in
-      .to(pillRef.current, {
-        autoAlpha: 1,
-        scale: 1,
-        duration: 0.5,
-        ease: "expo.out",
-      })
-      // C — letters stagger up, overlapping with tail of bloom
-      .to(letters, {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.38,
-        ease: "expo.out",
-        stagger: 0.04,
-      }, 0.12)
+      gsap.timeline()
+        // B — pill blooms in
+        .to(pillRef.current, {
+          autoAlpha: 1,
+          scale: 1,
+          duration: 0.5,
+          ease: "expo.out",
+        })
+        // C — letters stagger up, overlapping with tail of bloom
+        .to(letters, {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.38,
+          ease: "expo.out",
+          stagger: 0.04,
+        }, 0.12)
+    })
+
+    return () => mm.revert()
   }, { scope: pillRef })
 
   return (

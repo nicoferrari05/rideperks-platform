@@ -35,10 +35,12 @@ export default function SavingsProgressBar({ current, max, variant = "full", mon
           }}>
             <div style={{
               height: "100%",
-              width: `${live}%`,
+              width: "100%",
+              transform: `scaleX(${live / 100})`,
+              transformOrigin: "left",
               backgroundColor: color,
               borderRadius: "999px",
-              transition: "width 900ms cubic-bezier(0.23, 1, 0.32, 1)",
+              transition: "transform 900ms cubic-bezier(0.23, 1, 0.32, 1)",
             }} />
           </div>
         </div>
@@ -66,10 +68,12 @@ export default function SavingsProgressBar({ current, max, variant = "full", mon
       }}>
         <div style={{
           height: "100%",
-          width: `${live}%`,
+          width: "100%",
+          transform: `scaleX(${live / 100})`,
+          transformOrigin: "left",
           backgroundColor: color,
           borderRadius: "999px",
-          transition: "width 1000ms cubic-bezier(0.23, 1, 0.32, 1)",
+          transition: "transform 1000ms cubic-bezier(0.23, 1, 0.32, 1)",
         }} />
       </div>
       <div className="flex items-center justify-between mt-2">
