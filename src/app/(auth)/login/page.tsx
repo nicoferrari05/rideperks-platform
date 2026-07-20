@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Eye, EyeOff, Loader2, ChevronRight } from "lucide-react"
+import { Eye, EyeOff, Loader2, ChevronRight, MessageCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import Logo from "@/components/shared/Logo"
+import { SUPPORT_WHATSAPP_URL } from "@/lib/support"
 
 type Mode = "driver" | "business"
 
@@ -290,6 +291,19 @@ export default function LoginPage() {
             </Link>
           </div>
         )}
+
+        <div className="text-center mt-6">
+          <a
+            href={SUPPORT_WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pressable inline-flex items-center justify-center gap-1.5 text-sm font-medium"
+            style={{ color: "var(--verde)" }}
+          >
+            <MessageCircle className="w-4 h-4" />
+            ¿Problemas para ingresar? Escríbenos
+          </a>
+        </div>
 
       </div>
     </div>
