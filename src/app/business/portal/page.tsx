@@ -2,6 +2,13 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import StaggerEntrance from "@/components/shared/StaggerEntrance"
 import BusinessPortalLogout from "@/components/business/BusinessPortalLogout"
+import SavingsCounter from "@/components/driver/SavingsCounter"
+
+type RedemptionRow = {
+  driver_id: string
+  redeemed_at: string
+  benefits: { savings_value: number | null; rideperks_price: number | null } | null
+}
 
 export default async function BusinessPortalPage() {
   const supabase = await createClient()
@@ -25,10 +32,10 @@ export default async function BusinessPortalPage() {
 
   const { data: redemptions } = await supabase
     .from("benefit_redemptions")
-    .select("driver_id, redeemed_at")
+    .select("driver_id, redeemed_at, benefits(savings_value, rideperks_price)")
     .eq("business_id", business.id)
 
-  const all = redemptions ?? []
+  const all = (redemptions ?? []) as unknown as RedemptionRow[]
   const totalCount = all.length
 
   const monthly = all.filter((r) => new Date(r.redeemed_at) >= startOfMonth)
@@ -49,6 +56,15 @@ export default async function BusinessPortalPage() {
   const driversThisMonth = new Set(monthly.map((r) => r.driver_id))
   const newDriversThisMonth = [...driversThisMonth].filter((id) => !driversBeforeThisMonth.has(id)).length
   const recurringDriversThisMonth = driversThisMonth.size - newDriversThisMonth
+
+  // Ahorro total — savings_value siempre está poblado (fuente confiable en todo el proyecto).
+  const totalSaved = all.reduce((sum, r) => sum + (r.benefits?.savings_value ?? 0), 0)
+
+  // Facturación — rideperks_price es opcional en el formulario de beneficios, así que
+  // solo se suma sobre los canjes que sí lo tienen y se muestra la cobertura si es parcial.
+  const redemptionsWithPrice = all.filter((r) => r.benefits?.rideperks_price != null)
+  const totalRevenue = redemptionsWithPrice.reduce((sum, r) => sum + (r.benefits?.rideperks_price ?? 0), 0)
+  const hasPartialRevenueCoverage = totalCount > 0 && redemptionsWithPrice.length < totalCount
 
   const monthLabel = new Date().toLocaleDateString("es-PA", { month: "long" }).toUpperCase()
 
@@ -82,6 +98,66 @@ export default async function BusinessPortalPage() {
         <BusinessPortalLogout />
       </div>
 
+      {/* Hero: ahorro total generado a conductores */}
+      <div
+        className="rounded-2xl p-6 relative overflow-hidden"
+        style={{
+          backgroundColor: "var(--midnight)",
+          color: "var(--bone)",
+          transform: "translateZ(0)",
+          WebkitTransform: "translateZ(0)",
+        }}
+      >
+        <div
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            right: "-15%", top: "-25%", width: "48%", height: "48%",
+            backgroundColor: "rgba(232,80,42,0.55)",
+            filter: "blur(50px)",
+          }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            opacity: 0.5,
+            mixBlendMode: "overlay",
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E\")",
+          }}
+        />
+        <div className="relative">
+          <p className="eyebrow" style={{ color: "rgba(245,241,234,0.5)", fontSize: "10px" }}>
+            AHORRO TOTAL GENERADO A CONDUCTORES
+          </p>
+          <div style={{ marginTop: "8px" }}>
+            <SavingsCounter value={totalSaved} color={totalSaved > 0 ? "var(--ember)" : "var(--bone)"} />
+          </div>
+          <p style={{ fontSize: "13px", color: "rgba(245,241,234,0.5)", marginTop: "4px" }}>
+            {totalCount} {totalCount === 1 ? "beneficio usado en total" : "beneficios usados en total"}
+          </p>
+        </div>
+      </div>
+
+      {/* Accent: facturación generada */}
+      <div
+        className="rounded-2xl p-5"
+        style={{ backgroundColor: "var(--paper)", border: "1px solid var(--line)" }}
+      >
+        <p className="eyebrow-muted mb-2">FACTURACIÓN GENERADA A TRAVÉS DE RIDEPERKS</p>
+        <p
+          className="font-mono-brand font-bold"
+          style={{ fontSize: "36px", letterSpacing: "-0.02em", lineHeight: 1, color: "var(--ember)" }}
+        >
+          ${totalRevenue.toFixed(2)}
+        </p>
+        {hasPartialRevenueCoverage && (
+          <p className="text-xs mt-2" style={{ color: "var(--mute)" }}>
+            Calculado sobre {redemptionsWithPrice.length} de {totalCount} canjes con precio cargado
+          </p>
+        )}
+      </div>
+
+      {/* Actividad */}
       <StaggerEntrance selector=".kpi-card" stagger={0.06} y={14} duration={0.4}>
         <div className="grid grid-cols-2 gap-3">
           {kpis.map((kpi) => (
