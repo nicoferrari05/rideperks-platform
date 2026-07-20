@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import Link from "next/link"
+import { ChevronRight } from "lucide-react"
 import StaggerEntrance from "@/components/shared/StaggerEntrance"
 import BusinessPortalLogout from "@/components/business/BusinessPortalLogout"
 import SavingsCounter from "@/components/driver/SavingsCounter"
@@ -158,6 +160,19 @@ export default async function BusinessPortalPage() {
       </div>
 
       {/* Actividad */}
+      <div className="flex items-center justify-between">
+        <p className="eyebrow-muted">ACTIVIDAD</p>
+        {totalCount > 0 && (
+          <Link
+            href="/business/portal/history"
+            className="flex items-center gap-0.5 font-semibold"
+            style={{ fontSize: "12px", color: "var(--ember)" }}
+          >
+            Ver historial completo
+            <ChevronRight className="w-3 h-3" />
+          </Link>
+        )}
+      </div>
       <StaggerEntrance selector=".kpi-card" stagger={0.06} y={14} duration={0.4}>
         <div className="grid grid-cols-2 gap-3">
           {kpis.map((kpi) => (
