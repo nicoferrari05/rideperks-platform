@@ -25,7 +25,8 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Rutas protegidas: redirigir a login si no está autenticado
-  if (pathname.startsWith('/driver') || pathname.startsWith('/admin')) {
+  // Nota: /business/portal requiere login, pero /business/verify (código PIN) se queda público.
+  if (pathname.startsWith('/driver') || pathname.startsWith('/admin') || pathname.startsWith('/business/portal')) {
     if (!user) {
       return NextResponse.redirect(new URL('/login', request.url))
     }

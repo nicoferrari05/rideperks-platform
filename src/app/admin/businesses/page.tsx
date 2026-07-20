@@ -162,6 +162,19 @@ export default async function BusinessesAdminPage() {
                             {b.access_code}
                           </p>
                         )}
+                        {(b as { owner_user_id?: string | null }).owner_user_id && (
+                          <span
+                            className="font-mono-brand mt-1.5 ml-1.5 inline-block px-2 py-0.5 rounded-lg"
+                            style={{
+                              fontSize: "11px",
+                              letterSpacing: "0.06em",
+                              backgroundColor: "rgba(47,143,110,0.12)",
+                              color: "var(--verde)",
+                            }}
+                          >
+                            PORTAL ACTIVO
+                          </span>
+                        )}
 
                         {/* Redemption stats */}
                         <div className="flex items-center gap-3 mt-2">
@@ -203,6 +216,7 @@ export default async function BusinessesAdminPage() {
                       businessId={b.id}
                       isActive={b.is_active}
                       accessCode={b.access_code ?? null}
+                      ownerUserId={(b as { owner_user_id?: string | null }).owner_user_id ?? null}
                       name={b.name}
                       category={b.category ?? null}
                       address={b.address ?? null}

@@ -6,7 +6,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { MoreHorizontal, Eye, EyeOff, Loader2, Trash2, KeyRound, Pencil } from "lucide-react"
+import { MoreHorizontal, Eye, EyeOff, Loader2, Trash2, KeyRound, Pencil, UserPlus, Copy, Check } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,7 @@ interface Props {
   businessId: string
   isActive: boolean
   accessCode: string | null
+  ownerUserId: string | null
   name: string
   category: string | null
   address: string | null
@@ -28,12 +29,24 @@ interface Props {
   description: string | null
 }
 
+function generatePassword() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"
+  return Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join("")
+}
+
 export default function BusinessRowActions({
-  businessId, isActive, accessCode, name,
+  businessId, isActive, accessCode, ownerUserId, name,
   category, address, wazeUrl, phone, description,
 }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+
+  const [portalDialog, setPortalDialog] = useState(false)
+  const [portalEmail, setPortalEmail] = useState("")
+  const [portalPassword, setPortalPassword] = useState(generatePassword())
+  const [portalLoading, setPortalLoading] = useState(false)
+  const [portalCreated, setPortalCreated] = useState(false)
+  const [portalCopied, setPortalCopied] = useState(false)
 
   const [codeDialog, setCodeDialog] = useState(false)
   const [newCode, setNewCode] = useState(accessCode ?? "")
@@ -95,6 +108,36 @@ export default function BusinessRowActions({
     setLoading(false)
   }
 
+  async function createPortalAccess(e: { preventDefault(): void }) {
+    e.preventDefault()
+    if (!portalEmail.trim()) { toast.error("Ingresa el email del comercio"); return }
+    setPortalLoading(true)
+    try {
+      const res = await fetch("/api/admin/business-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ business_id: businessId, email: portalEmail.trim(), password: portalPassword }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error ?? "Error al crear el acceso")
+        setPortalLoading(false)
+        return
+      }
+      setPortalCreated(true)
+      router.refresh()
+    } catch {
+      toast.error("Error de conexión. Intenta de nuevo.")
+    }
+    setPortalLoading(false)
+  }
+
+  function copyPortalCredentials() {
+    navigator.clipboard.writeText(`Email: ${portalEmail}\nContraseña: ${portalPassword}`)
+    setPortalCopied(true)
+    setTimeout(() => setPortalCopied(false), 2000)
+  }
+
   async function deleteBusiness() {
     setLoading(true)
     const supabase = createClient()
@@ -147,6 +190,14 @@ export default function BusinessRowActions({
           <DropdownMenuItem onClick={() => { setNewCode(accessCode ?? ""); setCodeDialog(true) }}>
             <KeyRound className="w-4 h-4 mr-2" />Cambiar código
           </DropdownMenuItem>
+          {!ownerUserId && (
+            <DropdownMenuItem onClick={() => {
+              setPortalEmail(""); setPortalPassword(generatePassword())
+              setPortalCreated(false); setPortalDialog(true)
+            }}>
+              <UserPlus className="w-4 h-4 mr-2" />Crear acceso al portal
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="text-red-600 focus:text-red-600"
@@ -228,6 +279,63 @@ export default function BusinessRowActions({
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── PORTAL ACCESS DIALOG ────────────────────────── */}
+      <Dialog open={portalDialog} onOpenChange={setPortalDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Crear acceso al portal</DialogTitle>
+          </DialogHeader>
+          {!portalCreated ? (
+            <form onSubmit={createPortalAccess} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Email del comercio</Label>
+                <Input
+                  type="email"
+                  value={portalEmail}
+                  onChange={(e) => setPortalEmail(e.target.value)}
+                  placeholder="contacto@comercio.com"
+                  autoFocus
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Contraseña temporal</Label>
+                <Input value={portalPassword} readOnly className="font-mono tracking-wide" />
+                <p className="text-xs" style={{ color: "var(--mute)" }}>
+                  Se genera automáticamente. Cópiala y pásasela al comercio por WhatsApp.
+                </p>
+              </div>
+              <div className="flex gap-3 pt-1">
+                <Button type="button" variant="outline" className="flex-1" onClick={() => setPortalDialog(false)}>Cancelar</Button>
+                <Button type="submit" className="flex-1 gradient-brand border-0 text-white" disabled={portalLoading}>
+                  {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Crear acceso"}
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-4">
+              <div className="rounded-xl p-4 text-sm space-y-1" style={{ backgroundColor: "rgba(47,143,110,0.1)" }}>
+                <p className="font-semibold" style={{ color: "var(--verde)" }}>Cuenta creada</p>
+                <p style={{ color: "var(--midnight)" }}>Guarda estos datos ahora — la contraseña no se vuelve a mostrar.</p>
+              </div>
+              <div className="rounded-xl p-3 space-y-1 font-mono text-sm" style={{ backgroundColor: "var(--bone-2)" }}>
+                <p>Email: {portalEmail}</p>
+                <p>Contraseña: {portalPassword}</p>
+              </div>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" className="flex-1" onClick={copyPortalCredentials}>
+                  {portalCopied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                  {portalCopied ? "Copiado" : "Copiar"}
+                </Button>
+                <Button type="button" className="flex-1 gradient-brand border-0 text-white" onClick={() => setPortalDialog(false)}>
+                  Listo
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

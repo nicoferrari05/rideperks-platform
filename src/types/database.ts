@@ -56,6 +56,7 @@ export interface PartnerBusiness {
   logo_url: string | null
   is_active: boolean
   access_code: string | null
+  owner_user_id: string | null
   created_at: string
 }
 

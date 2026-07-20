@@ -40,7 +40,10 @@ export default function LoginPage() {
     }
     const { data: profile } = await supabase
       .from("profiles").select("role").eq("id", data.user.id).single()
-    window.location.href = profile?.role === "admin" ? "/admin" : "/driver/dashboard"
+    window.location.href =
+      profile?.role === "admin" ? "/admin"
+      : profile?.role === "business" ? "/business/portal"
+      : "/driver/dashboard"
   }
 
   async function handleBusinessAccess(e: { preventDefault(): void }) {
