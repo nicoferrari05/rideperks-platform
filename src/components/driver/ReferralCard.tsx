@@ -63,7 +63,7 @@ export default function ReferralCard({ code, referralCount, canUse }: Props) {
         </div>
 
         <p className="text-xs mt-3" style={{ color: "var(--mute)", lineHeight: 1.5 }}>
-          Invita a {GOAL} conductores que se unan y paguen su membresía — te ganas un tanque lleno (hasta $45.00).
+          Invita a {GOAL} conductores que se unan y activen su membresía — te ganás $20.00 en efectivo.
         </p>
       </div>
 

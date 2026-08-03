@@ -22,8 +22,9 @@ CREATE TABLE IF NOT EXISTS profiles (
 );
 
 -- Auto-crear profile al registrarse.
--- Fase MVP: los conductores quedan verificados y con acceso activo de
--- inmediato (sin foto, sin aprobación manual) — ver free_access_migration.sql.
+-- Fase MVP: los conductores quedan verificados de inmediato (sin foto,
+-- sin aprobación manual). El acceso se activa con un pago único de $15
+-- vía Yappy — ver paid_referrals_migration.sql y api/yappy/ipn/route.ts.
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -36,11 +37,6 @@ BEGIN
     new_role,
     CASE WHEN new_role = 'driver' THEN 'verified' ELSE 'pending' END
   );
-
-  IF new_role = 'driver' THEN
-    INSERT INTO subscriptions (driver_id, status, plan_name, amount, expires_at, notes)
-    VALUES (NEW.id, 'active', 'mvp_free', 0, NOW() + INTERVAL '100 years', 'Acceso gratuito MVP — sin verificación manual');
-  END IF;
 
   RETURN NEW;
 END;

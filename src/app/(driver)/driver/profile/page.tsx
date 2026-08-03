@@ -66,7 +66,9 @@ export default async function ProfilePage() {
     ? new Date(firstSubscription.starts_at).toLocaleDateString("es-PA", { day: "2-digit", month: "long", year: "numeric" })
     : null
 
-  const isFounder = (subscription as { plan_name?: string } | null)?.plan_name === "mvp_free"
+  const planName = (subscription as { plan_name?: string } | null)?.plan_name
+  const isPermanent = planName === "mvp_free" || planName === "lifetime"
+  const permanentLabel = planName === "mvp_free" ? "MIEMBRO FUNDADOR" : "MEMBRESÍA"
 
   const sc = statusConfig[profile?.status ?? "pending"]
   const StatusIcon = sc.Icon
@@ -203,10 +205,10 @@ export default async function ProfilePage() {
               <>
                 {/* Expiry */}
                 <p className="font-mono-brand" style={{ fontSize: "10px", letterSpacing: "0.1em", color: "rgba(245,241,234,0.4)" }}>
-                  {isFounder ? "MIEMBRO FUNDADOR" : "ACTIVA HASTA"}
+                  {isPermanent ? permanentLabel : "ACTIVA HASTA"}
                 </p>
-                <p className="font-bold mt-1 mb-5" style={{ fontSize: "22px", letterSpacing: "-0.02em", color: isFounder ? "var(--sol)" : "var(--bone)" }}>
-                  {isFounder
+                <p className="font-bold mt-1 mb-5" style={{ fontSize: "22px", letterSpacing: "-0.02em", color: isPermanent ? "var(--sol)" : "var(--bone)" }}>
+                  {isPermanent
                     ? "Acceso ilimitado"
                     : new Date(subscription.expires_at).toLocaleDateString("es-PA", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>
@@ -261,7 +263,7 @@ export default async function ProfilePage() {
             )}
 
             {/* Yappy CTA */}
-            {!isFounder && (
+            {!isPermanent && (
               <div
                 className="flex flex-col items-center gap-2 pt-4"
                 style={{ borderTop: "1px solid rgba(245,241,234,0.08)" }}

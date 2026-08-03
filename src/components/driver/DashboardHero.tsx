@@ -15,7 +15,8 @@ interface DashboardHeroProps {
   daysUntilExpiry: number | null
   potentialMonthly: number
   monthLabel: string
-  isFounder: boolean
+  /** Eyebrow label for a non-expiring membership (founder or one-time-paid). Null shows the real expiry date. */
+  permanentLabel: string | null
 }
 
 export default function DashboardHero({
@@ -28,7 +29,7 @@ export default function DashboardHero({
   daysUntilExpiry,
   potentialMonthly,
   monthLabel,
-  isFounder,
+  permanentLabel,
 }: DashboardHeroProps) {
   const [view, setView] = useState<"month" | "lifetime">("month")
 
@@ -162,10 +163,10 @@ export default function DashboardHero({
         {/* Bottom row: expiry + CTA */}
         <div className="flex items-end justify-between mt-6">
           <div>
-            {isFounder ? (
+            {permanentLabel ? (
               <>
                 <p className="font-mono-brand" style={{ fontSize: "10px", opacity: 0.5, letterSpacing: "0.1em" }}>
-                  MIEMBRO FUNDADOR
+                  {permanentLabel}
                 </p>
                 <p className="font-mono-brand font-medium mt-0.5" style={{ fontSize: "13px", color: "var(--sol)" }}>
                   Acceso ilimitado
@@ -181,7 +182,7 @@ export default function DashboardHero({
                 </p>
               </>
             )}
-            {!isFounder && daysUntilExpiry !== null && daysUntilExpiry > 7 && daysUntilExpiry <= 30 && (
+            {!permanentLabel && daysUntilExpiry !== null && daysUntilExpiry > 7 && daysUntilExpiry <= 30 && (
               <span
                 className="inline-flex items-center font-mono-brand font-semibold mt-2 px-2.5 py-1 rounded-full"
                 style={{

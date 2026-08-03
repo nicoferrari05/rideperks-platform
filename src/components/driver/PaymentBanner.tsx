@@ -31,7 +31,7 @@ export default function PaymentBanner({ phone }: { phone: string }) {
           marginBottom: "14px",
         }}
       >
-        Activa tu membresía para usar todos los beneficios · $15.00/mes
+        Activa tu membresía con un pago único de $15.00 — acceso ilimitado de por vida
       </p>
       <YappyPayButton defaultPhone={phone} />
     </div>
