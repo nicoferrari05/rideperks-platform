@@ -31,35 +31,11 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setLoginError(null)
-
-    let resolvedEmail = email.trim()
-    if (!resolvedEmail.includes("@")) {
-      try {
-        const res = await fetch("/api/auth/resolve-identifier", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ identifier: resolvedEmail }),
-        })
-        const data = await res.json()
-        if (!res.ok) {
-          setLoginError("Usuario o contraseña incorrectos")
-          toast.error("Usuario o contraseña incorrectos")
-          setLoading(false)
-          return
-        }
-        resolvedEmail = data.email
-      } catch {
-        toast.error("Error de conexión. Intenta de nuevo.")
-        setLoading(false)
-        return
-      }
-    }
-
     const supabase = createClient()
-    const { data, error } = await supabase.auth.signInWithPassword({ email: resolvedEmail, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      setLoginError("Usuario/correo o contraseña incorrectos")
-      toast.error("Usuario/correo o contraseña incorrectos")
+      setLoginError("Email o contraseña incorrectos")
+      toast.error("Email o contraseña incorrectos")
       setLoading(false)
       return
     }
@@ -157,14 +133,15 @@ export default function LoginPage() {
                     className="font-mono-brand block"
                     style={{ fontSize: "11px", letterSpacing: "0.12em", color: "rgba(245,241,234,0.5)" }}
                   >
-                    USUARIO O CORREO
+                    EMAIL
                   </label>
                   <input
                     id="email"
-                    type="text"
-                    autoComplete="username"
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
                     enterKeyHint="next"
-                    placeholder="tu usuario o tu@email.com"
+                    placeholder="tu@email.com"
                     value={email}
                     onChange={(e) => { setEmail(e.target.value); setLoginError(null) }}
                     required
