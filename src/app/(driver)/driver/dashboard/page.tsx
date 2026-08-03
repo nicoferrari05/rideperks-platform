@@ -80,6 +80,7 @@ export default async function DriverDashboard() {
     ? Math.floor((new Date(subscription.expires_at).getTime() - Date.now()) / 86400000)
     : null
 
+  const isFounder = (subscription as { plan_name?: string } | null)?.plan_name === "mvp_free"
   const membershipCost = (subscription as { amount?: number } | null)?.amount ?? 15
   const roi = totalSaved > 0 ? totalSaved / membershipCost : 0
 
@@ -258,6 +259,7 @@ export default async function DriverDashboard() {
               daysUntilExpiry={daysUntilExpiry}
               potentialMonthly={potentialMonthly}
               monthLabel={monthLabel}
+              isFounder={isFounder}
             />
           </div>
         ) : (
