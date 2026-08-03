@@ -17,9 +17,13 @@ CREATE TABLE IF NOT EXISTS profiles (
   platform    TEXT CHECK (platform IN ('uber', 'indrive', 'pedidosya', 'multiple')),
   status      TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'rejected', 'suspended')),
   avatar_url  TEXT,
+  username    TEXT CHECK (username IS NULL OR username ~ '^[a-zA-Z0-9_]{3,20}$'),
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_username_unique_idx
+  ON profiles (lower(username)) WHERE username IS NOT NULL;
 
 -- Auto-crear profile al registrarse.
 -- Fase MVP: los conductores quedan verificados de inmediato (sin foto,

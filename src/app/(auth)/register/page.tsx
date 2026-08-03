@@ -18,6 +18,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     full_name: "",
     email: "",
+    username: "",
     phone: "",
     platform: "",
     password: "",
@@ -53,6 +54,10 @@ export default function RegisterPage() {
     if (!form.platform) {
       nextErrors.platform = "Selecciona tu plataforma"
     }
+    const username = form.username.trim()
+    if (username && !/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+      nextErrors.username = "3-20 caracteres: letras, números o _"
+    }
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors)
       toast.error(Object.values(nextErrors)[0])
@@ -60,6 +65,24 @@ export default function RegisterPage() {
     }
 
     setLoading(true)
+
+    if (username) {
+      try {
+        const availRes = await fetch(`/api/auth/username-available?u=${encodeURIComponent(username)}`)
+        const availData = await availRes.json()
+        if (!availData.available) {
+          setErrors({ username: "Ese usuario ya está en uso" })
+          toast.error("Ese usuario ya está en uso")
+          setLoading(false)
+          return
+        }
+      } catch {
+        toast.error("Error de conexión. Intenta de nuevo.")
+        setLoading(false)
+        return
+      }
+    }
+
     const supabase = createClient()
 
     const { error } = await supabase.auth.signUp({
@@ -82,6 +105,7 @@ export default function RegisterPage() {
           phone: form.phone,
           platform: form.platform,
           full_name: form.full_name,
+          ...(username ? { username } : {}),
           ...(refCode ? { referred_by: refCode } : {}),
         })
         .eq("id", user.id)
@@ -179,6 +203,24 @@ export default function RegisterPage() {
                 className="w-full rounded-xl px-4 py-3 text-base md:text-sm outline-none"
                 style={inputStyle}
               />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-mono-brand block" style={labelStyle}>USUARIO (OPCIONAL)</label>
+              <input
+                type="text"
+                autoComplete="username"
+                enterKeyHint="next"
+                placeholder="Para ingresar sin correo"
+                value={form.username}
+                onChange={(e) => set("username", e.target.value.replace(/\s/g, ""))}
+                aria-invalid={!!errors.username}
+                className="w-full rounded-xl px-4 py-3 text-base md:text-sm outline-none"
+                style={fieldStyle("username")}
+              />
+              {errors.username && (
+                <p role="alert" className="text-sm" style={errorTextStyle}>{errors.username}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">

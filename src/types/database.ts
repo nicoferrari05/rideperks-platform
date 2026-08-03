@@ -15,6 +15,7 @@ export interface Profile {
   platform: DriverPlatform | null
   status: DriverStatus
   avatar_url: string | null
+  username: string | null
   referral_code: string | null
   referred_by: string | null
   created_at: string
