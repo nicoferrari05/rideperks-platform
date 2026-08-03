@@ -21,16 +21,27 @@ CREATE TABLE IF NOT EXISTS profiles (
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Auto-crear profile al registrarse
+-- Auto-crear profile al registrarse.
+-- Fase MVP: los conductores quedan verificados y con acceso activo de
+-- inmediato (sin foto, sin aprobación manual) — ver free_access_migration.sql.
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+  new_role TEXT := COALESCE(NEW.raw_user_meta_data->>'role', 'driver');
 BEGIN
-  INSERT INTO profiles (id, full_name, role)
+  INSERT INTO profiles (id, full_name, role, status)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-    COALESCE(NEW.raw_user_meta_data->>'role', 'driver')
+    new_role,
+    CASE WHEN new_role = 'driver' THEN 'verified' ELSE 'pending' END
   );
+
+  IF new_role = 'driver' THEN
+    INSERT INTO subscriptions (driver_id, status, plan_name, amount, expires_at, notes)
+    VALUES (NEW.id, 'active', 'mvp_free', 0, NOW() + INTERVAL '100 years', 'Acceso gratuito MVP — sin verificación manual');
+  END IF;
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

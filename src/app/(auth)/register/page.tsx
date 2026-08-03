@@ -87,8 +87,8 @@ export default function RegisterPage() {
         .eq("id", user.id)
     }
 
-    toast.success("Cuenta creada. Ahora sube tu foto de verificación.")
-    router.push("/driver/verify")
+    toast.success("Cuenta creada. ¡Bienvenido a RidePerks!")
+    router.push("/driver/dashboard")
     router.refresh()
   }
 
