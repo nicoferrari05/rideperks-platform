@@ -7,5 +7,5 @@ export default async function JoinPage({
 }) {
   const params = await searchParams
   const ref = params.ref
-  redirect(ref ? `/register?ref=${encodeURIComponent(ref)}` : "/register")
+  redirect(ref ? `/?ref=${encodeURIComponent(ref)}` : "/")
 }

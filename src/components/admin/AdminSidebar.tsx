@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, Users, Gift, Store, CreditCard, BarChart2, LogOut, Menu, X, UserPlus } from "lucide-react"
+import { LayoutDashboard, Users, Gift, Store, CreditCard, BarChart2, LogOut, Menu, X, UserPlus, ListChecks } from "lucide-react"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -10,6 +10,7 @@ import Logo from "@/components/shared/Logo"
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/admin/waitlist", label: "Lista de espera", icon: ListChecks },
   { href: "/admin/drivers", label: "Conductores", icon: Users },
   { href: "/admin/benefits", label: "Beneficios", icon: Gift },
   { href: "/admin/businesses", label: "Comercios", icon: Store },

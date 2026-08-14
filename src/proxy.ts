@@ -24,11 +24,22 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
 
-  // Rutas protegidas: redirigir a login si no está autenticado
-  // Nota: /business/portal requiere login, pero /business/verify (código PIN) se queda público.
-  if (pathname.startsWith('/driver') || pathname.startsWith('/admin') || pathname.startsWith('/business/portal')) {
+  // Mientras RidePerks está pausado de cara al público (pivote a lista de
+  // espera), /driver, /admin y /business quedan reservados solo para la
+  // cuenta admin — cualquier otra visita rebota a la landing nueva. Nada
+  // de esto se borra, es reversible con un solo diff cuando la app nueva
+  // esté lista para salir en vivo.
+  if (pathname.startsWith('/driver') || pathname.startsWith('/admin') || pathname.startsWith('/business')) {
     if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    if (profile?.role !== 'admin') {
+      return NextResponse.redirect(new URL('/', request.url))
     }
   }
 
