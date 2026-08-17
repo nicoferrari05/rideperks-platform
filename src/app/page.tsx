@@ -1,5 +1,6 @@
 import Logo from "@/components/shared/Logo"
 import WaitlistForm from "@/components/shared/WaitlistForm"
+import { createAdminClient } from "@/lib/supabase/admin"
 
 const benefits = [
   { label: "COMBUSTIBLE", figure: "20%", bg: "var(--sol)", color: "var(--midnight)" },
@@ -8,7 +9,20 @@ const benefits = [
   { label: "SALUD", figure: "10%", bg: "var(--midnight)", color: "var(--bone)" },
 ]
 
-export default function HomePage() {
+const COUNTER_THRESHOLD = 30
+
+// El conteo se lee en el servidor, así que sin esto Next.js lo congelaría
+// en el número que había al momento del build en vez de mantenerlo al día.
+export const revalidate = 60
+
+export default async function HomePage() {
+  const supabase = createAdminClient()
+  const { count } = await supabase
+    .from("waitlist_signups")
+    .select("id", { count: "exact", head: true })
+
+  const showCounter = (count ?? 0) >= COUNTER_THRESHOLD
+
   return (
     <div>
       {/* Hero */}
@@ -45,8 +59,29 @@ export default function HomePage() {
           <p style={{ color: "rgba(245,241,234,0.5)", fontSize: "16px", lineHeight: 1.6 }}>
             RidePerks está en construcción. Anótate ahora y sé de los primeros en tener acceso — más rápido si invitas a otros conductores.
           </p>
+          {showCounter && (
+            <div
+              className="inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full"
+              style={{ backgroundColor: "rgba(245,241,234,0.08)" }}
+            >
+              <span className="counter-dot" style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--verde)" }} />
+              <p className="font-mono-brand" style={{ fontSize: "12px", letterSpacing: "0.04em", color: "var(--bone)" }}>
+                {count} {count === 1 ? "conductor ya se anotó" : "conductores ya se anotaron"}
+              </p>
+            </div>
+          )}
         </div>
       </section>
+
+      <style>{`
+        @media (prefers-reduced-motion: no-preference) {
+          .counter-dot { animation: rp-pulse 2s ease-in-out infinite; }
+        }
+        @keyframes rp-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.35; }
+        }
+      `}</style>
 
       {/* Value props */}
       <section style={{ backgroundColor: "var(--bone)", padding: "72px 0" }}>
