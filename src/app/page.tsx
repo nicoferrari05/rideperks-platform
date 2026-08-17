@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react"
 import Logo from "@/components/shared/Logo"
 import WaitlistForm from "@/components/shared/WaitlistForm"
 import { createAdminClient } from "@/lib/supabase/admin"
@@ -71,15 +72,35 @@ export default async function HomePage() {
             </div>
           )}
         </div>
+
+        {/* Scroll hint */}
+        <div
+          aria-hidden="true"
+          className="absolute left-0 right-0 flex flex-col items-center gap-1.5"
+          style={{ bottom: "max(env(safe-area-inset-bottom, 0px), 24px)" }}
+        >
+          <span
+            className="font-mono-brand scroll-hint"
+            style={{ fontSize: "11px", letterSpacing: "0.14em", color: "rgba(245,241,234,0.35)" }}
+          >
+            DESLIZA
+          </span>
+          <ChevronDown className="w-4 h-4 scroll-hint" style={{ color: "rgba(245,241,234,0.35)" }} />
+        </div>
       </section>
 
       <style>{`
         @media (prefers-reduced-motion: no-preference) {
           .counter-dot { animation: rp-pulse 2s ease-in-out infinite; }
+          .scroll-hint { animation: rp-bounce 1.8s ease-in-out infinite; }
         }
         @keyframes rp-pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.35; }
+        }
+        @keyframes rp-bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(6px); }
         }
       `}</style>
 
